@@ -4,15 +4,17 @@
 
 class MainController {
 
-  constructor($http) {
+  constructor($http, Phased) {
     this.$http = $http;
     this.awesomeThings = [];
+    this.Phased = Phased;
   }
 
   $onInit() {
     this.$http.get('/api/things').then(response => {
       this.awesomeThings = response.data;
     });
+    console.log(this.Phased);
   }
 }
 

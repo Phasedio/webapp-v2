@@ -1,6 +1,6 @@
 {
   "name": "webapp-v2",
-  "version": "0.0.0",
+  "version": "0.2.0",
   "dependencies": {
     "angular": "~1.5.0",
     "json3": "~3.3.1",
@@ -13,7 +13,11 @@
     "angular-route": "~1.5.0",
     "angular-bootstrap": "~1.1.2",
     "font-awesome": ">=4.1.0",
-    "lodash": "~2.4.1"
+    "lodash": "~2.4.1",
+    "promise-polyfill": "^4.0.3",
+    "firebase": "^2.4.2",
+    "phoneformat": "^0.0.7",
+    "angularfire": "^1.2.0"
   },
   "devDependencies": {
     "angular-mocks": "~1.5.0"
