@@ -3,6 +3,9 @@
 class NavbarController {
   //start-non-standard
   menu = [{
+    'title': 'Login',
+    'link': '/login'
+  }, {
     'title': 'Home',
     'link': '/'
   }];
