@@ -3,8 +3,9 @@
 (function() {
 
 class LoginController {
-  constructor($scope) {
+  constructor($scope, Phased) {
     this.$scope = $scope;
+    $scope.Phased = Phased;
   }
 
   $onInit() {
@@ -14,11 +15,13 @@ class LoginController {
 
   // callback function $scope == this
   doLogin() {
-    console.log('logging in...', this.username, this.password);
+    console.log(this.Phased);
+    this.Phased.login(this.username, this.password);
   }
 }
 
-LoginController.$inject = ['$scope'];
+// don't forget to inject your controllers!
+LoginController.$inject = ['$scope', 'Phased'];
 
 angular.module('webappV2App')
   .component('login', {
