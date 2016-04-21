@@ -2,14 +2,68 @@
 angular.module('webappV2App')
 	.provider('Phased', function PhasedProvider() {
 		// private
-		var $rootScope, $http, $location, $window, $firebaseAuth, _FBAuth, _FBRef, _FURL, _reqCallbacks = [], _CONFIG = {};
+		var $rootScope,
+			$http,
+			$location,
+			$window,
+			$firebaseAuth,
+			_FBAuth,
+			_FBRef,
+			_FURL,
+			_INIT_EVENTS = {
+				SET_UP : 'Phased.setup',
+				META_SET_UP : 'Phased.meta',
+				TEAM_SET_UP : 'Phased.teamComplete',
+				MEMBERS_SET_UP : 'Phased.membersComplete',
+				PROJECTS_SET_UP : 'Phased.projectsComplete',
+				STATUSES_SET_UP : 'Phased.statusesComplete'
+			},
+			_RUNTIME_EVENTS = {
+				STATUS_NEW : 'Phased:newStatus',
+				STATUS_CHANGED : 'Phased:changedStatus',
+				STATUS_DELETED : 'Phased:deletedStatus',
+
+				TASK_NEW : 'Phased:newTask',
+				TASK_CHANGED : 'Phased:changedTask',
+				TASK_DELETED : 'Phased:deletedTask',
+
+				PROJECT_NEW : 'Phased:newProject',
+				PROJECT_CHANGED : 'Phased:changedProject',
+				PROJECT_DELETED : 'Phased:deletedProject',
+			},
+			// tasks to do after the indicated events
+			_toDoAfter = {
+				SET_UP : [],
+				META_SET_UP : [],
+				TEAM_SET_UP : [],
+				MEMBERS_SET_UP : [],
+				PROJECTS_SET_UP : [],
+				STATUSES_SET_UP : []
+			},
+			_CONFIG = {},
+			_DEFAULTS = {
+				STATUS_LIMIT : 30,
+				TEAM : {
+					details : {},
+					members : {},
+					statuses : {},
+					projects : {}
+				}
+			};
 
 		// public-facing object
 		var Phased = {
+			// init status flags
 			SET_UP : false,
-			meta : {},					// copy of metadata from server. do not overwrite.
+			META_SET_UP : false,
+			TEAM_SET_UP : false,
+			MEMBERS_SET_UP : false,
+			PROJECTS_SET_UP : true,
+			STATUSES_SET_UP : true,
+			meta : {},						// copy of metadata from server. do not overwrite.
 			authData : false,			// copy of authData from firebase authentication callback.
-			user : {}						// copy of user profile from server with additional uid key
+			user : {},						// copy of user profile from server with additional uid key
+			team : angular.copy(_DEFAULTS.TEAM)
 		}
 
 		/*
@@ -128,21 +182,68 @@ angular.module('webappV2App')
 		**
 		*/
 
-    var _registerAsync = function registerAsync(callback, args) {
-      if (Phased.SET_UP)
+		//
+		// ASYNC INTERFACE
+		//
+
+		/*
+		*	Registers a job to be done now or after event has happened
+		*
+		*	eg: _registerAfterEvent('SET_UP', countTo, 5) // will call countTo(5) as soon as Phased.SET_UP
+		*/
+    var _registerAfter = function registerAfter(event, callback, args) {
+    	if (!(event in _INIT_EVENTS)) {
+    		console.warn(`${event} is not a valid event`);
+    		return;
+    	}
+
+      if (Phased[event])			// call immediately, or
         return callback(args);
-      else
-        _reqCallbacks.push({callback : callback, args : args });
+      else										// save for later
+        _toDoAfter[event].push({callback : callback, args : args });
     }
 
-    var _doAsync = function doAsync() {
-      for (var i in _reqCallbacks) {
-        _reqCallbacks[i].callback(_reqCallbacks[i].args || undefined);
-      }
-      Phased.SET_UP = true;
-      console.log('Phased:setup', Phased);
-			$rootScope.$broadcast('Phased:setup');
+    /*
+    *	called to emit a specific event
+    *
+    *	1. do all callbacks needing to be done after that event
+    *	2. set that event's flag to true
+    *	3. broadcast event through rootScope
+    */
+    var _doAfter = function doAfter(event) {
+    	if (!(event in _INIT_EVENTS)) {
+    		console.warn(`${event} is not a valid event`);
+    		return;
+    	}
+
+    	$rootScope.$evalAsync(() => {
+	      for (let i in _toDoAfter[event]) {
+	        _toDoAfter[event][i].callback(_toDoAfter[event][i].args || undefined);
+	      }
+	      Phased[event] = true;
+	      console.log(`${_INIT_EVENTS[event]}`, Phased);
+				$rootScope.$broadcast(`${_INIT_EVENTS[event]}`);
+
+				_maybeFinalizeSetup();
+			});
     }
+
+    /*
+    *	If all _INIT_EVENTS are fired, fire SET_UP
+    *
+    */
+    var _maybeFinalizeSetup = function maybeFinalizeSetup() {
+    	// do nothing if an event other than SET_UP hasn't passed
+    	// or if SET_UP already passed
+    	if (Phased.SET_UP) return;
+
+    	for (let event in _INIT_EVENTS) {
+    		if (event != 'SET_UP' && !Phased[event]) return;
+    	}
+    	_doAfter('SET_UP');
+    }
+
+
 
 
     //
@@ -157,17 +258,12 @@ angular.module('webappV2App')
     var _getMeta = function getMeta() {
       _FBRef.child('meta').once('value', function(snap) {
         _.assign(Phased.meta, snap.val());
-        _doAfterMeta();
+        _doAfter('META_SET_UP');
       });
     }
 
-    var _doAfterMeta = function doAfterMeta() {
-    	Phased.META_SET_UP = true;
-    }
-
     /*
-    *
-    *	Gathers and watches team data
+    *	Gathers team data
     *
     */
 
