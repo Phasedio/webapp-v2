@@ -452,6 +452,13 @@ angular.module('webappV2App')
 		    	}
 		    });
     	});
+
+    	// always keep profile data in sync for any members on team
+    	_FBRef.child(`team/${Phased.team.uid}/members`).on('child_changed', snap => {
+    		$rootScope.$evalAsync(() => {
+    			_.assign(Phased.team.members[snap.key()], snap.val());
+    		});
+    	});
     }
 
     //
