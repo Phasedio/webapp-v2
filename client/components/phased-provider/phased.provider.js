@@ -49,7 +49,8 @@ angular.module('webappV2App')
 					statuses : {},
 					projects : {}
 				}
-			};
+			},
+			_oldestStatusTime = new Date().getTime();
 
 		// public-facing object
 		var Phased = {
@@ -300,6 +301,11 @@ angular.module('webappV2App')
     	_FBRef.child('team/' + teamID + '/statuses')
     	.limitToLast(_DEFAULTS.STATUS_LIMIT).once('value', snap => {
     		_.assign(Phased.team.statuses, snap.val());
+    		// find oldest status time and save val for pagination
+        for (var i in Phased.team.statuses) {
+    			if (Phased.team.statuses[i].time < _oldestStatusTime)
+    				_oldestStatusTime = Phased.team.statuses[i].time;
+    		}
     		maybeTeamComplete('statuses');
     	});
     }
@@ -380,12 +386,49 @@ angular.module('webappV2App')
     		});
     	})
 
-    	// statuses (limited)
-    	_FBRef.child('team/' + teamID + '/statuses')
+    	// statuses (limited to 30 and newer)
+    	// get most recent 30
+    	_FBRef.child(`team/${teamID}/statuses`)
     	.limitToLast(_DEFAULTS.STATUS_LIMIT).once('value', snap => {
     		_.assign(Phased.team.statuses, snap.val());
+    		// find oldest status time and save val for pagination
+        for (var i in Phased.team.statuses) {
+    			if (Phased.team.statuses[i].time < _oldestStatusTime)
+    				_oldestStatusTime = Phased.team.statuses[i].time;
+    		}
     		maybeTeamComplete('statuses');
     	});
+			
+			// watch for statuses added after what we've already collected are added
+			_FBRef.child(`team/${teamID}/statuses`)
+			.orderByChild('time').startAt(new Date().getTime())
+			.on('child_added', snap => {
+				$rootScope.$evalAsync(() => {
+					Phased.team.statuses[snap.key()] = snap.val();
+					$rootScope.$broadcast(_RUNTIME_EVENTS.STATUS_NEW);
+				});
+			});
+
+			// watch for changes
+			_FBRef.child(`team/${teamID}/statuses`)
+			.limitToLast(_DEFAULTS.STATUS_LIMIT).on('child_changed', snap => {
+				$rootScope.$evalAsync(() => {
+	        Phased.team.statuses[snap.key()] = snap.val();
+	        $rootScope.$broadcast(_RUNTIME_EVENTS.STATUS_CHANGED);
+	      });
+			});
+
+			// watch for removed statuses
+			_FBRef.child(`team/${teamID}/statuses`)
+			.limitToLast(_DEFAULTS.STATUS_LIMIT).on('child_removed', snap => {
+				let key = snap.key();
+				if (key in Phased.team.statuses) {
+					$rootScope.$evalAsync(() => {
+						delete Phased.team.statuses[key];
+						$rootScope.$broadcast(_RUNTIME_EVENTS.STATUS_DELETED);
+					});
+				}
+			});
     }
 
     /*
