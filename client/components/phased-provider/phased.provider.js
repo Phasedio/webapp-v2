@@ -182,29 +182,6 @@ angular.module('webappV2App')
     //
 
     /*
-    *	Fills a user's profile
-    *	called immediately after auth
-    */
-    var _fillUserProfile = function fillUserProfile() {
-    	return new Promise(function _fillUserProfilePromise(fulfill, reject) {
-    		if (!('uid' in Phased.authData)) {
-    			console.warn('Cannot gather user information; no UID set.');
-    			reject();
-    			return;
-    		}
-    		_FBRef.child('profile/' + Phased.authData.uid).once('value', function (snap) {
-    			var data = snap.val();
-    			$rootScope.$evalAsync(() => {
-	    			_.assign(Phased.user, data, { uid: Phased.authData.uid });
-
-	    			console.log('profile:', Phased.user);
-	    			fulfill();
-	    		});
-    		});
-    	});
-    }
-
-    /*
     *	Similar to the Phased.login callback
 		*	
 		*	1. stashes user auth data
@@ -232,6 +209,30 @@ angular.module('webappV2App')
 				_die('logout');
 			}
     }
+    
+    /*
+    *	Fills a user's profile
+    *	called immediately after auth
+    */
+    var _fillUserProfile = function fillUserProfile() {
+    	return new Promise(function _fillUserProfilePromise(fulfill, reject) {
+    		if (!('uid' in Phased.authData)) {
+    			console.warn('Cannot gather user information; no UID set.');
+    			reject();
+    			return;
+    		}
+    		_FBRef.child('profile/' + Phased.authData.uid).once('value', function (snap) {
+    			var data = snap.val();
+    			$rootScope.$evalAsync(() => {
+	    			_.assign(Phased.user, data, { uid: Phased.authData.uid });
+
+	    			console.log('profile:', Phased.user);
+	    			fulfill();
+	    		});
+    		});
+    	});
+    }
+
 
 
     /*
@@ -255,7 +256,6 @@ angular.module('webappV2App')
 		*	Logs a user out
 		*/
 		Phased.logout = function logout() {
-			console.log('logout');
 			_FBAuth.$unauth();
 		}
 	})
