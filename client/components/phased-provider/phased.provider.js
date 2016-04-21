@@ -273,7 +273,7 @@ angular.module('webappV2App')
 
     var _getTeam = function getTeam() {
     	console.log('getting team...');
-    	var teamID = Phased.user.currentTeam,
+    	var teamID = Phased.team.uid = Phased.user.currentTeam,
     		props = ['details', 'members', 'statuses'],
     		completed = [];
 
@@ -343,7 +343,7 @@ angular.module('webappV2App')
     *
     */
     var _watchTeam = function watchTeam() {
-    	var teamID = Phased.user.currentTeam,
+    	var teamID = Phased.team.uid = Phased.user.currentTeam,
     		props = ['details', 'members', 'statuses'],
     		completed = [];
 
@@ -534,5 +534,94 @@ angular.module('webappV2App')
 		*/
 		Phased.logout = function logout() {
 			_FBAuth.$unauth();
+		}
+
+
+		/*
+		*	Posts a generic status update
+		*/
+		Phased.postStatus = function postStatus(name, args = {}) {
+			args.name = name; // to allow simple syntax: Phased.postStatus('my status');
+			_registerAfter('META_SET_UP', _doPostStatus, args);
+		}
+
+		/*
+		*	Post a generic status update
+		*	ALL STATUS UPDATES SHOLD USE THIS METHOD
+		*
+		*	1. check that properties are valid
+		*	2. post to team
+		*	3. update own currentStatus
+		*/
+		var _doPostStatus = function doPostStatus(args = {}) {
+			const {name, type, projectID, taskID, startTime, endTime} = args;
+
+			var newStatus = {
+				user: Phased.user.uid,
+				time: Firebase.ServerValue.TIMESTAMP // always posted as now
+			};
+
+			// 1. PROP VALIDATION
+			// name
+			if (!('name' in args) || typeof args.name != 'string') {
+				console.warn('Cannot post a blank status update!');
+				return;
+			} else {
+				newStatus.name = name;
+			}
+
+			// type (should be, eg, Phased.meta.status.TYPE_ID.REPO_PUSH)
+			if (type) {
+				if (!(type in Phased.meta.status.TYPE))
+					console.warn('Status type not available; posting plain status.');
+				else
+					newStatus.type = type;
+			} else {
+				newStatus.type = Phased.meta.status.TYPE_ID.UPDATE
+			}
+
+			// startTime
+			if (startTime) {
+				if (typeof startTime != 'number') {
+					console.warn('Status startTime should be a timeStamp or null; posting as now.');
+					newStatus.startTime = Firebase.ServerValue.TIMESTAMP;
+				}  else {
+					newStatus.startTime = startTime;
+				}
+			} else {
+				console.warn('No startTime for status; posting as now.');
+				newStatus.startTime = Firebase.ServerValue.TIMESTAMP;
+			}
+
+			// endTime
+			if (endTime) {
+				if (typeof endTime != 'number') {
+					console.warn('Status endTime should be a timeStamp or null; posting without.');
+				}  else {
+					newStatus.endTime = endTime;
+				}
+			}
+
+			// projectID
+			if (projectID) {
+				if (typeof projectID != 'string')
+					console.warn('Status projectID should be a string or null; posting without.');
+				else
+					newStatus.projectID = projectID;
+			}
+			
+			// taskID
+			if (taskID) {
+				if (typeof taskID != 'string')
+					console.warn('Status taskID should be a string or null; posting without.');
+				else
+					newStatus.taskID = taskID;
+			}
+
+			// 2. POST TO TEAM
+			var statusRef = _FBRef.child(`team/${Phased.team.uid}/statuses`).push(newStatus);
+
+			// 3. POST TO USER
+			_FBRef.child(`team/${Phased.team.uid}/members/${Phased.user.uid}/currentStatus`).set(statusRef.key());
 		}
 	})

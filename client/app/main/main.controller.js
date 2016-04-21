@@ -4,10 +4,10 @@
 
 class MainController {
 
-  constructor($http, Phased) {
+  constructor($http, $scope, Phased) {
     this.$http = $http;
     this.awesomeThings = [];
-    this.Phased = Phased;
+    $scope.Phased = this.Phased = Phased;
   }
 
   $onInit() {
