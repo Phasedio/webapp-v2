@@ -2,14 +2,7 @@
 angular.module('webappV2App')
 	.provider('Phased', function PhasedProvider() {
 		// private
-		var $rootScope,
-			$http,
-			$location,
-			$firebaseAuth,
-			_FBAuth,
-			_FBRef,
-			_FURL,
-			_reqCallbacks = [];
+		var $rootScope, $http, $location, $window, $firebaseAuth, _FBAuth, _FBRef, _FURL, _reqCallbacks = [], _CONFIG = {};
 
 		// public-facing object
 		var Phased = {
@@ -20,11 +13,12 @@ angular.module('webappV2App')
 		}
 
 		// run when injected
-		this.$get = ['$rootScope', '$http', '$location', '$firebaseAuth',
-			function $get(_$rootScope, _$http, _$location, _$firebaseAuth) {
+		this.$get = ['$rootScope', '$http', '$location', '$window', '$firebaseAuth',
+			function $get(_$rootScope, _$http, _$location, _$window, _$firebaseAuth) {
 			$rootScope = _$rootScope;
 			$http = _$http;
 			$location = _$location;
+			$window = _$window,
 			$firebaseAuth = _$firebaseAuth;
 
 			_FBRef = new Firebase(_FURL);
@@ -52,20 +46,49 @@ angular.module('webappV2App')
 					return;
 				}
 
-				// 2.
-
+				// 2. & 3. --> stash these flags for later usage
+				_.assign(_CONFIG, prefs);
 
 				fulfill();
 			});
 		}
 
-		// run after user has logged in
+		/*
+		*
+		* run after user has logged in
+		*	starts gathering data from server
+		*
+		*/
 		var _init = function init() {
 			return new Promise(function initPromise(fulfill, reject) {
 				console.log('init');
+
+				if (!Phased.META_SET_UP)
+					_getMeta();
+
+				// if the user is logged into a team
+				if (Phased.authData && Phased.user.currentTeam) {
+					// initialize the team
+					if (_CONFIG.WATCH_TEAM)
+						_watchTeam();
+					else
+						_getTeam();
+
+					// maybe watch some stuff
+					if (_CONFIG.WATCH_NOTIFICATIONS) 
+						_watchNotifications();
+					if (_CONFIG.WATCH_PRESENCE)
+						_watchPresence();
+					if (_CONFIG.WATCH_INTEGRATIONS)
+						_watchIntegrations();
+				}
+
 				fulfill();
 			})
 		}
+
+
+
 
 		/*
 		**
@@ -90,61 +113,24 @@ angular.module('webappV2App')
     }
 
 
-    /*
-    **
-    **  INTIALIZING FUNCTIONS
-    **
-    */
+    //
+  	// INTIALIZING FUNCTIONS
+  	//
 
     /*
     *
     * Gathers all static data, applies to PhasedProvider
     *
     */
-    var _initializeMeta = function() {
+    var _getMeta = function getMeta() {
       _FBRef.child('meta').once('value', function(snap) {
-        var data = snap.val();
-
-        // task
-        Phased.meta.task = {
-          PRIORITY : data.task.PRIORITY,
-          PRIORITY_ID : data.task.PRIORITY_ID,
-
-          HISTORY_ID : data.task.HISTORY_ID, // no strings for this one
-
-          STATUS : data.task.STATUS,
-          STATUS_ID : data.task.STATUS_ID
-        };
-
-        // PROJECT
-        Phased.meta.project = {
-          PRIORITY : data.project.PRIORITY,
-          PRIORITY_ID : data.project.PRIORITY_ID,
-
-          HISTORY : data.project.HISTORY,
-          HISTORY_ID : data.project.HISTORY_ID
-        };
-
-        // STATUS
-        Phased.meta.status.SOURCE = data.status.SOURCE;
-        Phased.meta.status.SOURCE_ID = data.status.SOURCE_ID;
-        Phased.meta.status.TYPE = data.status.TYPE;
-        Phased.meta.status.TYPE_ID = data.status.TYPE_ID;
-
-        // ROLE
-        Phased.meta.ROLE = data.ROLE;
-        Phased.meta.ROLE_ID = data.ROLE_ID;
-
-        // PRESENCE
-        Phased.meta.PRESENCE = data.PRESENCE;
-        Phased.meta.PRESENCE_ID = data.PRESENCE_ID;
-
-        // NOTIF
-        Phased.meta.NOTIF_TYPE = data.NOTIF_TYPE;
-        Phased.meta.NOTIF_TYPE_ID = data.NOTIF_TYPE_ID;
-
-        // doAfterMeta();
+        _.assign(Phased.meta, snap.val());
+        _doAfterMeta();
       });
+    }
+
+    var _doAfterMeta = function doAfterMeta() {
+    	Phased.META_SET_UP = true;
     }
 
     /*
@@ -167,6 +153,8 @@ angular.module('webappV2App')
     		});
     	});
     }
+
+
 
     /*
     **
@@ -200,8 +188,11 @@ angular.module('webappV2App')
 			});
 		}
 
+		/*
+		*	Logs a user out
+		*/
 		Phased.logout = function logout() {
 			console.log('logout');
+			_FBAuth.$unauth();
 		}
-
 	})
