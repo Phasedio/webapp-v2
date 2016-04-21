@@ -10,5 +10,7 @@ div.navbar.navbar-default.navbar-static-top(ng-controller='NavbarController')
 
     div#navbar-main.navbar-collapse.collapse(uib-collapse='nav.isCollapsed')
       ul.nav.navbar-nav
-        li(ng-repeat='item in nav.menu', ng-class='{active: nav.isActive(item.link)}')
+        li(ng-repeat='item in nav.menu', ng-if='!item.hideCondition' ng-class='{active: nav.isActive(item.link)}')
           a(ng-href='{{item.link}}') {{item.title}}
+        li
+          a(ng-href="#", ng-if="nav.Phased.authData", ng-click="$event.preventDefault(); nav.logout()") Logout

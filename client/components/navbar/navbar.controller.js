@@ -5,7 +5,8 @@ class NavbarController {
   menu = [{
     'title': 'Login',
     'link': '/login'
-  }, {
+  },
+  {
     'title': 'Home',
     'link': '/'
   }];
@@ -13,12 +14,17 @@ class NavbarController {
   isCollapsed = true;
   //end-non-standard
 
-  constructor($location) {
+  constructor($location, Phased) {
     this.$location = $location;
+    this.Phased = Phased;
     }
 
   isActive(route) {
     return route === this.$location.path();
+  }
+
+  logout() {
+    this.Phased.logout();
   }
 }
 

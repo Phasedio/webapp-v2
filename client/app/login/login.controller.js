@@ -21,12 +21,7 @@ class LoginController {
 
   // callback function $scope == this
   doLogin() {
-    const {$scope, $location, Phased} = this;
-    Phased.login($scope.email, $scope.password)
-      .then(function () {
-        $location.path('/');
-        $scope.$apply();
-      });
+    this.Phased.login(this.$scope.email, this.$scope.password);
   }
 } 
 

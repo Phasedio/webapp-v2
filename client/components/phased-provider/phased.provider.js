@@ -99,6 +99,27 @@ angular.module('webappV2App')
 		}
 
 
+		/*
+		*
+		*	User has logged out or left the app
+		*
+		*/
+
+		var _die = function die(source) {
+			console.log('dying of a ' + source);
+			// 1. user has logged out
+			if (source.toLowerCase() == 'logout') {
+				Phased.SET_UP = false;
+				Phased.authData = false;
+				Phased.user = {};
+				delete Phased.team;
+			} 
+			// 2. normal exit (stash app state here, in localstorage or FB cache key)
+			else {
+
+			}
+		}
+
 
 
 		/*
@@ -145,6 +166,22 @@ angular.module('webappV2App')
     }
 
     /*
+    *
+    *	Gathers and watches team data
+    *
+    */
+
+    var _getTeam = function getTeam() {
+    	return new Promise((fulfill, reject) => {
+    		console.log('getting team...');
+    	});
+    }
+
+    //
+    //	AUTH FUNCTIONS
+    //
+
+    /*
     *	Fills a user's profile
     *	called immediately after auth
     */
@@ -168,15 +205,30 @@ angular.module('webappV2App')
     }
 
     /*
-    *	Similar to the Phased.login callback;
-    *	simply fills the user's profile and then calls init
+    *	Similar to the Phased.login callback
+		*	
+		*	1. stashes user auth data
+		*	2. saves auth token to default POST request
+		*	3. bounces user to / if on /login
+		*	4. fills user profile data, then calls init
     */
     var _onAuth = function onAuth(authData) {
-    	if ('uid' in authData) {
+    	if (authData && 'uid' in authData) {
+    		console.log('onAuth');
+				// 1. stash auth data
 				Phased.authData = authData;
-				_fillUserProfile()
-					.then(_init);
+				
+				// 2. use token to authenticate with our server
+				$http.defaults.headers.post.Authorization = 'Bearer ' + authData.token;
+				
+				// 3. bounce to '/' if on /login
+				if ($location.path().indexOf('login') >= 0)
+					$location.path('/');
+
+				// 4.
+				_fillUserProfile().then(_init);
 			} else {
+				// if the user is not logged in, die
 				_die('logout');
 			}
     }
@@ -196,21 +248,7 @@ angular.module('webappV2App')
 		*	Log a user in using username and password
 		*/
 		Phased.login = function login(email, password) {
-			return new Promise(function doLoginPromise(fulfill, reject) {
-				_FBAuth.$authWithPassword({email: email, password:password}).then(function authFilled(authData) {
-					console.log('auth successful', authData);
-					if ('uid' in authData) {
-						Phased.authData = authData;
-						_fillUserProfile()
-							.then(function() {
-								fulfill(); // fulfill and then start getting meta
-								_init();
-							}, reject);
-					} else {
-						reject(authData);
-					}
-				}, reject);
-			});
+			_FBAuth.$authWithPassword({email: email, password:password})
 		}
 
 		/*
