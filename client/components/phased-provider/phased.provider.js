@@ -332,6 +332,85 @@ angular.module('webappV2App')
     	}
     }
 
+    /*
+    *	watches team data
+    *
+    */
+    var _watchTeam = function watchTeam() {
+    	var teamID = Phased.user.currentTeam,
+    		props = ['details', 'members', 'statuses'],
+    		completed = [];
+
+    	var maybeTeamComplete = prop => {
+    		if (Phased.TEAM_SET_UP) return;
+    		completed.push(prop);
+    		// if props == completed
+    		if (_.xor(props, completed).length == 0)
+    			_doAfter('TEAM_SET_UP');
+    	}
+
+    	// details
+    	_FBRef.child('team/' + teamID + '/details').on('value', snap => {
+    		$rootScope.$evalAsync(() => {
+	    		_.assign(Phased.team.details, snap.val());
+	    	});
+    		maybeTeamComplete('details');
+    	});
+
+    	// members
+    	// get list of members on team currently
+    	_FBRef.child('team/' + teamID + '/members').once('value', snap => {
+    		_.assign(Phased.team.members, snap.val());
+    		maybeTeamComplete('members');
+    	});
+
+    	// always keep profile data in sync for any members on team
+    	_FBRef.child(`team/${teamID}/members`).on('child_added', snap => {
+    		let uid = snap.key();
+    		Phased.team.members[uid] = snap.val();
+    		_watchMember(uid);
+    	});
+
+    	// delete members from team when removed; also unwatch
+    	_FBRef.child(`team/${teamID}/members`).on('child_removed', snap => {
+    		let uid = snap.key();
+    		_FBRef.child(`team/${teamID}/members/${uid}`).off('value'); // unwatch
+    		$rootScope.$evalAsync(() => {
+    			delete Phased.team.members[uid]; // delete from team
+    		});
+    	})
+
+    	// statuses (limited)
+    	_FBRef.child('team/' + teamID + '/statuses')
+    	.limitToLast(_DEFAULTS.STATUS_LIMIT).once('value', snap => {
+    		_.assign(Phased.team.statuses, snap.val());
+    		maybeTeamComplete('statuses');
+    	});
+    }
+
+    /*
+		*	Set up data binding for a single member on a team
+		*
+		*	if MEMBERS_SET_UP hasn't been fired, check if it should be
+    */
+    var _watchMember = function watchMember(uid) {
+    	// set up data binding for members
+    	_FBRef.child(`profile/${uid}`).on('value', snap => {
+    		$rootScope.$evalAsync(() => {
+    			_.assign(Phased.team.members[uid], snap.val());
+	    		// possibly fire event
+		    	if (!Phased.MEMBERS_SET_UP) {
+		    		// if any member doesn't have their profile data, don't fire event
+		    		for (let i in Phased.team.members) {
+		    			if (!Phased.team.members[i].name) return;
+		    		}
+
+						_doAfter('MEMBERS_SET_UP');
+		    	}
+		    });
+    	});
+    }
+
     //
     //	AUTH FUNCTIONS
     //

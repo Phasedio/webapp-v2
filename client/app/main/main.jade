@@ -1,10 +1,11 @@
 header#banner.hero-unit
-  .container
-    h1 'Allo, 'Allo
-      span(ng-if="$ctrl.Phased.authData") , {{$ctrl.Phased.user.name}}!
-      span(ng-if="!($ctrl.Phased.authData)") !
+  .container(ng-if="!$ctrl.Phased.authData")
+    h1 'Allo, 'Allo!
     p.lead Kick-start your next web app with Angular Fullstack
     img(src='assets/images/yeoman.png', alt='I\'m Yeoman')
+  .container(ng-if="$ctrl.Phased.authData")
+    h1 {{$ctrl.Phased.team.details.name}}
+    p.lead Currently logged in as {{$ctrl.Phased.user.name}}
 
 .container
   .row

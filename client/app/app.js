@@ -20,7 +20,8 @@ angular.module('webappV2App', [
 
     // stripeProvider.setPublishableKey('pk_live_FPvARdIWeOzOfW8TGqtFd9QN');
     PhasedProvider.config({
-      FURL: FURL
+      FURL: FURL,
+      WATCH_TEAM: true
     });
   })
 
