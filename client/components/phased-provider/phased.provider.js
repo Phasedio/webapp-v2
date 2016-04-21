@@ -126,7 +126,7 @@ angular.module('webappV2App')
 		*/
 		var _init = function init() {
 			return new Promise(function initPromise(fulfill, reject) {
-				console.log('init');
+				console.log('init', Phased);
 
 				if (!Phased.META_SET_UP)
 					_getMeta();
@@ -154,8 +154,8 @@ angular.module('webappV2App')
 
 
 		/*
-		*
 		*	User has logged out or left the app
+		*	reset PhasedProvider for new _init
 		*
 		*/
 
@@ -163,10 +163,13 @@ angular.module('webappV2App')
 			console.log('dying of a ' + source);
 			// 1. user has logged out
 			if (source.toLowerCase() == 'logout') {
-				Phased.SET_UP = false;
+				// reset all init events
+				for (let event in _INIT_EVENTS)
+					Phased[event] = false;
+				
 				Phased.authData = false;
 				Phased.user = {};
-				delete Phased.team;
+				Phased.team = angular.copy(_DEFAULTS.TEAM);
 			} 
 			// 2. normal exit (stash app state here, in localstorage or FB cache key)
 			else {
@@ -268,9 +271,65 @@ angular.module('webappV2App')
     */
 
     var _getTeam = function getTeam() {
-    	return new Promise((fulfill, reject) => {
-    		console.log('getting team...');
+    	console.log('getting team...');
+    	var teamID = Phased.user.currentTeam,
+    		props = ['details', 'members', 'statuses'],
+    		completed = [];
+
+    	var maybeTeamComplete = prop => {
+    		completed.push(prop);
+    		// if props == completed
+    		if (_.xor(props, completed).length == 0)
+    			_doAfter('TEAM_SET_UP');
+    	}
+
+    	// details
+    	_FBRef.child('team/' + teamID + '/details').once('value', snap => {
+    		_.assign(Phased.team.details, snap.val());
+    		maybeTeamComplete('details');
     	});
+
+    	// members
+    	_FBRef.child('team/' + teamID + '/members').once('value', snap => {
+    		_.assign(Phased.team.members, snap.val());
+    		maybeTeamComplete('members');
+    		_getMembers();
+    	});
+
+    	// statuses (limited)
+    	_FBRef.child('team/' + teamID + '/statuses')
+    	.limitToLast(_DEFAULTS.STATUS_LIMIT).once('value', snap => {
+    		_.assign(Phased.team.statuses, snap.val());
+    		maybeTeamComplete('statuses');
+    	});
+    }
+
+    /*
+    *	Gathers team member profiles
+    *
+    */
+    var _getMembers = function getMembers() {
+    	var membersCollected = 0,
+    		membersToGet = Object.keys(Phased.team.members).length,
+    		maybeMembersComplete = () => {
+    			membersCollected++;
+    			if (membersCollected == membersToGet)
+    				_doAfter('MEMBERS_SET_UP');
+    		}
+
+    	for (let uid in Phased.team.members) {
+    		let member = Phased.team.members[uid];
+
+    		if (uid == Phased.authData.uid) {
+    			_.assign(Phased.team.members[uid], Phased.user);
+    			maybeMembersComplete();
+    		} else {
+    			_FBRef.child(`profile/${uid}`).once('value', snap => {
+    				_.assign(Phased.team.members[uid], snap.val());
+    				maybeMembersComplete();
+    			});
+    		}
+    	}
     }
 
     //
@@ -305,7 +364,7 @@ angular.module('webappV2App')
 				_die('logout');
 			}
     }
-    
+
     /*
     *	Fills a user's profile
     *	called immediately after auth

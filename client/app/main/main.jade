@@ -8,9 +8,16 @@ header#banner.hero-unit
 
 .container
   .row
-    .col-lg-12
+    .col-lg-12(ng-if='!$ctrl.Phased.authData')
       h1.page-header Features:
       ul.nav.nav-tabs.nav-stacked.col-md-4.col-lg-4.col-sm-6(ng-repeat='thing in $ctrl.awesomeThings')
         li
           a(href='#', uib-tooltip='{{thing.info}}')
             | {{thing.name}}
+    .col-lg-12(ng-if='$ctrl.Phased.authData')
+      h1.page-header {{::$ctrl.Phased.team.name}}
+      ul.nav.nav-tabs.nav-stacked.col-md-4.col-lg-4.col-sm-6
+        li(ng-repeat="member in $ctrl.Phased.team.members")
+          p
+            img(ng-src="{{member.gravatar}}")
+            {{member.name}}
