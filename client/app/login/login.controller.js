@@ -24,7 +24,6 @@ class LoginController {
     const {$scope, $location, Phased} = this;
     Phased.login($scope.email, $scope.password)
       .then(function () {
-        console.log('should change loc');
         $location.path('/');
         $scope.$apply();
       });

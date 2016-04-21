@@ -12,7 +12,14 @@ angular.module('webappV2App')
 			user : {}						// copy of user profile from server with additional uid key
 		}
 
-		// run when injected
+		/*
+		*
+		*	CONSTRUCTOR
+		*	
+		*	1. save references to injected services to local var names
+		*	2. init FB objects
+		*	3. add event handlers for FB auth and connection states
+		*/
 		this.$get = ['$rootScope', '$http', '$location', '$window', '$firebaseAuth',
 			function $get(_$rootScope, _$http, _$location, _$window, _$firebaseAuth) {
 			$rootScope = _$rootScope;
@@ -24,15 +31,19 @@ angular.module('webappV2App')
 			_FBRef = new Firebase(_FURL);
 			_FBAuth = $firebaseAuth(_FBRef);
 
+			// listeners for changes in auth and connection state go here
+			_FBAuth.$onAuth(_onAuth);
+
 			return Phased;
 		}];
 
 		/*
-			run in config block
-
-			1. initialize FBRef
-			2. decide if we're running in 'watch' modes (2-way sync)
-			3. set bounce routes
+		*
+		*	CONFIG
+		*
+		*	1. initialize FBRef
+		*	2. decide if we're running in 'watch' modes (2-way sync)
+		*	3. set bounce routes
 		*/
 		this.config = function config(prefs = {}) {
 			return new Promise(function configPromise(fulfill, reject) {
@@ -55,9 +66,9 @@ angular.module('webappV2App')
 
 		/*
 		*
+		*	INIT
 		* run after user has logged in
 		*	starts gathering data from server
-		*
 		*/
 		var _init = function init() {
 			return new Promise(function initPromise(fulfill, reject) {
@@ -96,14 +107,14 @@ angular.module('webappV2App')
 		**
 		*/
 
-    var _registerAsync = function(callback, args) {
+    var _registerAsync = function registerAsync(callback, args) {
       if (Phased.SET_UP)
         return callback(args);
       else
         _reqCallbacks.push({callback : callback, args : args });
     }
 
-    var _doAsync = function() {
+    var _doAsync = function doAsync() {
       for (var i in _reqCallbacks) {
         _reqCallbacks[i].callback(_reqCallbacks[i].args || undefined);
       }
@@ -137,7 +148,7 @@ angular.module('webappV2App')
     *	Fills a user's profile
     *	called immediately after auth
     */
-    var _fillUserProfile = function _fillUserProfile() {
+    var _fillUserProfile = function fillUserProfile() {
     	return new Promise(function _fillUserProfilePromise(fulfill, reject) {
     		if (!('uid' in Phased.authData)) {
     			console.warn('Cannot gather user information; no UID set.');
@@ -146,14 +157,29 @@ angular.module('webappV2App')
     		}
     		_FBRef.child('profile/' + Phased.authData.uid).once('value', function (snap) {
     			var data = snap.val();
-    			_.assign(Phased.user, data, { uid: Phased.authData.uid });
+    			$rootScope.$evalAsync(() => {
+	    			_.assign(Phased.user, data, { uid: Phased.authData.uid });
 
-    			console.log('profile:', Phased.user);
-    			fulfill();
+	    			console.log('profile:', Phased.user);
+	    			fulfill();
+	    		});
     		});
     	});
     }
 
+    /*
+    *	Similar to the Phased.login callback;
+    *	simply fills the user's profile and then calls init
+    */
+    var _onAuth = function onAuth(authData) {
+    	if ('uid' in authData) {
+				Phased.authData = authData;
+				_fillUserProfile()
+					.then(_init);
+			} else {
+				_die('logout');
+			}
+    }
 
 
     /*
@@ -173,7 +199,6 @@ angular.module('webappV2App')
 			return new Promise(function doLoginPromise(fulfill, reject) {
 				_FBAuth.$authWithPassword({email: email, password:password}).then(function authFilled(authData) {
 					console.log('auth successful', authData);
-
 					if ('uid' in authData) {
 						Phased.authData = authData;
 						_fillUserProfile()
