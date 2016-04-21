@@ -150,7 +150,7 @@ angular.module('webappV2App')
 				}
 
 				fulfill();
-			})
+			});
 		}
 
 
@@ -201,10 +201,15 @@ angular.module('webappV2App')
     		return;
     	}
 
-      if (Phased[event])			// call immediately, or
-        return callback(args);
-      else										// save for later
-        _toDoAfter[event].push({callback : callback, args : args });
+      if (Phased[event]) {			// call immediately, or
+        return new Promise((fulfill, reject) => {
+        	callback(args, fulfill, reject);
+        });
+      } else {										// save for later
+        return new Promise((fulfill, reject) => {
+        	_toDoAfter[event].push({callback : callback, args : args, fulfill: fulfill, reject: reject });
+        });
+      }
     }
 
     /*
@@ -222,12 +227,11 @@ angular.module('webappV2App')
 
     	$rootScope.$evalAsync(() => {
 	      for (let i in _toDoAfter[event]) {
-	        _toDoAfter[event][i].callback(_toDoAfter[event][i].args || undefined);
+	      	let job = _toDoAfter[event][i];
+	        job.callback(job.args || undefined, job.fulfill, job.reject);
 	      }
 	      Phased[event] = true;
-	      console.log(`${_INIT_EVENTS[event]}`, Phased);
 				$rootScope.$broadcast(`${_INIT_EVENTS[event]}`);
-
 				_maybeFinalizeSetup();
 			});
     }
@@ -441,6 +445,7 @@ angular.module('webappV2App')
     	_FBRef.child(`profile/${uid}`).on('value', snap => {
     		$rootScope.$evalAsync(() => {
     			_.assign(Phased.team.members[uid], snap.val());
+
 	    		// possibly fire event
 		    	if (!Phased.MEMBERS_SET_UP) {
 		    		// if any member doesn't have their profile data, don't fire event
@@ -475,7 +480,6 @@ angular.module('webappV2App')
     */
     var _onAuth = function onAuth(authData) {
     	if (authData && 'uid' in authData) {
-    		console.log('onAuth');
 				// 1. stash auth data
 				Phased.authData = authData;
 				
@@ -505,12 +509,9 @@ angular.module('webappV2App')
     			reject();
     			return;
     		}
-    		_FBRef.child('profile/' + Phased.authData.uid).once('value', function (snap) {
-    			var data = snap.val();
+    		_FBRef.child('profile/' + Phased.authData.uid).on('value', function (snap) {
     			$rootScope.$evalAsync(() => {
-	    			_.assign(Phased.user, data, { uid: Phased.authData.uid });
-
-	    			console.log('profile:', Phased.user);
+	    			_.assign(Phased.user, snap.val(), { uid: Phased.authData.uid });
 	    			fulfill();
 	    		});
     		});
@@ -549,7 +550,7 @@ angular.module('webappV2App')
 		*/
 		Phased.postStatus = function postStatus(name, args = {}) {
 			args.name = name; // to allow simple syntax: Phased.postStatus('my status');
-			_registerAfter('META_SET_UP', _doPostStatus, args);
+			return _registerAfter('META_SET_UP', _doPostStatus, args);
 		}
 
 		/*
@@ -560,7 +561,7 @@ angular.module('webappV2App')
 		*	2. post to team
 		*	3. update own currentStatus
 		*/
-		var _doPostStatus = function doPostStatus(args = {}) {
+		var _doPostStatus = function doPostStatus(args = {}, fulfill, reject) {
 			const {name, type, projectID, taskID, startTime, endTime} = args;
 
 			var newStatus = {
@@ -572,6 +573,7 @@ angular.module('webappV2App')
 			// name
 			if (!('name' in args) || typeof args.name != 'string') {
 				console.warn('Cannot post a blank status update!');
+				reject();
 				return;
 			} else {
 				newStatus.name = name;
@@ -630,5 +632,8 @@ angular.module('webappV2App')
 
 			// 3. POST TO USER
 			_FBRef.child(`team/${Phased.team.uid}/members/${Phased.user.uid}/currentStatus`).set(statusRef.key());
+
+			// fulfill promise
+			fulfill();
 		}
 	})

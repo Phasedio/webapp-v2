@@ -2,19 +2,18 @@
 
 (function() {
 
-class MainController {
+var MainController = function MainController($http, $scope, Phased) {
 
-  constructor($http, $scope, Phased) {
-    this.$http = $http;
-    this.awesomeThings = [];
-    $scope.Phased = this.Phased = Phased;
-  }
+  /*
+  * mimics Yeoman's controller class constructor function
+  */
+  (function constructor() {
+    $scope.Phased = Phased;
+  })();
 
-  $onInit() {
-    this.$http.get('/api/things').then(response => {
-      this.awesomeThings = response.data;
-    });
-    console.log(this.Phased);
+  // posts a simple status, then clears it
+  $scope.postStatus = function postStatus() {
+    Phased.postStatus($scope.statusName).then(() => $scope.statusName = '');
   }
 }
 
