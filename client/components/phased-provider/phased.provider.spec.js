@@ -13,6 +13,11 @@ describe('Component: PhasedProvider', function() {
 
   beforeEach(function (){
     sandbox = sinon.sandbox.create();
+    // stub console methods
+    sandbox.stub(window.console, 'log');
+    sandbox.stub(window.console, 'warn');
+    sandbox.stub(window.console, 'error');
+
     // create the dummy module
     angular.module('dummyModule', [])
     .config(['PhasedProvider', function(_PhasedProvider) {
@@ -36,11 +41,6 @@ describe('Component: PhasedProvider', function() {
         // spy on some modules
         sandbox.spy(window, 'Firebase'); // constructor
     });
-
-    // stub some methods
-    sandbox.stub(window.console, 'log');
-    sandbox.stub(window.console, 'warn');
-    sandbox.stub(window.console, 'error');
   });
 
   afterEach(function () {

@@ -5,6 +5,7 @@ describe('Component: loginController', function() {
   // load the controller's module
   beforeEach(module('webappV2App'));
 
+  var sandbox;
   var scope;
   var loginController;
   var $httpBackend;
@@ -17,6 +18,12 @@ describe('Component: loginController', function() {
     Phased,
     $componentController,
     $rootScope) {
+      // sandbox
+      sandbox = sinon.sandbox.create();
+      // stub console methods
+      sandbox.stub(window.console, 'log');
+      sandbox.stub(window.console, 'warn');
+      sandbox.stub(window.console, 'error');
 
       scope = $rootScope.$new();
       loginController = $componentController('login', {
@@ -25,6 +32,10 @@ describe('Component: loginController', function() {
         Phased: Phased
       });
   }));
+
+  afterEach(function () {
+    sandbox.restore();
+  });
 
   it('should register login function to scope', function() {
     loginController.$onInit();

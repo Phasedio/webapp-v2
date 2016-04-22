@@ -5,6 +5,7 @@ describe('Component: mainComponent', function() {
   // load the controller's module
   beforeEach(module('webappV2App'));
 
+  var sandbox;
   var scope;
   var mainComponent;
   var Phased;
@@ -15,14 +16,24 @@ describe('Component: mainComponent', function() {
     $componentController,
     $rootScope,
     Phased) {
+      sandbox = sinon.sandbox.create();
+      // stub console methods
+      sandbox.stub(window.console, 'log');
+      sandbox.stub(window.console, 'warn');
+      sandbox.stub(window.console, 'error');
+
       scope = $rootScope.$new();
-      sinon.spy(Phased, 'postStatus');
+      sandbox.spy(Phased, 'postStatus');
       mainComponent = $componentController('main', {
         $http: $http,
         $scope: scope,
         Phased: Phased
       });
   }));
+  
+  afterEach(function () {
+    sandbox.restore();
+  });
 
   describe('#postStatus', function () {
     it('should register #postStatus to scope', function() {
