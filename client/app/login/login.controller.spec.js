@@ -43,33 +43,73 @@ describe('Component: loginController', function() {
     sandbox.restore();
   });
 
+  //
+  // TESTS
+  //
+
   it('should register login function to scope', function() {
     scope.login.should.be.a('function');
   });
 
-  it('should not login if either username or password are blank', function () {
-    sandbox.spy(Phased, 'login');
-    
-    // no email or pass
-    scope.login();
-    // should not call Phased.login
-    assert(!Phased.login.called, 'attempted to login without email or pass');
-    Phased.login.reset();
+  // #login
+  describe('#login', function() {
+    it('should not login if either username or password are blank', function () {
+      sandbox.spy(Phased, 'login');
+      
+      // no email or pass
+      scope.login();
+      assert(!Phased.login.called, 'attempted to login without email or pass'); // should not call Phased.login
+      Phased.login.reset();
 
 
-    // email but no pass
-    scope.email = 'asdf@asdf.com';
-    scope.login();
-    // should not call Phased.login
-    assert(!Phased.login.called, 'attempted to login without pass');
-    Phased.login.reset();
+      // email but no pass
+      scope.email = 'asdf@asdf.com';
+      scope.login();
+      assert(!Phased.login.called, 'attempted to login without pass');
+      Phased.login.reset();
 
-    // pass but no email
-    delete scope.email;
-    scope.password = 'correctbatterysomestuff';
-    scope.login();
-    // should not call Phased.login
-    assert(!Phased.login.called, 'attempted to login without email');
-    Phased.login.reset();
+      // pass but no email
+      delete scope.email;
+      scope.password = 'correctbatterysomestuff';
+      scope.login();
+      assert(!Phased.login.called, 'attempted to login without email');
+      Phased.login.reset();
+      delete scope.password;
+    });
+
+    it('should call Phased.login', function () {
+      sandbox.spy(Phased, 'login');
+      scope.email = 'valid@email.yes';
+      scope.password = 'batterystaple';
+
+      scope.login();
+
+      assert(Phased.login.called, 'Phased.login was not called');
+      Phased.login.restore();
+    });
+
+    // this currently gives false positives (note test for false == true)
+    it('should gracefully handle failed login attempts', function () {
+      // stub Phased.login to return and reject a promise
+      var loginPromise;
+      sandbox.stub(Phased, 'login', () => {
+        loginPromise = new Promise((fill,rej) => {
+          rej(new Error('Incorrect login'));
+          // fill();
+
+          expect(scope.loginErrMessage).to.equal('Incorrect login');
+          assert.equal(false, true, 'shit is not working');
+          done();
+        });
+        return loginPromise;
+      });
+
+      scope.email = 'asdf';
+      scope.password = 'asdf';
+      scope.login();
+      assert(Phased.login.called, 'Phased.login was not called');
+      assert.equal(false, true, 'this test is broken (gives false positives) -DR');
+      // Phased.login.restore(); 
+    });
   });
 });
