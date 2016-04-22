@@ -15,7 +15,7 @@ describe('Component: loginController', function() {
   beforeEach(inject(function(
     $location,
     $http,
-    Phased,
+    _Phased_,
     $componentController,
     $rootScope) {
       // sandbox
@@ -25,12 +25,18 @@ describe('Component: loginController', function() {
       sandbox.stub(window.console, 'warn');
       sandbox.stub(window.console, 'error');
 
+      // make a new scope for the controller to live in
       scope = $rootScope.$new();
+
+      // save a ref to Phased
+      Phased = _Phased_;
+
       loginController = $componentController('login', {
         $http: $http,
         $scope: scope,
-        Phased: Phased
+        Phased: _Phased_
       });
+      loginController.$onInit();
   }));
 
   afterEach(function () {
@@ -38,7 +44,32 @@ describe('Component: loginController', function() {
   });
 
   it('should register login function to scope', function() {
-    loginController.$onInit();
     scope.login.should.be.a('function');
+  });
+
+  it('should not login if either username or password are blank', function () {
+    sandbox.spy(Phased, 'login');
+    
+    // no email or pass
+    scope.login();
+    // should not call Phased.login
+    assert(!Phased.login.called, 'attempted to login without email or pass');
+    Phased.login.reset();
+
+
+    // email but no pass
+    scope.email = 'asdf@asdf.com';
+    scope.login();
+    // should not call Phased.login
+    assert(!Phased.login.called, 'attempted to login without pass');
+    Phased.login.reset();
+
+    // pass but no email
+    delete scope.email;
+    scope.password = 'correctbatterysomestuff';
+    scope.login();
+    // should not call Phased.login
+    assert(!Phased.login.called, 'attempted to login without email');
+    Phased.login.reset();
   });
 });
