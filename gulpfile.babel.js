@@ -113,7 +113,7 @@ function sortModulesFirst(a, b) {
 
 let lintClientScripts = lazypipe()
     .pipe(plugins.jshint, `${clientPath}/.jshintrc`)
-    .pipe(plugins.jshint.reporter, 'jshint-stylish');
+    // .pipe(plugins.jshint.reporter, 'jshint-stylish');
 
 let lintServerScripts = lazypipe()
     .pipe(plugins.jshint, `${serverPath}/.jshintrc`)
