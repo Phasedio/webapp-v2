@@ -30,16 +30,21 @@ describe('Component: mainComponent', function() {
         Phased: Phased
       });
   }));
-  
+
   afterEach(function () {
     sandbox.restore();
   });
 
-  describe('#postStatus', function () {
-    it('should register #postStatus to scope', function() {
-      scope.postStatus.should.be.a('function');
-    });
+  //
+  //  TESTS
+  //
 
+  it('should register #postStatus to scope', function() {
+    scope.postStatus.should.be.a('function');
+  });
+
+  // postStatus
+  describe('#postStatus', function () {
     it('should call Phased#postStatus', function () {
       scope.postStatus();
       assert(scope.Phased.postStatus.called);

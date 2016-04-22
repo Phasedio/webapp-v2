@@ -105,8 +105,8 @@ describe('Component: PhasedProvider', function() {
       assert(Firebase.prototype.authWithPassword.called, 'did not call authWithPassword');
     });
 
-    it('should gracefully fail with bad credentials', function () {
-      assert(false, 'gracefulness is not yet implemented');
+    it('should return a FB promise', function () { // return the return val of FB.authWithPassword
+      Phased.login('a', 'e').then.should.be.a('function');
     })
 
     // broken test; gives false negative
