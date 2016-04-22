@@ -7,28 +7,39 @@ describe('Component: mainComponent', function() {
 
   var scope;
   var mainComponent;
-  var $httpBackend;
+  var Phased;
 
   // Initialize the controller and a mock scope
   beforeEach(inject(function(
-    _$httpBackend_,
     $http,
     $componentController,
-    $rootScope) {
-      $httpBackend = _$httpBackend_;
-      $httpBackend.expectGET('/api/things')
-        .respond(['HTML5 Boilerplate', 'AngularJS', 'Karma', 'Express']);
-
+    $rootScope,
+    Phased) {
       scope = $rootScope.$new();
+      sinon.spy(Phased, 'postStatus');
       mainComponent = $componentController('main', {
         $http: $http,
-        $scope: scope
+        $scope: scope,
+        Phased: Phased
       });
   }));
 
-  it('should attach a list of things to the controller', function() {
-    mainComponent.$onInit();
-    $httpBackend.flush();
-    mainComponent.awesomeThings.length.should.equal(4);
+  describe('#postStatus', function () {
+    it('should register #postStatus to scope', function() {
+      scope.postStatus.should.be.a('function');
+    });
+
+    it('should call Phased#postStatus', function () {
+      scope.postStatus();
+      assert(scope.Phased.postStatus.called);
+    });
+
+    // not sure how to test this with the async
+    // it('should clear the status after posting it', function () {
+    //   scope.statusName = 'dummy status';
+    //   scope.postStatus();
+    //   // expect(scope.statusName).to.eventually.have.length(0);
+    //   // scope.statusName.should.eventually.have.length(0);
+    // })
   });
 });

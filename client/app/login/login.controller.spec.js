@@ -1,34 +1,33 @@
 'use strict';
 
-describe('Component: mainComponent', function() {
+describe('Component: loginController', function() {
 
   // load the controller's module
   beforeEach(module('webappV2App'));
 
   var scope;
-  var mainComponent;
+  var loginController;
   var $httpBackend;
+  var Phased;
 
   // Initialize the controller and a mock scope
   beforeEach(inject(function(
-    _$httpBackend_,
+    $location,
     $http,
+    Phased,
     $componentController,
     $rootScope) {
-      $httpBackend = _$httpBackend_;
-      $httpBackend.expectGET('/api/things')
-        .respond(['HTML5 Boilerplate', 'AngularJS', 'Karma', 'Express']);
 
       scope = $rootScope.$new();
-      mainComponent = $componentController('main', {
+      loginController = $componentController('login', {
         $http: $http,
-        $scope: scope
+        $scope: scope,
+        Phased: Phased
       });
   }));
 
-  it('should attach a list of things to the controller', function() {
-    mainComponent.$onInit();
-    $httpBackend.flush();
-    mainComponent.awesomeThings.length.should.equal(4);
+  it('should register login function to scope', function() {
+    loginController.$onInit();
+    scope.login.should.be.a('function');
   });
 });
