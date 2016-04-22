@@ -24,7 +24,7 @@ header#banner.hero-unit
         li(ng-repeat="member in Phased.team.members")
           p
             img(ng-src="{{member.gravatar}}")
-            {{member.name}}: 
+            span {{member.name}}: 
             span(ng-if="member.currentStatus && Phased.STATUSES_SET_UP") "{{Phased.team.statuses[member.currentStatus].name}}"
     .col-lg-4
       form(ng-submit="postStatus()", name="statusForm")
