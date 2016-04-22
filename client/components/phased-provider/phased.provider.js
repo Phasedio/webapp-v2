@@ -534,7 +534,7 @@ angular.module('webappV2App')
 		*	Log a user in using username and password
 		*/
 		Phased.login = function login(email, password) {
-			_FBAuth.$authWithPassword({email: email, password:password})
+			return _FBAuth.$authWithPassword({email: email, password:password});
 		}
 
 		/*

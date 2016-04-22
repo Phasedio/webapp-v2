@@ -21,7 +21,25 @@ class LoginController {
 
   // callback function $scope == this
   doLogin() {
-    this.Phased.login(this.$scope.email, this.$scope.password);
+    const {$scope, Phased} = this;
+    delete $scope.loginErrMessage;
+
+    // bail if incomplete credentials entered
+    if (
+      (!$scope.email || !$scope.password)
+      ||
+      !($scope.email.length > 0 && $scope.password.length > 0)
+      ) {
+      return;
+    }
+
+    Phased.login($scope.email, $scope.password)
+      .then(() => {/* redirect handled in Phased*/}, (err) => {
+        if (err) {
+          console.log(err);
+          $scope.loginErrMessage = err.message;
+        }
+      });
   }
 } 
 
