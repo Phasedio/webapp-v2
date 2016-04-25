@@ -4,22 +4,17 @@ class NavbarController {
   //start-non-standard
   menu = [
   {
-    'title': 'Assignments',
+    'title': 'Home',
     'link': '/assignments'
   },
   {
-    'title': 'FYI',
-    'link': '/fyi'
+    'title': 'Reports',
+    'link': '/reports'
   },
   {
     'title': 'Team',
     'link': '/team'
-  },
-  {
-    'title': 'Profile',
-    'link': '/profile',
-    'pinRight': true
-  },];
+  }];
 
   isCollapsed = true;
   //end-non-standard

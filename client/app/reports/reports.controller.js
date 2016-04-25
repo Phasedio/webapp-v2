@@ -2,7 +2,7 @@
 
 (function() {
 
-var FYIController = function FYIController($http, $scope, Phased) {
+var ReportsController = function ReportsController($http, $scope, Phased) {
 
   /*
   * mimics Yeoman's controller class constructor function
@@ -18,9 +18,9 @@ var FYIController = function FYIController($http, $scope, Phased) {
 }
 
 angular.module('webappV2App')
-  .component('fyi', {
-    templateUrl: 'app/fyi/fyi.html',
-    controller: FYIController
+  .component('reports', {
+    templateUrl: 'app/reports/reports.html',
+    controller: ReportsController
   });
 
 })();

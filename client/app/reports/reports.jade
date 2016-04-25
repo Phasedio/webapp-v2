@@ -1,0 +1,22 @@
+header#banner.hero-unit
+  .container
+    form.fyi-form(ng-submit="postStatus()", name="statusForm")
+        label(for="statusName")
+          img(ng-src="{{Phased.user.gravatar}}")
+        input(type="text" name="statusName" ng-model="statusName" placeholder="For your information...")
+
+.container
+  .row
+    .col-lg-8
+      h1.page-header {{::Phased.team.name}}
+      ul.nav.nav-tabs.nav-stacked.col-md-4.col-lg-4.col-sm-6
+        li(ng-repeat="member in Phased.team.members")
+          p
+            img(ng-src="{{member.gravatar}}")
+            span {{member.name}}: 
+            span(ng-if="member.currentStatus && Phased.STATUSES_SET_UP") "{{Phased.team.statuses[member.currentStatus].name}}"
+    .col-lg-4
+      
+      ul
+        li(ng-repeat="status in Phased.team.statuses")
+          p {{Phased.team.members[status.user].name}}: "{{status.name}}" ({{status.startTime | date : 'ha'}})

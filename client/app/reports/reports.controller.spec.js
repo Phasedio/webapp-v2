@@ -1,13 +1,13 @@
 'use strict';
 
-describe('Component: fyiComponent', function() {
+describe('Component: reportsComponent', function() {
 
   // load the controller's module
   beforeEach(module('webappV2App'));
 
   var sandbox;
   var scope;
-  var fyiComponent;
+  var reportsComponent;
   var Phased;
 
   // Initialize the controller and a mock scope
@@ -24,7 +24,7 @@ describe('Component: fyiComponent', function() {
 
       scope = $rootScope.$new();
       sandbox.spy(Phased, 'postStatus');
-      fyiComponent = $componentController('fyi', {
+      reportsComponent = $componentController('reportsComponent', {
         $http: $http,
         $scope: scope,
         Phased: Phased
