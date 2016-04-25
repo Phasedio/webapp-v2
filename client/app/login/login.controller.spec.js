@@ -36,6 +36,7 @@ describe('Component: loginController', function() {
         $scope: scope,
         Phased: _Phased_
       });
+      sandbox.spy(loginController, 'doLogin');
       loginController.$onInit();
   }));
 
@@ -91,25 +92,25 @@ describe('Component: loginController', function() {
     // this currently gives false positives (note test for false == true)
     it('should gracefully handle failed login attempts', function () {
       // stub Phased.login to return and reject a promise
-      var loginPromise;
-      sandbox.stub(Phased, 'login', () => {
-        loginPromise = new Promise((fill,rej) => {
-          rej(new Error('Incorrect login'));
-          // fill();
-
-          expect(scope.loginErrMessage).to.equal('Incorrect login');
-          assert.equal(false, true, 'shit is not working');
-          done();
-        });
-        return loginPromise;
+      var errMsg = "Incorrect login"
+      sandbox.stub(loginController.Phased, 'login', () => {
+        var stubPromise = sinon.stub().returnsPromise().rejects(new Error(errMsg));
+        return stubPromise();
       });
 
+      // dummy stuff
       scope.email = 'asdf';
       scope.password = 'asdf';
       scope.login();
-      assert(Phased.login.called, 'Phased.login was not called');
-      assert.equal(false, true, 'this test is broken (gives false positives) -DR');
-      // Phased.login.restore(); 
+
+      // test conditions
+      assert(loginController.doLogin.called, 'loginController.doLogin was not called');
+      assert(loginController.Phased.login.called, 'Phased.login was not called');
+      // expect controller method to assign error message from Phased to a scope variable
+      expect(scope.loginErrMessage).to.equal(errMsg);
+      
+      // restore original method
+      Phased.login.restore(); 
     });
   });
 });

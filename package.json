@@ -83,6 +83,7 @@
     "karma-phantomjs-launcher": "~1.0.0",
     "karma-requirejs": "~0.2.2",
     "karma-script-launcher": "~0.1.0",
+    "karma-sinon-stub-promise": "^1.0.0",
     "karma-spec-reporter": "~0.0.20",
     "lazypipe": "^0.2.4",
     "mocha": "^2.2.5",
@@ -94,6 +95,7 @@
     "run-sequence": "^1.1.0",
     "sinon": "^1.16.1",
     "sinon-chai": "^2.8.0",
+    "sinon-stub-promise": "^2.0.0",
     "supertest": "^1.1.0",
     "utile": "~0.3.0",
     "wiredep": "^2.2.2"
