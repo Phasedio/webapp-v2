@@ -16,7 +16,7 @@ angular.module('webappV2App')
 				PROFILE_SET_UP : 'Phased:profileComplete',
 				TEAM_SET_UP : 'Phased:teamComplete',
 				MEMBERS_SET_UP : 'Phased:membersComplete',
-				PROJECTS_SET_UP : 'Phased:projectsComplete',
+				TASKS_SET_UP : 'Phased:tasksComplete',
 				STATUSES_SET_UP : 'Phased:statusesComplete'
 			},
 			_RUNTIME_EVENTS = {
@@ -25,17 +25,13 @@ angular.module('webappV2App')
 				LOGIN : 'Phased:login', 
 				LOGOUT : 'Phased:logout',
 
-				STATUS_NEW : 'Phased:newStatus',
+				STATUS_ADDED : 'Phased:newStatus',
 				STATUS_CHANGED : 'Phased:changedStatus',
 				STATUS_DELETED : 'Phased:deletedStatus',
 
-				TASK_NEW : 'Phased:newTask',
+				TASK_ADDED : 'Phased:newTask',
 				TASK_CHANGED : 'Phased:changedTask',
-				TASK_DELETED : 'Phased:deletedTask',
-
-				PROJECT_NEW : 'Phased:newProject',
-				PROJECT_CHANGED : 'Phased:changedProject',
-				PROJECT_DELETED : 'Phased:deletedProject'
+				TASK_DELETED : 'Phased:deletedTask'
 			},
 			// tasks to do after the indicated events
 			_toDoAfter = {
@@ -44,7 +40,7 @@ angular.module('webappV2App')
 				PROFILE_SET_UP : [],
 				TEAM_SET_UP : [],
 				MEMBERS_SET_UP : [],
-				PROJECTS_SET_UP : [],
+				TASKS_SET_UP : [],
 				STATUSES_SET_UP : []
 			},
 			_CONFIG = {},
@@ -54,7 +50,7 @@ angular.module('webappV2App')
 					details : {},
 					members : {},
 					statuses : {},
-					projects : {}
+					tasks : {}
 				}
 			},
 			_oldestStatusTime = new Date().getTime();
@@ -68,8 +64,8 @@ angular.module('webappV2App')
 			PROFILE_SET_UP : false,
 			TEAM_SET_UP : false,
 			MEMBERS_SET_UP : false,
-			PROJECTS_SET_UP : true,
-			STATUSES_SET_UP : true,
+			TASKS_SET_UP : false,
+			STATUSES_SET_UP : false,
 			meta : {},						// copy of metadata from server. do not overwrite.
 			authData : false,			// copy of authData from firebase authentication callback.
 			user : {},						// copy of user profile from server with additional uid key
@@ -291,7 +287,7 @@ angular.module('webappV2App')
     var _getTeam = function getTeam() {
     	console.log('getting team...');
     	var teamID = Phased.team.uid = Phased.user.currentTeam,
-    		props = ['details', 'members', 'statuses'],
+    		props = ['details', 'members', 'statuses', 'tasks'],
     		completed = [];
 
     	var maybeTeamComplete = prop => {
@@ -302,20 +298,20 @@ angular.module('webappV2App')
     	}
 
     	// details
-    	_FBRef.child('team/' + teamID + '/details').once('value', snap => {
+    	_FBRef.child(`team/${teamID}/details`).once('value', snap => {
     		_.assign(Phased.team.details, snap.val());
     		maybeTeamComplete('details');
     	});
 
     	// members
-    	_FBRef.child('team/' + teamID + '/members').once('value', snap => {
+    	_FBRef.child(`team/${teamID}/members`).once('value', snap => {
     		_.assign(Phased.team.members, snap.val());
     		maybeTeamComplete('members');
     		_getMembers();
     	});
 
     	// statuses (limited)
-    	_FBRef.child('team/' + teamID + '/statuses')
+    	_FBRef.child(`team/${teamID}/statuses`)
     	.limitToLast(_DEFAULTS.STATUS_LIMIT).once('value', snap => {
     		_.assign(Phased.team.statuses, snap.val());
     		// find oldest status time and save val for pagination
@@ -323,7 +319,15 @@ angular.module('webappV2App')
     			if (Phased.team.statuses[i].time < _oldestStatusTime)
     				_oldestStatusTime = Phased.team.statuses[i].time;
     		}
+    		_doAfter('STATUSES_SET_UP');
     		maybeTeamComplete('statuses');
+    	});
+
+    	// all tasks
+    	_FBRef.child(`team/${teamID}/tasks`).once('value', snap => {
+    		_.assign(Phased.team.tasks, snap.val());
+    		_doAfter('TASKS_SET_UP');
+    		maybeTeamComplete('tasks');
     	});
     }
 
@@ -362,7 +366,8 @@ angular.module('webappV2App')
     var _watchTeam = function watchTeam() {
     	var teamID = Phased.team.uid = Phased.user.currentTeam,
     		props = ['details', 'members', 'statuses'],
-    		completed = [];
+    		completed = [],
+    		now = moment.utc().unix();
 
     	var maybeTeamComplete = prop => {
     		if (Phased.TEAM_SET_UP) return;
@@ -372,17 +377,19 @@ angular.module('webappV2App')
     			_doAfter('TEAM_SET_UP');
     	}
 
+    	//
     	// details
-    	_FBRef.child('team/' + teamID + '/details').on('value', snap => {
+    	_FBRef.child(`team/${teamID}/details`).on('value', snap => {
     		$rootScope.$evalAsync(() => {
 	    		_.assign(Phased.team.details, snap.val());
 	    	});
     		maybeTeamComplete('details');
     	});
 
+    	//
     	// members
     	// get list of members on team currently
-    	_FBRef.child('team/' + teamID + '/members').once('value', snap => {
+    	_FBRef.child(`team/${teamID}/members`).once('value', snap => {
     		_.assign(Phased.team.members, snap.val());
     		maybeTeamComplete('members');
     	});
@@ -401,8 +408,9 @@ angular.module('webappV2App')
     		$rootScope.$evalAsync(() => {
     			delete Phased.team.members[uid]; // delete from team
     		});
-    	})
+    	});
 
+    	//
     	// statuses (limited to 30 and newer)
     	// get most recent 30
     	_FBRef.child(`team/${teamID}/statuses`)
@@ -413,6 +421,7 @@ angular.module('webappV2App')
     			if (Phased.team.statuses[i].time < _oldestStatusTime)
     				_oldestStatusTime = Phased.team.statuses[i].time;
     		}
+    		_doAfter('STATUSES_SET_UP');
     		maybeTeamComplete('statuses');
     	});
 			
@@ -422,7 +431,7 @@ angular.module('webappV2App')
 			.on('child_added', snap => {
 				$rootScope.$evalAsync(() => {
 					Phased.team.statuses[snap.key()] = snap.val();
-					$rootScope.$broadcast(_RUNTIME_EVENTS.STATUS_NEW);
+					$rootScope.$broadcast(_RUNTIME_EVENTS.STATUS_ADDED);
 				});
 			});
 
@@ -446,6 +455,41 @@ angular.module('webappV2App')
 					});
 				}
 			});
+
+			//
+			// tasks
+    	// get list of members on team currently
+    	_FBRef.child(`team/${teamID}/tasks`)
+    	.orderByChild('created').endAt(now)
+    	.once('value', snap => {
+    		_.assign(Phased.team.tasks, snap.val());
+    		
+    		for (let uid in Phased.team.tasks)
+    			_watchTask(uid);
+
+    		_doAfter('TASKS_SET_UP');
+    		maybeTeamComplete('tasks');
+    	});
+
+    	// watch tasks
+    	_FBRef.child(`team/${teamID}/tasks`)
+    	.orderByChild('created').startAt(now)
+    	.on('child_added', snap => {
+    		let uid = snap.key();
+    		Phased.team.tasks[uid] = snap.val();
+    		_watchTask(uid);
+    		$rootScope.$broadcast(_RUNTIME_EVENTS.TASK_ADDED);
+    	});
+
+    	// delete and unwatch tasks
+    	_FBRef.child(`team/${teamID}/tasks`).on('child_removed', snap => {
+    		let uid = snap.key();
+    		_FBRef.child(`team/${teamID}/tasks/${uid}`).off('value'); // unwatch
+    		$rootScope.$evalAsync(() => {
+  				delete Phased.team.tasks[uid]; // delete from team	
+  				$rootScope.$broadcast(_RUNTIME_EVENTS.TASK_DELETED);
+    		});
+    	});
     }
 
     /*
@@ -457,7 +501,12 @@ angular.module('webappV2App')
     	// set up data binding for members
     	_FBRef.child(`profile/${uid}`).on('value', snap => {
     		$rootScope.$evalAsync(() => {
-    			_.assign(Phased.team.members[uid], snap.val());
+    			var _newVals = snap.val();
+    			_.assign(Phased.team.members[uid], _newVals); 			// add new values
+    			_.forOwn(Phased.team.members[uid], (val, key) => {	// remove possibly deleted ones
+	    			if (!_newVals.hasOwnProperty(key))
+	    				delete Phased.team.members[uid][key];
+	    		});
 
 	    		// possibly fire event
 		    	if (!Phased.MEMBERS_SET_UP) {
@@ -476,6 +525,23 @@ angular.module('webappV2App')
     		$rootScope.$evalAsync(() => {
     			_.assign(Phased.team.members[snap.key()], snap.val());
     		});
+    	});
+    }
+
+    /*
+		*	Set up data binding for a single task on a team
+		*	broadcasts TASK_CHANGED
+    */
+    var _watchTask = function watchTask(uid) {
+    	var teamID = Phased.team.uid;
+    	_FBRef.child(`team/${teamID}/tasks/${uid}`).on('value', snap => {
+    		var _newVals = snap.val();
+  			_.assign(Phased.team.tasks[uid], _newVals); 			// add new values
+  			_.forOwn(Phased.team.tasks[uid], (val, key) => {	// remove possibly deleted ones
+    			if (!_newVals.hasOwnProperty(key))
+    				delete Phased.team.tasks[uid][key];
+    		});
+    		$rootScope.$broadcast(_RUNTIME_EVENTS.TASK_CHANGED);
     	});
     }
 
