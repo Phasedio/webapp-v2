@@ -9,7 +9,8 @@ describe('Component: PhasedProvider', function() {
     $http,
     $location,
     $window,
-    $firebaseAuth;
+    $firebaseAuth,
+    Phased;
 
   beforeEach(function (){
     sandbox = sinon.sandbox.create();
@@ -17,6 +18,8 @@ describe('Component: PhasedProvider', function() {
     sandbox.stub(window.console, 'log');
     sandbox.stub(window.console, 'warn');
     sandbox.stub(window.console, 'error');
+    sandbox.spy(window, 'Firebase'); // constructor
+    sandbox.spy(Firebase.prototype, 'onAuth');
 
     // create the dummy module
     angular.module('dummyModule', [])
@@ -25,21 +28,21 @@ describe('Component: PhasedProvider', function() {
     }]);
 
     // inject into our module and stash some other modules
+    // this will instantiate the Phased factory by calling PhasedProvider.$get
     module('webappV2App', 'dummyModule');
     inject(function(
       _$rootScope_,
       _$http_,
       _$location_,
       _$window_,
-      _$firebaseAuth_) {
+      _$firebaseAuth_,
+      _Phased_) {
         $rootScope = _$rootScope_;
         $http = _$http_;
         $location = _$location_;
         $window = _$window_;
-        $firebaseAuth = _$firebaseAuth_;
-
-        // spy on some modules
-        sandbox.spy(window, 'Firebase'); // constructor
+        $firebaseAuth = _$firebaseAuth_,
+        Phased = _Phased_;
     });
   });
 
@@ -70,20 +73,12 @@ describe('Component: PhasedProvider', function() {
 
     // CONSTRUCTION
     describe('#construction', function () {
-      // create the Phased factory by injecting it (calls PhasedProvider.$get)
-      var Phased;
-      beforeEach(function () {
-        sandbox.spy(Firebase.prototype, 'onAuth');
-        inject(function (_Phased_){
-          Phased = _Phased_;
-        });
-      });
-
       it('should provide Phased factory', function () {
         expect(Phased).to.be.an('object');
       });
 
       it('should handle FB auth changes', function () {
+        window.Firebase.should.be.a('function');
         assert(window.Firebase.called, 'FB was not instantiated');
         assert(Firebase.prototype.onAuth.called, 'onAuth was not called');
       });
@@ -92,20 +87,16 @@ describe('Component: PhasedProvider', function() {
 
   // LOGIN AND LOGOUT
   describe('login and logout', function () {
-    var Phased;
-    beforeEach(function () {
-      inject(function (_Phased_){
-        Phased = _Phased_;
-      });
-    });
-
     it('should attempt to log in with FB', function () {
       sandbox.spy(Firebase.prototype, 'authWithPassword');
       Phased.login('d', 'a');
       assert(Firebase.prototype.authWithPassword.called, 'did not call authWithPassword');
     });
 
-    it('should return a FB promise', function () { // return the return val of FB.authWithPassword
+    it('should return a FB promise', function () {
+      // strictly speaking, this is a "then-able" and not a promise; since the return value of 
+      // FB.authWithPassword isn't an instance of Promise
+      // (so we check to see that "then" is a function rather than if it's a Promise)
       Phased.login('a', 'e').then.should.be.a('function');
     })
 
