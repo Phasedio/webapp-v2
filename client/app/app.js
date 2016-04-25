@@ -41,6 +41,11 @@ angular.module('webappV2App', [
         $location.path('/login');
       }
     });
+
+    // add route name to high-level DOM element class for styling
+    $rootScope.$on('$routeChangeSuccess', () => {
+      $rootScope.route = $location.path().split('/')[1];
+    });
   })
 
   /**
