@@ -8,7 +8,8 @@ angular.module('webappV2App', [
   'ngRoute',
   'ui.bootstrap',
   'firebase',
-  'ngOrderObjectBy'
+  'ngOrderObjectBy',
+  'angularMoment'
 ])
   .constant('FURL', 'https://phased-dev2.firebaseio.com/')
   .config(function($routeProvider, $locationProvider, PhasedProvider, FURL) {
