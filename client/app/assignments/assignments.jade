@@ -1,9 +1,19 @@
 header#banner.hero-unit
   .container
     h1 Assignments
-    p.lead Currently logged in as {{Phased.user.name}}
+    nav
+      a.button.add-new(href="#" ng-click="onAddNew($event)") Add New
+      a.button.filter(href="#" ng-click="onFilter($event)") Filter
 
 .container
   .row
     .col-lg-12
-      p This is where the assignments will go.
+      //- in a list for semantic markup
+      ul.task-list
+        li.task(ng-repeat="task in Phased.team.tasks | orderObjectBy : 'created' : true" class="type-{{Phased.meta.task.TYPE[task.type]}}")
+          h1 {{task.name}} 
+          p.due-date(ng-if="task.dueDate")
+            time {{task.dueDate | date : 'shortDate'}}
+          p.status {{Phased.meta.task.STATUS[task.status]}}
+          p.comments(href="#" ng-click="onComments($event, status)") Comments
+          p.footer Work on this
