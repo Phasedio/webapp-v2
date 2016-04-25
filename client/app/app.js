@@ -30,13 +30,17 @@ angular.module('webappV2App', [
     */
 
     // always go to /login after logging out
+    // (Phased:logout also fired when app is loaded and user isn't logged in)
     $rootScope.$on('Phased:logout', () =>{
       $location.path('/login');
     });
 
-    // always go to /login if user is logged out
+    // always go to /login if user is logged out & within app
     $rootScope.$on('$routeChangeStart', (e, futureRoute, currentRoute) => {
-      if (!Phased.LOGGED_IN && $location.path().indexOf('login') < 0) {
+      if (!!currentRoute // coming from within app
+        && !Phased.LOGGED_IN // not logged in
+        && $location.path().indexOf('login') < 0 // not already on login page
+      ) {
         e.preventDefault();
         $location.path('/login');
       }
