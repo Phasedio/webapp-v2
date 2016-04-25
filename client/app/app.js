@@ -7,7 +7,8 @@ angular.module('webappV2App', [
   'ngSanitize',
   'ngRoute',
   'ui.bootstrap',
-  'firebase'
+  'firebase',
+  'ngOrderObjectBy'
 ])
   .constant('FURL', 'https://phased-dev2.firebaseio.com/')
   .config(function($routeProvider, $locationProvider, PhasedProvider, FURL) {
@@ -50,29 +51,6 @@ angular.module('webappV2App', [
     $rootScope.$on('$routeChangeSuccess', () => {
       $rootScope.route = $location.path().split('/')[1];
     });
-  })
-
-  /**
-  *
-  * allows ordering an object as if it were an array,
-  * at the cost of being able to access its original index
-  * Adds a property 'key' with the original index to
-  * address this
-  *
-  */
-  .filter('orderObjectBy', function orderObjectBy() {
-    return function(items, field, reverse) {
-      var filtered = [];
-      for (var i in items) {
-        items[i].key = i;
-        filtered.push(items[i]);
-      }
-      filtered.sort(function (a, b) {
-        return (a[field] > b[field] ? 1 : -1);
-      });
-      if(reverse) filtered.reverse();
-      return filtered;
-    };
   })
   /*
     If a phone number can be formatted nicely, format it; otherwise, return the original
