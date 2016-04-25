@@ -10,13 +10,19 @@ class LoginController {
   }
 
   $onInit() {
-    const {$scope, Phased} = this; // get scope and phased from this
+    const {$scope, $location, Phased} = this; // get scope and phased from this
 
     // register own methods to scope
     $scope.login = this.doLogin.bind(this); // ensure callbacks are called in this context
 
-    // do some init scripting
-    console.log('login controller loaded');
+    if (Phased.LOGGED_IN) {
+      $location.path('/assignments');
+    } else {
+      // listen for logins and bounce to /assignments
+      $scope.$on('Phased:login', () => {
+        $location.path('/assignments');
+      })
+    }
   }
 
   // callback function $scope == this

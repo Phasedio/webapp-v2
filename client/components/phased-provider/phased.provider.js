@@ -11,14 +11,20 @@ angular.module('webappV2App')
 			_FBRef,
 			_FURL,
 			_INIT_EVENTS = {
-				SET_UP : 'Phased.setup',
-				META_SET_UP : 'Phased.meta',
-				TEAM_SET_UP : 'Phased.teamComplete',
-				MEMBERS_SET_UP : 'Phased.membersComplete',
-				PROJECTS_SET_UP : 'Phased.projectsComplete',
-				STATUSES_SET_UP : 'Phased.statusesComplete'
+				SET_UP : 'Phased:setup',
+				META_SET_UP : 'Phased:meta',
+				PROFILE_SET_UP : 'Phased:profileComplete',
+				TEAM_SET_UP : 'Phased:teamComplete',
+				MEMBERS_SET_UP : 'Phased:membersComplete',
+				PROJECTS_SET_UP : 'Phased:projectsComplete',
+				STATUSES_SET_UP : 'Phased:statusesComplete'
 			},
 			_RUNTIME_EVENTS = {
+				// NB: Phased:login is broadcast immediately after firebase auth
+				// and therefore before any data has been loaded from the server
+				LOGIN : 'Phased:login', 
+				LOGOUT : 'Phased:logout',
+
 				STATUS_NEW : 'Phased:newStatus',
 				STATUS_CHANGED : 'Phased:changedStatus',
 				STATUS_DELETED : 'Phased:deletedStatus',
@@ -29,12 +35,13 @@ angular.module('webappV2App')
 
 				PROJECT_NEW : 'Phased:newProject',
 				PROJECT_CHANGED : 'Phased:changedProject',
-				PROJECT_DELETED : 'Phased:deletedProject',
+				PROJECT_DELETED : 'Phased:deletedProject'
 			},
 			// tasks to do after the indicated events
 			_toDoAfter = {
 				SET_UP : [],
 				META_SET_UP : [],
+				PROFILE_SET_UP : [],
 				TEAM_SET_UP : [],
 				MEMBERS_SET_UP : [],
 				PROJECTS_SET_UP : [],
@@ -56,7 +63,9 @@ angular.module('webappV2App')
 		var Phased = {
 			// init status flags
 			SET_UP : false,
+			LOGGED_IN : false,
 			META_SET_UP : false,
+			PROFILE_SET_UP : false,
 			TEAM_SET_UP : false,
 			MEMBERS_SET_UP : false,
 			PROJECTS_SET_UP : true,
@@ -169,8 +178,12 @@ angular.module('webappV2App')
 					Phased[event] = false;
 				
 				Phased.authData = false;
+				Phased.LOGGED_IN = false;
 				Phased.user = {};
 				Phased.team = angular.copy(_DEFAULTS.TEAM);
+
+				// broadcast logout
+				$rootScope.$broadcast(_RUNTIME_EVENTS.LOGOUT);
 			} 
 			// 2. normal exit (stash app state here, in localstorage or FB cache key)
 			else {
@@ -475,7 +488,7 @@ angular.module('webappV2App')
 		*	
 		*	1. stashes user auth data
 		*	2. saves auth token to default POST request
-		*	3. bounces user to / if on /login
+		* 3. broadcast login
 		*	4. fills user profile data, then calls init
     */
     var _onAuth = function onAuth(authData) {
@@ -485,10 +498,10 @@ angular.module('webappV2App')
 				
 				// 2. use token to authenticate with our server
 				$http.defaults.headers.post.Authorization = 'Bearer ' + authData.token;
-				
-				// 3. bounce to '/' if on /login
-				if ($location.path().indexOf('login') >= 0)
-					$location.path('/');
+
+				// 3. broadcast login
+				Phased.LOGGED_IN = true;
+				$rootScope.$broadcast(_RUNTIME_EVENTS.LOGIN);
 
 				// 4.
 				_fillUserProfile().then(_init);
@@ -501,6 +514,7 @@ angular.module('webappV2App')
     /*
     *	Fills a user's profile
     *	called immediately after auth
+    * broadcasts Phased:profileComplete
     */
     var _fillUserProfile = function fillUserProfile() {
     	return new Promise(function _fillUserProfilePromise(fulfill, reject) {
@@ -512,6 +526,7 @@ angular.module('webappV2App')
     		_FBRef.child('profile/' + Phased.authData.uid).on('value', function (snap) {
     			$rootScope.$evalAsync(() => {
 	    			_.assign(Phased.user, snap.val(), { uid: Phased.authData.uid });
+	    			_doAfter('PROFILE_SET_UP');
 	    			fulfill();
 	    		});
     		});

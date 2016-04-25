@@ -13,7 +13,7 @@ angular.module('webappV2App', [
   .config(function($routeProvider, $locationProvider, PhasedProvider, FURL) {
     $routeProvider
       .otherwise({
-        redirectTo: '/'
+        redirectTo: '/login'
       });
 
     $locationProvider.html5Mode(true);
@@ -22,6 +22,24 @@ angular.module('webappV2App', [
     PhasedProvider.config({
       FURL: FURL,
       WATCH_TEAM: true
+    });
+  })
+  .run(function run($rootScope, $location, Phased) {
+    /*
+      ROUTE MGMT
+    */
+
+    // always go to /login after logging out
+    $rootScope.$on('Phased:logout', () =>{
+      $location.path('/login');
+    });
+
+    // always go to /login if user is logged out
+    $rootScope.$on('$routeChangeStart', (e, futureRoute, currentRoute) => {
+      if (!Phased.LOGGED_IN && $location.path().indexOf('login') < 0) {
+        e.preventDefault();
+        $location.path('/login');
+      }
     });
   })
 
