@@ -38,24 +38,4 @@ describe('Component: reportsComponent', function() {
   //
   //  TESTS
   //
-
-  it('should register #postStatus to scope', function() {
-    scope.postStatus.should.be.a('function');
-  });
-
-  // postStatus
-  describe('#postStatus', function () {
-    it('should call Phased#postStatus', function () {
-      scope.postStatus();
-      assert(scope.Phased.postStatus.called);
-    });
-
-    // not sure how to test this with the async
-    // it('should clear the status after posting it', function () {
-    //   scope.statusName = 'dummy status';
-    //   scope.postStatus();
-    //   // expect(scope.statusName).to.eventually.have.length(0);
-    //   // scope.statusName.should.eventually.have.length(0);
-    // })
-  });
 });

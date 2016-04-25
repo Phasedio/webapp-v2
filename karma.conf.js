@@ -30,6 +30,9 @@ module.exports = function(config) {
       'client/bower_components/firebase/firebase.js',
       'client/bower_components/phoneformat/phoneformat.min.js',
       'client/bower_components/angularfire/dist/angularfire.js',
+      'client/bower_components/angular-order-object-by/src/ng-order-object-by.js',
+      'client/bower_components/moment/moment.js',
+      'client/bower_components/angular-moment/angular-moment.js',
       'client/bower_components/angular-mocks/angular-mocks.js',
       // endbower
       'client/app/app.js',
