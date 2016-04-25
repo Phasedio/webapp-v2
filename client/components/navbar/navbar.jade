@@ -8,7 +8,11 @@ div.navbar.navbar-default.navbar-static-top(ng-controller='NavbarController')
         span.icon-bar
       a.navbar-brand(href='/') webapp-v2
 
-    div#navbar-main.navbar-collapse.collapse(uib-collapse='nav.isCollapsed')
-      ul.nav.navbar-nav(ng-if="Phased.LOGGED_IN")
+    div#navbar-main.navbar-collapse.collapse(uib-collapse='nav.isCollapsed', ng-if="Phased.LOGGED_IN")
+      ul.nav.navbar-nav
         li(ng-repeat='item in nav.menu', ng-if='!item.hideCondition' ng-class='{active: nav.isActive(item.link), "pin-right":item.pinRight}')
           a(ng-href='{{item.link}}') {{item.title}}
+      .profile-link
+        a(href="/profile")
+          {{Phased.user.name}}
+          img.circular(ng-src="{{Phased.user.gravatar}}")

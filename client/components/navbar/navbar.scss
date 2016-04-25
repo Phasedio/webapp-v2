@@ -1,5 +1,14 @@
-.navbar-nav {
-	& > li.pin-right {
+.navbar {
+	#navbar-main {
 		float: right;
+	}
+	
+	.profile-link {
+		display: inline-block;
+		padding: 1rem;
+		img {
+			height: 3rem;
+			margin-left: 1rem;
+		}
 	}
 }
