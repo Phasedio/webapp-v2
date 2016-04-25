@@ -23,8 +23,42 @@
 }
 
 
-.route-fyi {
-  .fyi-form {
-    
-  }
+.route-reports {
+  .status-list {
+    max-width: 62rem;
+    margin: 0 auto;
+    padding: 0;
+    list-style: none;
+
+    li.status {
+      @extend .clearfix;
+
+      display: block;
+      border-radius: 2rem;
+      padding: 1rem;
+      margin: 1rem;
+      border: thin solid black;
+
+      .top {
+        @extend .clearfix;
+        & > * {
+          display: block;
+          position: relative;
+          float: left;
+        }
+      }
+
+      img.user-img {
+        width: 8rem;
+      }
+
+      article {
+        width: 48rem;
+        margin-left: 1rem;
+        h1, p {
+          margin: 0;
+        }
+      }
+    }
+  } 
 }
