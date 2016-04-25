@@ -24,10 +24,10 @@ class NavbarController {
   isCollapsed = true;
   //end-non-standard
 
-  constructor($location, Phased) {
+  constructor($location, $scope, Phased) {
     this.$location = $location;
-    this.Phased = Phased;
-    }
+    $scope.Phased = Phased;
+  }
 
   isActive(route) {
     return route === this.$location.path();
