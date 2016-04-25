@@ -2,14 +2,24 @@
 
 class NavbarController {
   //start-non-standard
-  menu = [{
-    'title': 'Login',
-    'link': '/login'
+  menu = [
+  {
+    'title': 'Assignments',
+    'link': '/assignments'
   },
   {
-    'title': 'Home',
-    'link': '/'
-  }];
+    'title': 'FYI',
+    'link': '/fyi'
+  },
+  {
+    'title': 'Team',
+    'link': '/team'
+  },
+  {
+    'title': 'Profile',
+    'link': '/profile',
+    'pinRight': true
+  },];
 
   isCollapsed = true;
   //end-non-standard
@@ -21,10 +31,6 @@ class NavbarController {
 
   isActive(route) {
     return route === this.$location.path();
-  }
-
-  logout() {
-    this.Phased.logout();
   }
 }
 

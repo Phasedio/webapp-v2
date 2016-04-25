@@ -3,7 +3,7 @@
 angular.module('webappV2App')
   .config(function($routeProvider) {
     $routeProvider
-      .when('/', {
-        template: '<main></main>'
+      .when('/assignments', {
+        template: '<assignments></assignments>'
       });
   });

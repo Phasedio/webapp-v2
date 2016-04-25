@@ -2,7 +2,7 @@
 
 (function() {
 
-var MainController = function MainController($http, $scope, Phased) {
+var TeamController = function TeamController($http, $scope, Phased) {
 
   /*
   * mimics Yeoman's controller class constructor function
@@ -18,9 +18,9 @@ var MainController = function MainController($http, $scope, Phased) {
 }
 
 angular.module('webappV2App')
-  .component('main', {
-    templateUrl: 'app/main/main.html',
-    controller: MainController
+  .component('team', {
+    templateUrl: 'app/team/team.html',
+    controller: TeamController
   });
 
 })();

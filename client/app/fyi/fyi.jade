@@ -1,0 +1,35 @@
+header#banner.hero-unit
+  .container(ng-if="!Phased.authData")
+    h1 'Allo, 'Allo!
+    p.lead Kick-start your next web app with Angular Fullstack
+    img(src='assets/images/yeoman.png', alt='I\'m Yeoman')
+  .container(ng-if="Phased.authData")
+    h1 {{Phased.team.details.name}}
+    p.lead Currently logged in as {{Phased.user.name}}
+
+.container(ng-hide='Phased.authData')
+  .row
+    .col-lg-12
+      h1.page-header Features:
+      ul.nav.nav-tabs.nav-stacked.col-md-4.col-lg-4.col-sm-6(ng-repeat='thing in $ctrl.awesomeThings')
+        li
+          a(href='#', uib-tooltip='{{thing.info}}')
+            | {{thing.name}}
+
+.container.logged-in(ng-show="Phased.authData")
+  .row
+    .col-lg-8
+      h1.page-header {{::Phased.team.name}}
+      ul.nav.nav-tabs.nav-stacked.col-md-4.col-lg-4.col-sm-6
+        li(ng-repeat="member in Phased.team.members")
+          p
+            img(ng-src="{{member.gravatar}}")
+            span {{member.name}}: 
+            span(ng-if="member.currentStatus && Phased.STATUSES_SET_UP") "{{Phased.team.statuses[member.currentStatus].name}}"
+    .col-lg-4
+      form(ng-submit="postStatus()", name="statusForm")
+        label(for="statusName") Update your status
+        input(type="text" name="statusName" ng-model="statusName" placeholder="Eating a sandwich")
+      ul
+        li(ng-repeat="status in Phased.team.statuses")
+          p {{Phased.team.members[status.user].name}}: "{{status.name}}" ({{status.startTime | date : 'ha'}})
