@@ -11,10 +11,6 @@ var ProfileController = function ProfileController($http, $scope, Phased) {
     $scope.Phased = Phased;
   })();
 
-  // posts a simple status, then clears it
-  $scope.postStatus = function postStatus() {
-    Phased.postStatus($scope.statusName).then(() => $scope.statusName = '');
-  }
 }
 
 angular.module('webappV2App')

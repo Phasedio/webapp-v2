@@ -40,7 +40,7 @@ class LoginController {
     }
 
     Phased.login($scope.email, $scope.password)
-      .then(() => {/* redirect handled in Phased*/}, (err) => {
+      .then(() => {/* redirect handled above*/}, (err) => {
         if (err) {
           console.log(err);
           $scope.loginErrMessage = err.message;

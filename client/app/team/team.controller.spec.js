@@ -15,7 +15,7 @@ describe('Component: teamComponent', function() {
     $http,
     $componentController,
     $rootScope,
-    Phased) {
+    _Phased_) {
       sandbox = sinon.sandbox.create();
       // stub console methods
       sandbox.stub(window.console, 'log');
@@ -23,7 +23,8 @@ describe('Component: teamComponent', function() {
       sandbox.stub(window.console, 'error');
 
       scope = $rootScope.$new();
-      sandbox.spy(Phased, 'postStatus');
+      Phased = _Phased_;
+
       teamComponent = $componentController('team', {
         $http: $http,
         $scope: scope,
@@ -39,23 +40,9 @@ describe('Component: teamComponent', function() {
   //  TESTS
   //
 
-  it('should register #postStatus to scope', function() {
-    scope.postStatus.should.be.a('function');
-  });
-
-  // postStatus
-  describe('#postStatus', function () {
-    it('should call Phased#postStatus', function () {
-      scope.postStatus();
-      assert(scope.Phased.postStatus.called);
+  describe('Phased on team page', function () {
+    it('should be a thing', function () {
+      Phased.should.be.an('object');
     });
-
-    // not sure how to test this with the async
-    // it('should clear the status after posting it', function () {
-    //   scope.statusName = 'dummy status';
-    //   scope.postStatus();
-    //   // expect(scope.statusName).to.eventually.have.length(0);
-    //   // scope.statusName.should.eventually.have.length(0);
-    // })
   });
 });
