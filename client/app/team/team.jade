@@ -1,9 +1,13 @@
 header#banner.hero-unit
-  .container
-    h1 Team: {{Phased.team.details.name}}
-    p.lead Currently logged in as {{Phased.user.name}}
+	.container
+		h1 {{Phased.team.details.name}}
+		p.lead Add new member
 
 .container
-  .row
-    .col-lg-12
-      p This is where the team page will go.
+	.row
+		.col-lg-12
+			.team-member(ng-repeat="member in Phased.team.members")
+				img(ng-src="{{member.gravatar}}" class="circular" title="{{member.name}}")
+				p.status-name {{Phased.team.statuses[member.currentStatus].name}}
+				p.status-time
+					time {{Phased.team.statuses[member.currentStatus].startTime | date : 'short'}}
