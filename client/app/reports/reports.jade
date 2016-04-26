@@ -13,9 +13,9 @@ header#banner.hero-unit
       ul.status-list
         li.status(ng-repeat="status in Phased.team.statuses | orderObjectBy : 'startTime' : true" class="type-{{Phased.meta.status.TYPE[status.type]}}")
           .top
-            img.user-img.circular(ng-src="{{Phased.team.members[status.user].gravatar}}")
+            img.user-img.circular(ng-src="{{Phased.team.members[status.user].profile.gravatar}}")
             article
-              p.user-name {{Phased.team.members[status.user].name}}
+              p.user-name {{Phased.team.members[status.user].profile.name}}
               h1 {{status.name}} 
               p.start-time
                 time {{status.startTime | date : 'short'}}

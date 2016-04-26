@@ -387,11 +387,11 @@ angular.module('webappV2App')
     		let member = Phased.team.members[uid];
 
     		if (uid == Phased.authData.uid) {
-    			_.assign(Phased.team.members[uid], Phased.user);
+    			_.assign(Phased.team.members[uid].profile, Phased.user);
     			maybeMembersComplete();
     		} else {
     			_FBRef.child(`profile/${uid}`).once('value', snap => {
-    				_.assign(Phased.team.members[uid], snap.val());
+    				_.assign(Phased.team.members[uid].profile, snap.val());
     				maybeMembersComplete();
     			});
     		}
@@ -436,7 +436,7 @@ angular.module('webappV2App')
     	// always keep profile data in sync for any members on team
     	_FBRef.child(`team/${teamID}/members`).on('child_added', snap => {
     		let uid = snap.key();
-    		Phased.team.members[uid] = snap.val();
+    		_.assign(Phased.team.members[uid], snap.val());
     		_watchMember(uid);
     	});
 
@@ -541,10 +541,11 @@ angular.module('webappV2App')
     	_FBRef.child(`profile/${uid}`).on('value', snap => {
     		$rootScope.$evalAsync(() => {
     			var _newVals = snap.val();
-    			_.assign(Phased.team.members[uid], _newVals); 			// add new values
-    			_.forOwn(Phased.team.members[uid], (val, key) => {	// remove possibly deleted ones
+    			Phased.team.members[uid].profile = Phased.team.members[uid].profile || {};
+    			_.assign(Phased.team.members[uid].profile, _newVals); 			// add new values
+    			_.forOwn(Phased.team.members[uid].profile, (val, key) => {	// remove possibly deleted ones
 	    			if (!_newVals.hasOwnProperty(key))
-	    				delete Phased.team.members[uid][key];
+	    				delete Phased.team.members[uid].profile[key];
 	    		});
 
 	    		// possibly fire event
@@ -562,7 +563,12 @@ angular.module('webappV2App')
     	// always keep profile data in sync for any members on team
     	_FBRef.child(`team/${Phased.team.uid}/members`).on('child_changed', snap => {
     		$rootScope.$evalAsync(() => {
-    			_.assign(Phased.team.members[snap.key()], snap.val());
+    			var uid = snap.key(), _newVals = snap.val();
+    			_.assign(Phased.team.members[uid], _newVals);
+    			_.forOwn(Phased.team.members[uid], (val, key) => {	// remove possibly deleted ones (other than profile)
+	    			if (key !== 'profile' && !_newVals.hasOwnProperty(key))
+	    				delete Phased.team.members[uid][key];
+	    		});
     		});
     	});
     }
@@ -617,7 +623,7 @@ angular.module('webappV2App')
     }
 
     /*
-    *	Fills a user's profile
+    *	Fills logged in user's profile
     *	called immediately after auth
     * broadcasts Phased:profileComplete
     */
