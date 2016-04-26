@@ -879,5 +879,7 @@ angular.module('webappV2App')
 
 			// 2. SEND TO SERVER
 			console.log('new task', newTask);
+
+			_FBRef.child(`team/${Phased.team.uid}/tasks`).push(newTask).then(fulfill, reject);
 		}
 	})
