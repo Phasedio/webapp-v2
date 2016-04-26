@@ -582,12 +582,17 @@ angular.module('webappV2App')
     	_FBRef.child(`team/${teamID}/tasks/${uid}`).on('value', snap => {
     		$rootScope.$evalAsync(() => {
 	    		var uid = snap.key(), _newVals = snap.val();
-	  			_.assign(Phased.team.tasks[uid], _newVals); 			// add new values
-	  			_.forOwn(Phased.team.tasks[uid], (val, key) => {	// remove possibly deleted ones
-	    			if (!_newVals.hasOwnProperty(key))
-	    				delete Phased.team.tasks[uid][key];
-	    		});
-	    		$rootScope.$broadcast(_RUNTIME_EVENTS.TASK_CHANGED);
+	    		if (!!_newVals) {
+		  			_.assign(Phased.team.tasks[uid], _newVals); 			// add new values
+		  			_.forOwn(Phased.team.tasks[uid], (val, key) => {	// remove possibly deleted ones
+		    			if (!_newVals.hasOwnProperty(key))
+		    				delete Phased.team.tasks[uid][key];
+		    		});
+	    			$rootScope.$broadcast(_RUNTIME_EVENTS.TASK_CHANGED);
+	    		} else {
+	    			delete Phased.team.tasks[uid];
+	    			$rootScope.$broadcast(_RUNTIME_EVENTS.TASK_DELETED);
+	    		}
 	    	});
     	});
     }
