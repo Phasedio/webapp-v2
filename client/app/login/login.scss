@@ -51,6 +51,10 @@
     width: 100%;
     border: 1px solid #979797;
     border-radius: 10px;
+    &:focus{
+      outline: none;
+      border-color:$green;
+    }
   }
   form{
     

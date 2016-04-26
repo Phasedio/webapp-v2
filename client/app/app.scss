@@ -47,6 +47,11 @@ $icon-font-path: "../bower_components/bootstrap-sass-official/vendor/assets/font
 $fa-font-path: "../bower_components/font-awesome/fonts";
 @import '../bower_components/font-awesome/scss/font-awesome';
 
+// App colours
+$green: #00B572;
+$black:#333333;
+
+
 /**
  * App-wide Styles
  */
@@ -77,8 +82,8 @@ body{
 
 .btn-phased-important{
     background: none;
-    color: green;
-    border: 1px solid green;
+    color: $green;
+    border: 1px solid $green;
     width: 160px;
     border-radius: 10px;
     margin: 0 auto;

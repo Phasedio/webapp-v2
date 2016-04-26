@@ -5,12 +5,12 @@
       h2 Phased
       form.spacer(name='login-form', ng-submit='login()')
         label(for='email') Email
-        input(type='text', name='email', ng-model='email', ng-change='userChg()',placeholder="email address")
+        input(type='text', name='email', ng-model='email', ng-change='userChg()',placeholder="email@address.com")
 
         label.break(for='password') Password
-        input(type='password', name='password', ng-model='password')
+        input(type='password', name='password', ng-model='password', placeholder="password")
 
         input.btn.btn-phased-important.break(type='submit', value='Let\'s Party')
-        button.btn.btn-phased-not-important.break(type='button', value='Forgot') Forgot 
+        button.btn.btn-phased-not-important.break(type='button', value='Forgot') Forgot Password 
         br
         p.error-message {{loginErrMessage}}
