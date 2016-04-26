@@ -32,10 +32,10 @@ describe('Component: PhasedProvider', function() {
   }
 
   // a stub data snapshot
-  var snapStub = {
-    key : sinon.stub(),
-    val : sinon.stub()
-  }
+  var snapStub = sinon.stub().returnsPromise().resolves({})();
+  snapStub.key = sinon.stub();
+  snapStub.val = sinon.stub();
+
   // a stub FBRef
   var FBRefStub = {
     push: sinon.stub().returns(snapStub),
