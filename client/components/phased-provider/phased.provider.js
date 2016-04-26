@@ -6,8 +6,6 @@ angular.module('webappV2App')
 			$http,
 			$location,
 			$window,
-			$firebaseAuth,
-			_FBAuth,
 			_FBRef,
 			_FURL,
 			_INIT_EVENTS = {
@@ -80,19 +78,17 @@ angular.module('webappV2App')
 		*	2. init FB objects
 		*	3. add event handlers for FB auth and connection states
 		*/
-		this.$get = ['$rootScope', '$http', '$location', '$window', '$firebaseAuth',
-			function $get(_$rootScope, _$http, _$location, _$window, _$firebaseAuth) {
+		this.$get = ['$rootScope', '$http', '$location', '$window',
+			function $get(_$rootScope, _$http, _$location, _$window) {
 			$rootScope = _$rootScope;
 			$http = _$http;
 			$location = _$location;
-			$window = _$window,
-			$firebaseAuth = _$firebaseAuth;
+			$window = _$window;
 
 			_FBRef = new Firebase(_FURL);
-			_FBAuth = $firebaseAuth(_FBRef);
 
 			// listeners for changes in auth and connection state go here
-			_FBAuth.$onAuth(_onAuth);
+			_FBRef.onAuth(_onAuth);
 
 			return Phased;
 		}];
@@ -169,17 +165,19 @@ angular.module('webappV2App')
 			console.log('dying of a ' + source);
 			// 1. user has logged out
 			if (source.toLowerCase() == 'logout') {
-				// reset all init events
-				for (let event in _INIT_EVENTS)
-					Phased[event] = false;
-				
-				Phased.authData = false;
-				Phased.LOGGED_IN = false;
-				Phased.user = {};
-				Phased.team = angular.copy(_DEFAULTS.TEAM);
+				$rootScope.$evalAsync(() => {
+					// reset all init events
+					for (let event in _INIT_EVENTS)
+						Phased[event] = false;
+					
+					Phased.authData = false;
+					Phased.LOGGED_IN = false;
+					Phased.user = {};
+					Phased.team = angular.copy(_DEFAULTS.TEAM);
 
-				// broadcast logout
-				$rootScope.$broadcast(_RUNTIME_EVENTS.LOGOUT);
+					// broadcast logout
+					$rootScope.$broadcast(_RUNTIME_EVENTS.LOGOUT);
+				});
 			} 
 			// 2. normal exit (stash app state here, in localstorage or FB cache key)
 			else {
@@ -200,31 +198,61 @@ angular.module('webappV2App')
 		//
 
 		/*
-		*	Registers a job to be done now or after event has happened
+		*	Registers a job to be done now or after all events in conditions have happened
 		*
-		*	eg: _registerAfterEvent('SET_UP', countTo, 5) // will call countTo(5) as soon as Phased.SET_UP
+		*	eg: _registerAfter('SET_UP', countTo, 5) // will call countTo(5) as soon as Phased.SET_UP
+		*	eg: _registerAfter(['META_SET_UP', 'PROFILE_SET_UP'], countTo, 5) // will call once after both Phased.META_SET_UP and PROFILE_SET_UP have passed
 		*/
-    var _registerAfter = function registerAfter(event, callback, args) {
-    	if (!(event in _INIT_EVENTS)) {
-    		console.warn(`${event} is not a valid event`);
-    		return;
-    	}
+    var _registerAfter = function registerAfter(conditions, callback, args) {
+    	// if there is only one condition, make it into an array
+    	if (typeof conditions == 'string')
+    		conditions = [conditions];
 
-      if (Phased[event]) {			// call immediately, or
-        return new Promise((fulfill, reject) => {
+    	// for each condition,
+    	//	a) check it is valid
+    	//	b) if it's met, remove from remaining conditions to check for
+    	for (var i = conditions.length -1; i >= 0; i--) { // start at end so we can rm els
+    		let event = conditions[i];
+
+	    	if (!(event in _INIT_EVENTS)) {
+	    		console.warn(`${event} is not a valid event`);
+	    		return;
+	    	}
+
+	    	// remove condition if passed
+	      if (Phased[event]) {
+	        conditions.pop(i);
+	      }
+	    }
+
+	    // if no more conditions remain, do immediately;
+	    if (conditions.length < 1) {
+	    	return new Promise((fulfill, reject) => {
         	callback(args, fulfill, reject);
         });
-      } else {										// save for later
-        return new Promise((fulfill, reject) => {
-        	_toDoAfter[event].push({callback : callback, args : args, fulfill: fulfill, reject: reject });
-        });
-      }
+	    }
+
+	    // otherwise, register to do after each remaining condition
+	    return new Promise((fulfill, reject) => {
+	    	var thisJob = {
+	    		callback : callback,
+	    		args : args,
+	    		fulfill: fulfill,
+	    		reject: reject,
+	    		conditions: conditions
+	    	}
+	    	for (var i in conditions) {
+	    		let event = conditions[i];
+      		_toDoAfter[event].push(thisJob);
+	    	}
+      });
     }
 
     /*
     *	called to emit a specific event
     *
     *	1. do all callbacks needing to be done after that event
+    *		only do these if their other conditions have also been met
     *	2. set that event's flag to true
     *	3. broadcast event through rootScope
     */
@@ -236,9 +264,20 @@ angular.module('webappV2App')
 
     	$rootScope.$evalAsync(() => {
 	      for (let i in _toDoAfter[event]) {
-	      	let job = _toDoAfter[event][i];
-	        job.callback(job.args || undefined, job.fulfill, job.reject);
+	      	let job = _toDoAfter[event][i]; // job should be the same object in other locations in _toDoAfter
+	      	// check if job has remaining conditions
+	      	if (job.conditions.length > 1) {
+	      		// more conditions other than this remain; don't do job
+	      		// but DO remove own condition (as it has passed)
+	      		job.conditions.pop(job.conditions.indexOf(event));
+	      	} else {
+	      		// no more conditions remain; do job
+	        	job.callback(job.args || undefined, job.fulfill, job.reject);
+	      	}
 	      }
+	      // clear saved jobs for this event
+	      _toDoAfter[event] = [];
+
 	      Phased[event] = true;
 				$rootScope.$broadcast(`${_INIT_EVENTS[event]}`);
 				_maybeFinalizeSetup();
@@ -348,11 +387,11 @@ angular.module('webappV2App')
     		let member = Phased.team.members[uid];
 
     		if (uid == Phased.authData.uid) {
-    			_.assign(Phased.team.members[uid], Phased.user);
+    			_.assign(Phased.team.members[uid].profile, Phased.user);
     			maybeMembersComplete();
     		} else {
     			_FBRef.child(`profile/${uid}`).once('value', snap => {
-    				_.assign(Phased.team.members[uid], snap.val());
+    				_.assign(Phased.team.members[uid].profile, snap.val());
     				maybeMembersComplete();
     			});
     		}
@@ -397,7 +436,7 @@ angular.module('webappV2App')
     	// always keep profile data in sync for any members on team
     	_FBRef.child(`team/${teamID}/members`).on('child_added', snap => {
     		let uid = snap.key();
-    		Phased.team.members[uid] = snap.val();
+    		_.assign(Phased.team.members[uid], snap.val());
     		_watchMember(uid);
     	});
 
@@ -502,10 +541,11 @@ angular.module('webappV2App')
     	_FBRef.child(`profile/${uid}`).on('value', snap => {
     		$rootScope.$evalAsync(() => {
     			var _newVals = snap.val();
-    			_.assign(Phased.team.members[uid], _newVals); 			// add new values
-    			_.forOwn(Phased.team.members[uid], (val, key) => {	// remove possibly deleted ones
+    			Phased.team.members[uid].profile = Phased.team.members[uid].profile || {};
+    			_.assign(Phased.team.members[uid].profile, _newVals); 			// add new values
+    			_.forOwn(Phased.team.members[uid].profile, (val, key) => {	// remove possibly deleted ones
 	    			if (!_newVals.hasOwnProperty(key))
-	    				delete Phased.team.members[uid][key];
+	    				delete Phased.team.members[uid].profile[key];
 	    		});
 
 	    		// possibly fire event
@@ -523,7 +563,12 @@ angular.module('webappV2App')
     	// always keep profile data in sync for any members on team
     	_FBRef.child(`team/${Phased.team.uid}/members`).on('child_changed', snap => {
     		$rootScope.$evalAsync(() => {
-    			_.assign(Phased.team.members[snap.key()], snap.val());
+    			var uid = snap.key(), _newVals = snap.val();
+    			_.assign(Phased.team.members[uid], _newVals);
+    			_.forOwn(Phased.team.members[uid], (val, key) => {	// remove possibly deleted ones (other than profile)
+	    			if (key !== 'profile' && !_newVals.hasOwnProperty(key))
+	    				delete Phased.team.members[uid][key];
+	    		});
     		});
     	});
     }
@@ -578,7 +623,7 @@ angular.module('webappV2App')
     }
 
     /*
-    *	Fills a user's profile
+    *	Fills logged in user's profile
     *	called immediately after auth
     * broadcasts Phased:profileComplete
     */
@@ -615,14 +660,14 @@ angular.module('webappV2App')
 		*	Log a user in using username and password
 		*/
 		Phased.login = function login(email, password) {
-			return _FBAuth.$authWithPassword({email: email, password:password});
+			return _FBRef.authWithPassword({email: email, password:password});
 		}
 
 		/*
 		*	Logs a user out
 		*/
 		Phased.logout = function logout() {
-			_FBAuth.$unauth();
+			_FBRef.unauth();
 		}
 
 
@@ -631,7 +676,7 @@ angular.module('webappV2App')
 		*/
 		Phased.postStatus = function postStatus(name, args = {}) {
 			args.name = name; // to allow simple syntax: Phased.postStatus('my status');
-			return _registerAfter('META_SET_UP', _doPostStatus, args);
+			return _registerAfter(['TEAM_SET_UP', 'META_SET_UP', 'PROFILE_SET_UP'], _doPostStatus, args);
 		}
 
 		/*

@@ -9,7 +9,7 @@ header#banner.hero-unit
 	.row
 		.col-lg-12
 			.team-member(ng-repeat="member in Phased.team.members")
-				img(ng-src="{{member.gravatar}}" class="circular" title="{{member.name}}")
+				img(ng-src="{{member.profile.gravatar}}" class="circular" title="{{member.profile.name}}")
 				p.status-name {{Phased.team.statuses[member.currentStatus].name}}
 				p.status-time
 					time {{Phased.team.statuses[member.currentStatus].startTime | date : 'short'}}
