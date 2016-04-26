@@ -758,10 +758,15 @@ angular.module('webappV2App')
 			var statusRef = _FBRef.child(`team/${Phased.team.uid}/statuses`).push(newStatus);
 
 			// 3. POST TO USER
-			_FBRef.child(`team/${Phased.team.uid}/members/${Phased.user.uid}/currentStatus`).set(statusRef.key());
-
-			// fulfill promise
-			fulfill();
+			statusRef.then(() => {
+				_FBRef.child(`team/${Phased.team.uid}/members/${Phased.user.uid}/currentStatus`).set(statusRef.key(), (err) => {
+					if (err) {
+						reject(err);
+					} else {
+						fulfill();
+					}
+				});
+			}, reject);
 		}
 
 		/*
