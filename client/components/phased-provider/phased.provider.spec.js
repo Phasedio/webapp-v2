@@ -1,7 +1,6 @@
 'use strict';
 
 describe('Component: PhasedProvider', function() {
-
   // stub a module to get a ref to the provider
   var PhasedProvider, sandbox;
   // other modules to save
@@ -20,6 +19,7 @@ describe('Component: PhasedProvider', function() {
     sandbox.stub(window.console, 'error');
     sandbox.spy(window, 'Firebase'); // constructor
     sandbox.spy(Firebase.prototype, 'onAuth');
+    sandbox.spy(Firebase.prototype, 'unauth');
 
     // create the dummy module
     angular.module('dummyModule', [])
@@ -91,6 +91,7 @@ describe('Component: PhasedProvider', function() {
       sandbox.spy(Firebase.prototype, 'authWithPassword');
       Phased.login('d', 'a');
       assert(Firebase.prototype.authWithPassword.called, 'did not call authWithPassword');
+      Firebase.prototype.authWithPassword.reset();
     });
 
     it('should return a FB promise', function () {
@@ -100,11 +101,12 @@ describe('Component: PhasedProvider', function() {
       Phased.login('a', 'e').then.should.be.a('function');
     })
 
-    // broken test; gives false negative
-    // it('should attempt to log out with FB', function () {
-    //   sandbox.spy(Firebase.prototype, 'unauth');
-    //   Phased.logout();
-    //   assert(Firebase.prototype.unauth.called, 'did not call unauth');
-    // });
+    it('should attempt to log out with FB', function () {
+      Phased.logout();
+      assert(Firebase.prototype.unauth.called, 'did not call unauth');
+      Firebase.prototype.unauth.reset();
+    });
+
+
   })
 });
