@@ -32,17 +32,9 @@ describe('Component: PhasedProvider', function() {
   }
 
   // a stub data snapshot
-  var snapStub = sinon.stub().returnsPromise().resolves({})();
-  snapStub.key = sinon.stub();
-  snapStub.val = sinon.stub();
-
+  var snapStub;
   // a stub FBRef
-  var FBRefStub = {
-    push: sinon.stub().returns(snapStub),
-    set: sinon.stub(),
-    on: sinon.stub().returnsPromise().resolves({}),
-    once: sinon.stub().returnsPromise().resolves({})
-  };
+  var FBRefStub;
 
   beforeEach(function (){
     sandbox = sinon.sandbox.create();
@@ -59,6 +51,17 @@ describe('Component: PhasedProvider', function() {
     sandbox.stub(Firebase.prototype, 'child', function () {
       return FBRefStub;
     });
+
+    snapStub = sinon.stub().returnsPromise().resolves({})();
+    snapStub.key = sinon.stub();
+    snapStub.val = sinon.stub();
+
+    FBRefStub = {
+      push: sinon.stub().returns(snapStub),
+      set: sinon.stub(),
+      on: sinon.stub().returnsPromise().resolves({}),
+      once: sinon.stub().returnsPromise().resolves({})
+    };
 
     // create the dummy module
     angular.module('dummyModule', [])
@@ -138,7 +141,7 @@ describe('Component: PhasedProvider', function() {
       // FB.authWithPassword isn't an instance of Promise
       // (so we check to see that "then" is a function rather than if it's a Promise)
       Phased.login('a', 'e').then.should.be.a('function');
-    })
+    });
 
     it('should attempt to log out with FB', function () {
       Phased.logout();
