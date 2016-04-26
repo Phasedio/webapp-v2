@@ -145,7 +145,109 @@ describe('Component: PhasedProvider', function() {
       assert(Firebase.prototype.unauth.called, 'did not call unauth');
       Firebase.prototype.unauth.reset();
     });
+  });
 
+  // POSTING A STATUS
+  describe('#postStatus', function () {
+    it('should return a promise', function () {
+      Phased.postStatus('test...').should.be.an.instanceOf(Promise);
+    });
 
-  })
+    it('should only post if meta and team are set up', function () {
+      Phased.meta = phasedMeta;
+
+      // 1. neither meta nor team
+      Phased.META_SET_UP = false;
+      Phased.TEAM_SET_UP = false;
+      Phased.postStatus('test...');
+      
+      assert(!Firebase.prototype.child.called, 'attempted to call child before team or meta set up');
+      assert(!FBRefStub.push.called, 'attempted to call push before team or meta set up');
+      assert(!FBRefStub.set.called, 'attempted to call set before team or meta set up');
+
+      Firebase.prototype.child.reset();
+      FBRefStub.push.reset();
+      FBRefStub.set.reset();
+
+      // 2. meta but not team
+      Phased.META_SET_UP = true;
+      Phased.TEAM_SET_UP = false;
+      Phased.postStatus('test...');
+      
+      assert(!Firebase.prototype.child.called, 'attempted to call child before team set up');
+      assert(!FBRefStub.push.called, 'attempted to call push before team set up');
+      assert(!FBRefStub.set.called, 'attempted to call set before team set up');
+
+      Firebase.prototype.child.reset();
+      FBRefStub.push.reset();
+      FBRefStub.set.reset();
+
+      // 3. team but not meta
+      Phased.META_SET_UP = false;
+      Phased.TEAM_SET_UP = true;
+      Phased.postStatus('test...');
+      
+      assert(!Firebase.prototype.child.called, 'attempted to call child before meta set up');
+      assert(!FBRefStub.push.called, 'attempted to call push before meta set up');
+      assert(!FBRefStub.set.called, 'attempted to call set before meta set up');
+
+      Firebase.prototype.child.reset();
+      FBRefStub.push.reset();
+      FBRefStub.set.reset();
+
+      // 4. team and meta
+      Phased.META_SET_UP = true;
+      Phased.TEAM_SET_UP = true;
+      Phased.postStatus('test...');
+      
+      assert(Firebase.prototype.child.called, 'failed to call child after set up');
+      assert(FBRefStub.push.called, 'failed to call push after set up');
+      assert(FBRefStub.set.called, 'failed to call set after set up');
+    });
+
+    it('should ensure the new status has no invalid keys', function () {
+      var validKeys = ['user', 'name', 'type', 'projectID', 'taskID', 'startTime', 'endTime', 'time'];
+      var statusKeys;
+      Phased.meta = phasedMeta;
+
+      // patch push to intercept the new status
+      FBRefStub.push = function () {};
+      sandbox.stub(FBRefStub, 'push', function (newStatus) {
+        statusKeys = Object.keys(newStatus);
+        return snapStub;
+      });
+
+      // 1. neither meta nor team
+      Phased.META_SET_UP = true;
+      Phased.TEAM_SET_UP = true;
+      Phased.postStatus('test...');
+
+      // 1. check that all keys are valid
+      for (var i in statusKeys)
+        validKeys.should.include(statusKeys[i], 'new status had invalid keys');
+    });
+
+    it('should ensure the new status has all of the required properties', function () {
+      var requiredKeys = ['user', 'name', 'type', 'time'];
+      var statusKeys;
+      Phased.meta = phasedMeta;
+
+      // patch push to intercept the new status
+      FBRefStub.push = function () {};
+      sandbox.stub(FBRefStub, 'push', function (newStatus) {
+        statusKeys = Object.keys(newStatus);
+        return snapStub;
+      });
+
+      // 1. neither meta nor team
+      Phased.META_SET_UP = true;
+      Phased.TEAM_SET_UP = true;
+      Phased.postStatus('test...');
+
+      // 2. check athat all required keys are represented
+      for (var i in requiredKeys)
+        statusKeys.should.include(requiredKeys[i], 'new status did not include required keys');
+    });
+
+  });
 });
