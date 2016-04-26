@@ -35,6 +35,8 @@ describe('Component: PhasedProvider', function() {
   var snapStub;
   // a stub FBRef
   var FBRefStub;
+  // data fed to push gets stashed here
+  var lastPushed;
 
   beforeEach(function (){
     sandbox = sinon.sandbox.create();
@@ -52,16 +54,20 @@ describe('Component: PhasedProvider', function() {
       return FBRefStub;
     });
 
-    snapStub = sinon.stub().returnsPromise().resolves({})();
-    snapStub.key = sinon.stub();
-    snapStub.val = sinon.stub();
+    snapStub = sandbox.stub().returnsPromise().resolves({})();
+    snapStub.key = sandbox.stub();
+    snapStub.val = sandbox.stub();
 
     FBRefStub = {
-      push: sinon.stub().returns(snapStub),
-      set: sinon.stub(),
-      on: sinon.stub().returnsPromise().resolves({}),
-      once: sinon.stub().returnsPromise().resolves({})
+      push: function (data) {
+        lastPushed = data;
+        return snapStub;
+      },
+      set: sandbox.stub(),
+      on: sandbox.stub().returnsPromise().resolves({}),
+      once: sandbox.stub().returnsPromise().resolves({})
     };
+    sandbox.spy(FBRefStub, 'push');
 
     // create the dummy module
     angular.module('dummyModule', [])
@@ -217,17 +223,15 @@ describe('Component: PhasedProvider', function() {
       var statusKeys;
       Phased.meta = phasedMeta;
 
-      // patch push to intercept the new status
-      FBRefStub.push = function () {};
-      sandbox.stub(FBRefStub, 'push', function (newStatus) {
-        statusKeys = Object.keys(newStatus);
-        return snapStub;
-      });
-
       Phased.META_SET_UP = true;
       Phased.TEAM_SET_UP = true;
       Phased.PROFILE_SET_UP = true;
       Phased.postStatus('test...');
+      
+      assert(FBRefStub.push.called, 'did not try to push to FB');
+      var statusKeys = Object.keys(lastPushed);
+      expect(statusKeys).to.be.an('array');
+
 
       // 1. check that all keys are valid
       for (var i in statusKeys)
@@ -239,17 +243,14 @@ describe('Component: PhasedProvider', function() {
       var statusKeys;
       Phased.meta = phasedMeta;
 
-      // patch push to intercept the new status
-      FBRefStub.push = function () {};
-      sandbox.stub(FBRefStub, 'push', function (newStatus) {
-        statusKeys = Object.keys(newStatus);
-        return snapStub;
-      });
-
       Phased.META_SET_UP = true;
       Phased.TEAM_SET_UP = true;
       Phased.PROFILE_SET_UP = true;
       Phased.postStatus('test...');
+
+      assert(FBRefStub.push.called, 'did not try to push to FB');
+      var statusKeys = Object.keys(lastPushed);
+      expect(statusKeys).to.be.an('array');
 
       // 2. check athat all required keys are represented
       for (var i in requiredKeys)
