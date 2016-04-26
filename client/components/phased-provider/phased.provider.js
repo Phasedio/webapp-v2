@@ -800,6 +800,13 @@ angular.module('webappV2App')
 		*/
 		var _doAddTask = function doAddTask(args = {}, fulfill, reject) {
 			const {name, dueDate, description, to, assignment, tags} = args;
+
+			if (typeof args != 'object') {
+				var msg = 'Phased.addTask expects an object; got ' + (typeof args);
+				console.warn(msg);
+				reject(new Error(msg));
+				return;
+			}
 			
 			var newTask = {
 				created: Firebase.ServerValue.TIMESTAMP, // now
