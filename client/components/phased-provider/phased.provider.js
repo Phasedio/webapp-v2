@@ -6,8 +6,6 @@ angular.module('webappV2App')
 			$http,
 			$location,
 			$window,
-			$firebaseAuth,
-			_FBAuth,
 			_FBRef,
 			_FURL,
 			_INIT_EVENTS = {
@@ -80,19 +78,17 @@ angular.module('webappV2App')
 		*	2. init FB objects
 		*	3. add event handlers for FB auth and connection states
 		*/
-		this.$get = ['$rootScope', '$http', '$location', '$window', '$firebaseAuth',
-			function $get(_$rootScope, _$http, _$location, _$window, _$firebaseAuth) {
+		this.$get = ['$rootScope', '$http', '$location', '$window',
+			function $get(_$rootScope, _$http, _$location, _$window) {
 			$rootScope = _$rootScope;
 			$http = _$http;
 			$location = _$location;
-			$window = _$window,
-			$firebaseAuth = _$firebaseAuth;
+			$window = _$window;
 
 			_FBRef = new Firebase(_FURL);
-			_FBAuth = $firebaseAuth(_FBRef);
 
 			// listeners for changes in auth and connection state go here
-			_FBAuth.$onAuth(_onAuth);
+			_FBRef.onAuth(_onAuth);
 
 			return Phased;
 		}];
@@ -169,17 +165,19 @@ angular.module('webappV2App')
 			console.log('dying of a ' + source);
 			// 1. user has logged out
 			if (source.toLowerCase() == 'logout') {
-				// reset all init events
-				for (let event in _INIT_EVENTS)
-					Phased[event] = false;
-				
-				Phased.authData = false;
-				Phased.LOGGED_IN = false;
-				Phased.user = {};
-				Phased.team = angular.copy(_DEFAULTS.TEAM);
+				$rootScope.$evalAsync(() => {
+					// reset all init events
+					for (let event in _INIT_EVENTS)
+						Phased[event] = false;
+					
+					Phased.authData = false;
+					Phased.LOGGED_IN = false;
+					Phased.user = {};
+					Phased.team = angular.copy(_DEFAULTS.TEAM);
 
-				// broadcast logout
-				$rootScope.$broadcast(_RUNTIME_EVENTS.LOGOUT);
+					// broadcast logout
+					$rootScope.$broadcast(_RUNTIME_EVENTS.LOGOUT);
+				});
 			} 
 			// 2. normal exit (stash app state here, in localstorage or FB cache key)
 			else {
@@ -615,14 +613,14 @@ angular.module('webappV2App')
 		*	Log a user in using username and password
 		*/
 		Phased.login = function login(email, password) {
-			return _FBAuth.$authWithPassword({email: email, password:password});
+			return _FBRef.authWithPassword({email: email, password:password});
 		}
 
 		/*
 		*	Logs a user out
 		*/
 		Phased.logout = function logout() {
-			_FBAuth.$unauth();
+			_FBRef.unauth();
 		}
 
 
