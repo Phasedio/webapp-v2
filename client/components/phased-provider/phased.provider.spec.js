@@ -153,12 +153,13 @@ describe('Component: PhasedProvider', function() {
       Phased.postStatus('test...').should.be.an.instanceOf(Promise);
     });
 
-    it('should only post if meta and team are set up', function () {
+    it('should only post if meta, team, and profile are set up', function () {
       Phased.meta = phasedMeta;
 
       // 1. neither meta nor team
       Phased.META_SET_UP = false;
       Phased.TEAM_SET_UP = false;
+      Phased.PROFILE_SET_UP = false;
       Phased.postStatus('test...');
       
       assert(!Firebase.prototype.child.called, 'attempted to call child before team or meta set up');
@@ -172,6 +173,7 @@ describe('Component: PhasedProvider', function() {
       // 2. meta but not team
       Phased.META_SET_UP = true;
       Phased.TEAM_SET_UP = false;
+      Phased.PROFILE_SET_UP = false;
       Phased.postStatus('test...');
       
       assert(!Firebase.prototype.child.called, 'attempted to call child before team set up');
@@ -185,6 +187,7 @@ describe('Component: PhasedProvider', function() {
       // 3. team but not meta
       Phased.META_SET_UP = false;
       Phased.TEAM_SET_UP = true;
+      Phased.PROFILE_SET_UP = false;
       Phased.postStatus('test...');
       
       assert(!Firebase.prototype.child.called, 'attempted to call child before meta set up');
@@ -198,6 +201,7 @@ describe('Component: PhasedProvider', function() {
       // 4. team and meta
       Phased.META_SET_UP = true;
       Phased.TEAM_SET_UP = true;
+      Phased.PROFILE_SET_UP = true;
       Phased.postStatus('test...');
       
       assert(Firebase.prototype.child.called, 'failed to call child after set up');
@@ -217,9 +221,9 @@ describe('Component: PhasedProvider', function() {
         return snapStub;
       });
 
-      // 1. neither meta nor team
       Phased.META_SET_UP = true;
       Phased.TEAM_SET_UP = true;
+      Phased.PROFILE_SET_UP = true;
       Phased.postStatus('test...');
 
       // 1. check that all keys are valid
@@ -239,9 +243,9 @@ describe('Component: PhasedProvider', function() {
         return snapStub;
       });
 
-      // 1. neither meta nor team
       Phased.META_SET_UP = true;
       Phased.TEAM_SET_UP = true;
+      Phased.PROFILE_SET_UP = true;
       Phased.postStatus('test...');
 
       // 2. check athat all required keys are represented
