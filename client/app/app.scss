@@ -1,3 +1,47 @@
+// Load in San Fransisco font
+
+/** Ultra Light */
+@font-face {
+  font-family: "San Francisco";
+  font-weight: 100;
+  src: url("https://applesocial.s3.amazonaws.com/assets/styles/fonts/sanfrancisco/sanfranciscodisplay-ultralight-webfont.woff");
+}
+
+/** Thin */
+@font-face {
+  font-family: "San Francisco";
+  font-weight: 200;
+  src: url("https://applesocial.s3.amazonaws.com/assets/styles/fonts/sanfrancisco/sanfranciscodisplay-thin-webfont.woff");
+}
+
+/** Regular */
+@font-face {
+  font-family: "San Francisco";
+  font-weight: 400;
+  src: url("https://applesocial.s3.amazonaws.com/assets/styles/fonts/sanfrancisco/sanfranciscodisplay-regular-webfont.woff");
+}
+
+/** Medium */
+@font-face {
+  font-family: "San Francisco";
+  font-weight: 500;
+  src: url("https://applesocial.s3.amazonaws.com/assets/styles/fonts/sanfrancisco/sanfranciscodisplay-medium-webfont.woff");
+}
+
+/** Semi Bold */
+@font-face {
+  font-family: "San Francisco";
+  font-weight: 600;
+  src: url("https://applesocial.s3.amazonaws.com/assets/styles/fonts/sanfrancisco/sanfranciscodisplay-semibold-webfont.woff");
+}
+
+/** Bold */ 
+@font-face {
+  font-family: "San Francisco";
+  font-weight: 700;
+  src: url("https://applesocial.s3.amazonaws.com/assets/styles/fonts/sanfrancisco/sanfranciscodisplay-bold-webfont.woff");
+}
+
 $icon-font-path: "../bower_components/bootstrap-sass-official/vendor/assets/fonts/bootstrap/";
 @import '../bower_components/bootstrap-sass-official/vendor/assets/stylesheets/bootstrap';
 $fa-font-path: "../bower_components/font-awesome/fonts";
@@ -7,6 +51,16 @@ $fa-font-path: "../bower_components/font-awesome/fonts";
  * App-wide Styles
  */
 
+h2{
+  font-weight: 200;
+  font-size: 48px;
+}
+.spacer{
+  margin-top:48px;
+}
+.break{
+  margin-top:20px !important;
+}
 .browserupgrade {
   margin: 0.2em 0;
   background: #ccc;
@@ -16,6 +70,30 @@ $fa-font-path: "../bower_components/font-awesome/fonts";
 
 .circular {
 	border-radius: 50%;
+}
+body{
+  color:#333333;
+}
+
+.btn-phased-important{
+    background: none;
+    color: green;
+    border: 1px solid green;
+    width: 160px;
+    border-radius: 10px;
+    margin: 0 auto;
+    display: block;
+    font-size:15px;
+}
+.btn-phased-not-important{
+    background: none;
+    color: #333333;
+    border: none;
+    width: 160px;
+    border-radius: 10px;
+    margin: 0 auto;
+    display: block;
+    font-size:15px;
 }
 
 // Component styles are injected through grunt

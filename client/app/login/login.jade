@@ -1,14 +1,16 @@
 .container
   .row
-    .col-lg-12
-      h1.page-header Log in to Phased:
-      form(name='login-form', ng-submit='login()')
+    .col-lg-4.col-lg-offset-4.login
+      img(src="assets/images/phased.png", width="100px")
+      h2 Phased
+      form.spacer(name='login-form', ng-submit='login()')
         label(for='email') Email
-        input(type='text', name='email', ng-model='email', ng-change='userChg()')
+        input(type='text', name='email', ng-model='email', ng-change='userChg()',placeholder="email address")
 
-        label(for='password') Password
+        label.break(for='password') Password
         input(type='password', name='password', ng-model='password')
 
-        input(type='submit', value='Let\'s Party')
+        input.btn.btn-phased-important.break(type='submit', value='Let\'s Party')
+        button.btn.btn-phased-not-important.break(type='button', value='Forgot') Forgot 
         br
         p.error-message {{loginErrMessage}}
