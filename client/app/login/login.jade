@@ -3,6 +3,7 @@
     .col-lg-4.col-lg-offset-4.login
       img(src="assets/images/phased.png", width="100px")
       h2 Phased
+      
       form.spacer(name='login-form', ng-submit='login()')
         label(for='email') Email
         input(type='text', name='email', ng-model='email', ng-change='userChg()',placeholder="email@address.com")
@@ -12,5 +13,8 @@
 
         input.btn.btn-phased-important.break(type='submit', value='Let\'s Party')
         button.btn.btn-phased-not-important.break(type='button', value='Forgot') Forgot Password 
+        button.btn.btn-phased-not-important.break(type='button', value='Forgot') Register
         br
-        p.error-message {{loginErrMessage}}
+        
+.error-notif(ng-if="loginErrMessage")
+  p.error-message ERR0R: {{loginErrMessage}}        

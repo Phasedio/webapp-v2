@@ -89,16 +89,25 @@ body{
     margin: 0 auto;
     display: block;
     font-size:15px;
+    transition: background 0.4s, color 0.4s;
+    &:hover{
+      color: #fff;
+      background: $green;
+    }
 }
 .btn-phased-not-important{
     background: none;
     color: #333333;
-    border: none;
+    border: 1px solid transparent;
     width: 160px;
     border-radius: 10px;
     margin: 0 auto;
     display: block;
     font-size:15px;
+    transition: border-color 0.4s;
+    &:hover{
+      border-color: #333333;
+    }
 }
 
 // Component styles are injected through grunt
