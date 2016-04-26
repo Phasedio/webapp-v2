@@ -831,7 +831,7 @@ angular.module('webappV2App')
 				else
 					console.warn('task.description should be a string; got ' + (typeof description));
 			}
-
+			
 			// assignment or to
 			// prefer to
 			if (!!to) {
