@@ -198,31 +198,61 @@ angular.module('webappV2App')
 		//
 
 		/*
-		*	Registers a job to be done now or after event has happened
+		*	Registers a job to be done now or after all events in conditions have happened
 		*
-		*	eg: _registerAfterEvent('SET_UP', countTo, 5) // will call countTo(5) as soon as Phased.SET_UP
+		*	eg: _registerAfter('SET_UP', countTo, 5) // will call countTo(5) as soon as Phased.SET_UP
+		*	eg: _registerAfter(['META_SET_UP', 'PROFILE_SET_UP'], countTo, 5) // will call once after both Phased.META_SET_UP and PROFILE_SET_UP have passed
 		*/
-    var _registerAfter = function registerAfter(event, callback, args) {
-    	if (!(event in _INIT_EVENTS)) {
-    		console.warn(`${event} is not a valid event`);
-    		return;
-    	}
+    var _registerAfter = function registerAfter(conditions, callback, args) {
+    	// if there is only one condition, make it into an array
+    	if (typeof conditions == 'string')
+    		conditions = [conditions];
 
-      if (Phased[event]) {			// call immediately, or
-        return new Promise((fulfill, reject) => {
+    	// for each condition,
+    	//	a) check it is valid
+    	//	b) if it's met, remove from remaining conditions to check for
+    	for (var i = conditions.length -1; i >= 0; i--) { // start at end so we can rm els
+    		let event = conditions[i];
+
+	    	if (!(event in _INIT_EVENTS)) {
+	    		console.warn(`${event} is not a valid event`);
+	    		return;
+	    	}
+
+	    	// remove condition if passed
+	      if (Phased[event]) {
+	        conditions.pop(i);
+	      }
+	    }
+
+	    // if no more conditions remain, do immediately;
+	    if (conditions.length < 1) {
+	    	return new Promise((fulfill, reject) => {
         	callback(args, fulfill, reject);
         });
-      } else {										// save for later
-        return new Promise((fulfill, reject) => {
-        	_toDoAfter[event].push({callback : callback, args : args, fulfill: fulfill, reject: reject });
-        });
-      }
+	    }
+
+	    // otherwise, register to do after each remaining condition
+	    return new Promise((fulfill, reject) => {
+	    	var thisJob = {
+	    		callback : callback,
+	    		args : args,
+	    		fulfill: fulfill,
+	    		reject: reject,
+	    		conditions: conditions
+	    	}
+	    	for (var i in conditions) {
+	    		let event = conditions[i];
+      		_toDoAfter[event].push(thisJob);
+	    	}
+      });
     }
 
     /*
     *	called to emit a specific event
     *
     *	1. do all callbacks needing to be done after that event
+    *		only do these if their other conditions have also been met
     *	2. set that event's flag to true
     *	3. broadcast event through rootScope
     */
@@ -234,9 +264,20 @@ angular.module('webappV2App')
 
     	$rootScope.$evalAsync(() => {
 	      for (let i in _toDoAfter[event]) {
-	      	let job = _toDoAfter[event][i];
-	        job.callback(job.args || undefined, job.fulfill, job.reject);
+	      	let job = _toDoAfter[event][i]; // job should be the same object in other locations in _toDoAfter
+	      	// check if job has remaining conditions
+	      	if (job.conditions.length > 1) {
+	      		// more conditions other than this remain; don't do job
+	      		// but DO remove own condition (as it has passed)
+	      		job.conditions.pop(job.conditions.indexOf(event));
+	      	} else {
+	      		// no more conditions remain; do job
+	        	job.callback(job.args || undefined, job.fulfill, job.reject);
+	      	}
 	      }
+	      // clear saved jobs for this event
+	      _toDoAfter[event] = [];
+
 	      Phased[event] = true;
 				$rootScope.$broadcast(`${_INIT_EVENTS[event]}`);
 				_maybeFinalizeSetup();
