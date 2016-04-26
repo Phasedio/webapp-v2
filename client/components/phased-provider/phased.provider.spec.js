@@ -11,15 +11,54 @@ describe('Component: PhasedProvider', function() {
     $firebaseAuth,
     Phased;
 
+  var phasedMeta = {
+    status : {
+      "SOURCE" : [ "webapp", "mobile_app", "github", "google_calendar", "slack" ],
+      "SOURCE_ID" : {
+        "GITHUB" : 2,
+        "GOOGLE_CALENDAR" : 3,
+        "MOBILE_APP" : 1,
+        "SLACK" : 4,
+        "WEBAPP" : 0
+      },
+      "TYPE" : [ "update", "repo_push", "task_event", "calendar_event" ],
+      "TYPE_ID" : {
+        "CALENDAR_EVENT" : 3,
+        "REPO_PUSH" : 1,
+        "TASK_EVENT" : 2,
+        "UPDATE" : 0
+      }
+    }
+  }
+
+  // a stub data snapshot
+  var snapStub = {
+    key : sinon.stub(),
+    val : sinon.stub()
+  }
+  // a stub FBRef
+  var FBRefStub = {
+    push: sinon.stub().returns(snapStub),
+    set: sinon.stub(),
+    on: sinon.stub().returnsPromise().resolves({}),
+    once: sinon.stub().returnsPromise().resolves({})
+  };
+
   beforeEach(function (){
     sandbox = sinon.sandbox.create();
+    sandbox.useFakeServer();
     // stub console methods
     sandbox.stub(window.console, 'log');
     sandbox.stub(window.console, 'warn');
     sandbox.stub(window.console, 'error');
     sandbox.spy(window, 'Firebase'); // constructor
+
+    // stub some firebase methods to return some dummy data
     sandbox.spy(Firebase.prototype, 'onAuth');
     sandbox.spy(Firebase.prototype, 'unauth');
+    sandbox.stub(Firebase.prototype, 'child', function () {
+      return FBRefStub;
+    });
 
     // create the dummy module
     angular.module('dummyModule', [])
