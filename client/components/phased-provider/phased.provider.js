@@ -670,7 +670,7 @@ angular.module('webappV2App')
 		*/
 		Phased.postStatus = function postStatus(name, args = {}) {
 			args.name = name; // to allow simple syntax: Phased.postStatus('my status');
-			return _registerAfter('META_SET_UP', _doPostStatus, args);
+			return _registerAfter(['TEAM_SET_UP', 'META_SET_UP', 'PROFILE_SET_UP'], _doPostStatus, args);
 		}
 
 		/*
