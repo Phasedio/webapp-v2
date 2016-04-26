@@ -580,13 +580,15 @@ angular.module('webappV2App')
     var _watchTask = function watchTask(uid) {
     	var teamID = Phased.team.uid;
     	_FBRef.child(`team/${teamID}/tasks/${uid}`).on('value', snap => {
-    		var _newVals = snap.val();
-  			_.assign(Phased.team.tasks[uid], _newVals); 			// add new values
-  			_.forOwn(Phased.team.tasks[uid], (val, key) => {	// remove possibly deleted ones
-    			if (!_newVals.hasOwnProperty(key))
-    				delete Phased.team.tasks[uid][key];
-    		});
-    		$rootScope.$broadcast(_RUNTIME_EVENTS.TASK_CHANGED);
+    		$rootScope.$evalAsync(() => {
+	    		var uid = snap.key(), _newVals = snap.val();
+	  			_.assign(Phased.team.tasks[uid], _newVals); 			// add new values
+	  			_.forOwn(Phased.team.tasks[uid], (val, key) => {	// remove possibly deleted ones
+	    			if (!_newVals.hasOwnProperty(key))
+	    				delete Phased.team.tasks[uid][key];
+	    		});
+	    		$rootScope.$broadcast(_RUNTIME_EVENTS.TASK_CHANGED);
+	    	});
     	});
     }
 
@@ -669,7 +671,6 @@ angular.module('webappV2App')
 		Phased.logout = function logout() {
 			_FBRef.unauth();
 		}
-
 
 		/*
 		*	Posts a generic status update
