@@ -777,8 +777,8 @@ angular.module('webappV2App')
 		/*
 		*	Creates an assignment
 		*/
-		Phased.addTask = function addTask(args = {}) {
-			return _registerAfter(['TEAM_SET_UP', 'META_SET_UP', 'PROFILE_SET_UP'], _doAddTask, args);
+		Phased.addTask = function addTask(task = {}) {
+			return _registerAfter(['TEAM_SET_UP', 'META_SET_UP', 'PROFILE_SET_UP'], _doAddTask, task);
 		}
 
 		/*
@@ -816,7 +816,7 @@ angular.module('webappV2App')
 			// 1. PROP VALIDATION
 			// name
 			if (!('name' in args) || typeof name != 'string') {
-				var msg = 'Cannot post a blank task!';
+				var msg = 'Cannot post a nameless task!';
 				console.warn(msg);
 				reject(new Error(msg));
 				return;
@@ -829,7 +829,7 @@ angular.module('webappV2App')
 				if (typeof description == 'string')
 					newTask.description = description;
 				else
-					console.warn('Description should be a string; got ' + (typeof description));
+					console.warn('task.description should be a string; got ' + (typeof description));
 			}
 
 			// assignment or to
@@ -841,7 +841,7 @@ angular.module('webappV2App')
 						by : Phased.user.uid
 					};
 				} else {
-					var msg = '"to" must be the UID for a team member; got ' + (typeof to);
+					var msg = 'task.to must be the UID for a team member; got ' + (typeof to);
 					console.warn(msg, to);
 					reject(new Error(msg));
 					return;
@@ -856,19 +856,19 @@ angular.module('webappV2App')
 							}
 						}
 					} else {
-						var msg = 'Task.assignment should be an object with "to" and "by" keys; got ' + (typeof assignment);
+						var msg = 'task.assignment should be an object with "to" and "by" keys; got ' + (typeof assignment);
 						console.warn(msg);
 						reject(new Error(msg));
 						return;
 					}
 				} else {
-					var msg = 'Task.assignment should be an object with "to" and "by" keys; got ' + (typeof assignment);
+					var msg = 'task.assignment should be an object with "to" and "by" keys; got ' + (typeof assignment);
 					console.warn(msg);
 					reject(new Error(msg));
 					return;
 				}
 			} else {
-				var msg = 'Neither to nor assignment were set; one or the other is required.';
+				var msg = 'Neither task.to nor task.assignment were set; one or the other is required.';
 				console.warn(msg);
 				reject(new Error(msg));
 				return;
