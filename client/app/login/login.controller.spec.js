@@ -20,10 +20,6 @@ describe('Component: loginController', function() {
     $rootScope) {
       // sandbox
       sandbox = sinon.sandbox.create();
-      // stub console methods
-      sandbox.stub(window.console, 'log');
-      sandbox.stub(window.console, 'warn');
-      sandbox.stub(window.console, 'error');
 
       // make a new scope for the controller to live in
       scope = $rootScope.$new();

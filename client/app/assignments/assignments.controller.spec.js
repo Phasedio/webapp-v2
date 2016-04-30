@@ -17,11 +17,6 @@ describe('Component: assignmentsComponent', function() {
     $rootScope,
     _Phased_) {
       sandbox = sinon.sandbox.create();
-      // stub console methods
-      sandbox.stub(window.console, 'log');
-      sandbox.stub(window.console, 'warn');
-      sandbox.stub(window.console, 'error');
-
       scope = $rootScope.$new();
       Phased = _Phased_;
 

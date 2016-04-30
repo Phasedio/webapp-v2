@@ -12,7 +12,8 @@ module.exports = function(config) {
     client: {
       mocha: {
         timeout: 5000 // set default mocha spec timeout
-      }
+      },
+      captureConsole: false
     },
 
     // list of files / patterns to load in the browser

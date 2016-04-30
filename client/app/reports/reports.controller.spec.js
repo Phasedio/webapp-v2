@@ -17,11 +17,6 @@ describe('Component: reportsComponent', function() {
     $rootScope,
     Phased) {
       sandbox = sinon.sandbox.create();
-      // stub console methods
-      sandbox.stub(window.console, 'log');
-      sandbox.stub(window.console, 'warn');
-      sandbox.stub(window.console, 'error');
-
       scope = $rootScope.$new();
       sandbox.spy(Phased, 'postStatus');
       reportsComponent = $componentController('reportsComponent', {
