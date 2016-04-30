@@ -988,7 +988,13 @@ angular.module('webappV2App')
 			}
 
 			console.log('cleaned task update', update);
-			fulfill(update);
+
+			_FBRef.child(`team/${Phased.team.uid}/tasks/${taskID}`).update(update).then((err) => {
+				if (err)
+					reject(err);
+				else
+					fulfill();
+			});
 		}
 
 		/*
