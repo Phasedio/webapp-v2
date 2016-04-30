@@ -164,7 +164,7 @@ angular.module('webappV2App')
 		*/
 
 		var _die = function die(source) {
-			console.log('dying of a ' + source);
+			// console.log('dying of a ' + source);
 			// 1. user has logged out
 			if (source.toLowerCase() == 'logout') {
 				$rootScope.$evalAsync(() => {
@@ -962,7 +962,7 @@ angular.module('webappV2App')
 				}
 			}
 
-			// check all strings
+			// check all user IDs
 			for (var i = params.user.length - 1; i >= 0; i--) {
 				let path = params.user[i];
 				let val = _.get(vals, path);
@@ -1006,8 +1006,6 @@ angular.module('webappV2App')
 					console.warn(`${typeof val} "${val}" at ${path} is neither a valid meta ID nor meta name; ignoring`);
 				}
 			}
-
-			console.log('cleaned task update', update);
 
 			_FBRef.child(`team/${Phased.team.uid}/tasks/${taskID}`).update(update).then((err) => {
 				if (err)

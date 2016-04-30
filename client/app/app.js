@@ -11,7 +11,6 @@ angular.module('webappV2App', [
   'ngOrderObjectBy',
   'angularMoment'
 ])
-  // .constant('FURL', 'https://phased-dev2.firebaseio.com/')
   /*
     gets UTC timecode for any of local timestamp, Date, or Moment
   */
