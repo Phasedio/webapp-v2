@@ -64,6 +64,8 @@ describe('Component: PhasedProvider', function() {
   var FBRefStub;
   // data fed to push gets stashed here
   var lastPushed;
+  // data fed to update gets stashed here
+  var lastUpdated;
 
   beforeEach(function (){
     sandbox.spy(window, 'Firebase'); // constructor
@@ -84,11 +86,16 @@ describe('Component: PhasedProvider', function() {
         lastPushed = data;
         return snapStub;
       },
+      update: function (data) {
+        lastUpdated = data;
+        return snapStub;
+      },
       set: sandbox.stub(),
       on: sandbox.stub().returnsPromise().resolves({}),
       once: sandbox.stub().returnsPromise().resolves({})
     };
     sandbox.spy(FBRefStub, 'push');
+    sandbox.spy(FBRefStub, 'update');
 
     // create the dummy module
     angular.module('dummyModule', [])
