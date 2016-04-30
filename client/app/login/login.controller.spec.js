@@ -5,7 +5,7 @@ describe('Component: loginController', function() {
   // load the controller's module
   beforeEach(module('webappV2App'));
 
-  var sandbox;
+  // var sandbox;
   var scope;
   var loginController;
   var $httpBackend;
@@ -18,9 +18,6 @@ describe('Component: loginController', function() {
     _Phased_,
     $componentController,
     $rootScope) {
-      // sandbox
-      sandbox = sinon.sandbox.create();
-
       // make a new scope for the controller to live in
       scope = $rootScope.$new();
 
@@ -35,11 +32,7 @@ describe('Component: loginController', function() {
       sandbox.spy(loginController, 'doLogin');
       loginController.$onInit();
   }));
-
-  afterEach(function () {
-    sandbox.restore();
-  });
-
+  
   //
   // TESTS
   //

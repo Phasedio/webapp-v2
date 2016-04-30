@@ -5,7 +5,6 @@ describe('Component: reportsComponent', function() {
   // load the controller's module
   beforeEach(module('webappV2App'));
 
-  var sandbox;
   var scope;
   var reportsComponent;
   var Phased;
@@ -16,7 +15,6 @@ describe('Component: reportsComponent', function() {
     $componentController,
     $rootScope,
     Phased) {
-      sandbox = sinon.sandbox.create();
       scope = $rootScope.$new();
       sandbox.spy(Phased, 'postStatus');
       reportsComponent = $componentController('reportsComponent', {
@@ -25,10 +23,6 @@ describe('Component: reportsComponent', function() {
         Phased: Phased
       });
   }));
-
-  afterEach(function () {
-    sandbox.restore();
-  });
 
   //
   //  TESTS

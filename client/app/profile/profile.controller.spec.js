@@ -5,7 +5,6 @@ describe('Component: profileComponent', function() {
   // load the controller's module
   beforeEach(module('webappV2App'));
 
-  var sandbox;
   var scope;
   var profileComponent;
   var Phased;
@@ -16,7 +15,6 @@ describe('Component: profileComponent', function() {
     $componentController,
     $rootScope,
     _Phased_) {
-      sandbox = sinon.sandbox.create();
       scope = $rootScope.$new();
       Phased = _Phased_;
 
@@ -26,10 +24,6 @@ describe('Component: profileComponent', function() {
         Phased: Phased
       });
   }));
-
-  afterEach(function () {
-    sandbox.restore();
-  });
 
   //
   //  TESTS

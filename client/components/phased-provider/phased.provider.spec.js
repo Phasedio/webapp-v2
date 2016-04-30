@@ -2,7 +2,7 @@
 
 describe('Component: PhasedProvider', function() {
   // stub a module to get a ref to the provider
-  var PhasedProvider, sandbox;
+  var PhasedProvider;
   // other modules to save
   var $rootScope,
     $http,
@@ -66,8 +66,6 @@ describe('Component: PhasedProvider', function() {
   var lastPushed;
 
   beforeEach(function (){
-    sandbox = sinon.sandbox.create();
-    sandbox.useFakeServer();
     sandbox.spy(window, 'Firebase'); // constructor
 
     // stub some firebase methods to return some dummy data
@@ -116,11 +114,7 @@ describe('Component: PhasedProvider', function() {
         Phased = _Phased_;
     });
   });
-
-  afterEach(function () {
-    sandbox.restore();
-  });
-
+  
   //
   //  TESTS
   //

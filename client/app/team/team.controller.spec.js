@@ -5,7 +5,6 @@ describe('Component: teamComponent', function() {
   // load the controller's module
   beforeEach(module('webappV2App'));
 
-  var sandbox;
   var scope;
   var teamComponent;
   var Phased;
@@ -16,12 +15,6 @@ describe('Component: teamComponent', function() {
     $componentController,
     $rootScope,
     _Phased_) {
-      sandbox = sinon.sandbox.create();
-      // stub console methods
-      sandbox.stub(window.console, 'log');
-      sandbox.stub(window.console, 'warn');
-      sandbox.stub(window.console, 'error');
-
       scope = $rootScope.$new();
       Phased = _Phased_;
 
@@ -31,10 +24,6 @@ describe('Component: teamComponent', function() {
         Phased: Phased
       });
   }));
-
-  afterEach(function () {
-    sandbox.restore();
-  });
 
   //
   //  TESTS
