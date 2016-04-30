@@ -51,7 +51,8 @@ angular.module('webappV2App')
 					tasks : {}
 				}
 			},
-			_oldestStatusTime = new Date().getTime();
+			_oldestStatusTime = new Date().getTime(),
+			_getUTCTimecode;
 
 		// public-facing object
 		var Phased = {
@@ -78,12 +79,13 @@ angular.module('webappV2App')
 		*	2. init FB objects
 		*	3. add event handlers for FB auth and connection states
 		*/
-		this.$get = ['$rootScope', '$http', '$location', '$window',
-			function $get(_$rootScope, _$http, _$location, _$window) {
-			$rootScope = _$rootScope;
-			$http = _$http;
-			$location = _$location;
-			$window = _$window;
+		this.$get = ['$rootScope', '$http', '$location', '$window', 'getUTCTimecode',
+			function $get(_$rootScope_, _$http_, _$location_, _$window_, _getUTCTimecode_) {
+			$rootScope = _$rootScope_;
+			$http = _$http_;
+			$location = _$location_;
+			$window = _$window_;
+			_getUTCTimecode = _getUTCTimecode_;
 
 			_FBRef = new Firebase(_FURL);
 
@@ -876,14 +878,9 @@ angular.module('webappV2App')
 
 			// dueDate (could be Date, Moment, or timestamp)
 			if (dueDate) {
-				if (moment.isDate(dueDate)) {
-					console.log('Got Date for "dueDate", assuming local timezone.');
-					newTask.dueDate = moment.utc(dueDate).valueOf();
-				} else if (moment.isMoment(dueDate)) {
-					newTask.dueDate = dueDate.utc().valueOf();
-				} else if (typeof dueDate == 'number') {
-					console.log('Got Number for "dueDate", assuming timestamp in local timezone.');
-					newTask.dueDate = moment.utc(dueDate).valueOf();
+				let timecode = _getUTCTimecode(dueDate);
+				if (!!timecode) {
+					newTask.dueDate = timecode;
 				} else {
 					console.warn('"dueDate" should be a Date, Moment, or numeric timestamp. Not using supplied value (' + typeof dueDate + ')');
 				}

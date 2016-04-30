@@ -11,8 +11,24 @@ angular.module('webappV2App', [
   'ngOrderObjectBy',
   'angularMoment'
 ])
-  .constant('FURL', 'https://phased-dev2.firebaseio.com/')
-  .config(function($routeProvider, $locationProvider, PhasedProvider, FURL) {
+  // .constant('FURL', 'https://phased-dev2.firebaseio.com/')
+  /*
+    gets UTC timecode for any of local timestamp, Date, or Moment
+  */
+  .constant('getUTCTimecode', function getUTCTimecode(input) {
+    if (moment.isDate(input)) {
+      console.log('Got Date, assuming local timezone.');
+      return moment.utc(input).valueOf();
+    } else if (moment.isMoment(input)) {
+      return input.utc().valueOf();
+    } else if (typeof input == 'number') {
+      console.log('Got Number, assuming timestamp in local timezone.');
+      return moment.utc(input).valueOf();
+    } else {
+      return false;
+    }
+  })
+  .config(function($routeProvider, $locationProvider, PhasedProvider, appConfig) {
     $routeProvider
       .otherwise({
         redirectTo: '/login'
