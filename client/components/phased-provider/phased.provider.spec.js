@@ -282,232 +282,235 @@ describe('Component: PhasedProvider', function() {
     });
   });
 
-  // ADDING A TASK
-  describe('#addTask', function () {
-    it('should return a promise', function () {
-      Phased.addTask({name: 'test...'}).should.be.an.instanceOf(Promise);
-    });
 
-    it('should fail if not passed an object', function () {
-      Phased.META_SET_UP = true;
-      Phased.TEAM_SET_UP = true;
-      Phased.PROFILE_SET_UP = true;
+  describe('task manipulation', function () {
+    // ADDING A TASK
+    describe('#addTask', function () {
+      it('should return a promise', function () {
+        Phased.addTask({name: 'test...'}).should.be.an.instanceOf(Promise);
+      });
 
-      Phased.addTask().should.be.rejected;
-      Phased.addTask('test...').should.be.rejected;
-      Phased.addTask(123).should.be.rejected;
-    });
+      it('should fail if not passed an object', function () {
+        Phased.META_SET_UP = true;
+        Phased.TEAM_SET_UP = true;
+        Phased.PROFILE_SET_UP = true;
 
-    it('should not run if any of meta, team, and profile are not set up', function () {
-      Phased.meta = phasedMeta;
-      Phased.team = {
-        members : {
-          'd' : true
+        Phased.addTask().should.be.rejected;
+        Phased.addTask('test...').should.be.rejected;
+        Phased.addTask(123).should.be.rejected;
+      });
+
+      it('should not run if any of meta, team, and profile are not set up', function () {
+        Phased.meta = phasedMeta;
+        Phased.team = {
+          members : {
+            'd' : true
+          }
+        };
+        var dummyTask = {
+          name: 'test',
+          to: 'd'
         }
-      };
-      var dummyTask = {
-        name: 'test',
-        to: 'd'
-      }
-      var runTest = (setup) => {
-        Phased.addTask(dummyTask);
-      
-        assert(!Firebase.prototype.child.called, 'attempted to call child with setup: ' + setup);
-        assert(!FBRefStub.push.called, 'attempted to call push with setup: ' + setup);
-        assert(!FBRefStub.set.called, 'attempted to call set with setup: ' + setup);
+        var runTest = (setup) => {
+          Phased.addTask(dummyTask);
+        
+          assert(!Firebase.prototype.child.called, 'attempted to call child with setup: ' + setup);
+          assert(!FBRefStub.push.called, 'attempted to call push with setup: ' + setup);
+          assert(!FBRefStub.set.called, 'attempted to call set with setup: ' + setup);
 
-        Firebase.prototype.child.reset();
-        FBRefStub.push.reset();
-        FBRefStub.set.reset();
-      }
-
-      // all false
-      Phased.META_SET_UP = false;
-      Phased.TEAM_SET_UP = false;
-      Phased.PROFILE_SET_UP = false;
-      runTest('all false');
-
-      // meta true
-      Phased.META_SET_UP = true;
-      Phased.TEAM_SET_UP = false;
-      Phased.PROFILE_SET_UP = false;
-      runTest('only meta');
-
-      // team true
-      Phased.META_SET_UP = false;
-      Phased.TEAM_SET_UP = true;
-      Phased.PROFILE_SET_UP = false;
-      runTest('only team');
-
-      // profile true
-      Phased.META_SET_UP = false;
-      Phased.TEAM_SET_UP = false;
-      Phased.PROFILE_SET_UP = true;
-      runTest('only profile');
-
-
-      // meta & team true
-      Phased.META_SET_UP = true;
-      Phased.TEAM_SET_UP = true;
-      Phased.PROFILE_SET_UP = false;
-      runTest('only meta and team');
-
-      // meta & profile true
-      Phased.META_SET_UP = true;
-      Phased.TEAM_SET_UP = false;
-      Phased.PROFILE_SET_UP = true;
-      runTest('only meta and profile');
-
-      // team and profile true
-      Phased.META_SET_UP = false;
-      Phased.TEAM_SET_UP = true;
-      Phased.PROFILE_SET_UP = true;
-      runTest('only team and profile');
-    });
-
-    it('should ensure the new task has no invalid keys', function () {
-      var validKeys = ['name', 'created', 'status', 'dueDate', 'description', 'assignment', 'tags'];
-      var taskKeys;
-      Phased.meta = phasedMeta;
-      Phased.team = {
-        members : {
-          'd' : true
-        },
-        user: {
-          uid : 'a'
+          Firebase.prototype.child.reset();
+          FBRefStub.push.reset();
+          FBRefStub.set.reset();
         }
-      };
-      var dummyTask = {
-        name: 'test',
-        to: 'd'
-      }
 
-      Phased.META_SET_UP = true;
-      Phased.TEAM_SET_UP = true;
-      Phased.PROFILE_SET_UP = true;
-      Phased.addTask(dummyTask).should.be.resolved;
+        // all false
+        Phased.META_SET_UP = false;
+        Phased.TEAM_SET_UP = false;
+        Phased.PROFILE_SET_UP = false;
+        runTest('all false');
 
-      assert(FBRefStub.push.called, 'did not try to push to FB');
-      var taskKeys = Object.keys(lastPushed);
-      expect(taskKeys).to.be.an('array');
+        // meta true
+        Phased.META_SET_UP = true;
+        Phased.TEAM_SET_UP = false;
+        Phased.PROFILE_SET_UP = false;
+        runTest('only meta');
 
-      // check that all keys are valid
-      for (var i in taskKeys)
-        validKeys.should.include(taskKeys[i], 'new task had invalid keys');
-    });
+        // team true
+        Phased.META_SET_UP = false;
+        Phased.TEAM_SET_UP = true;
+        Phased.PROFILE_SET_UP = false;
+        runTest('only team');
 
-    it('should ensure the new task has all the required keys', function () {
-      var requiredKeys = ['name', 'created', 'assignment', 'status'];
-      Phased.meta = phasedMeta;
-      Phased.team = {
-        members : {
-          'd' : true
+        // profile true
+        Phased.META_SET_UP = false;
+        Phased.TEAM_SET_UP = false;
+        Phased.PROFILE_SET_UP = true;
+        runTest('only profile');
+
+
+        // meta & team true
+        Phased.META_SET_UP = true;
+        Phased.TEAM_SET_UP = true;
+        Phased.PROFILE_SET_UP = false;
+        runTest('only meta and team');
+
+        // meta & profile true
+        Phased.META_SET_UP = true;
+        Phased.TEAM_SET_UP = false;
+        Phased.PROFILE_SET_UP = true;
+        runTest('only meta and profile');
+
+        // team and profile true
+        Phased.META_SET_UP = false;
+        Phased.TEAM_SET_UP = true;
+        Phased.PROFILE_SET_UP = true;
+        runTest('only team and profile');
+      });
+
+      it('should ensure the new task has no invalid keys', function () {
+        var validKeys = ['name', 'created', 'status', 'dueDate', 'description', 'assignment', 'tags'];
+        var taskKeys;
+        Phased.meta = phasedMeta;
+        Phased.team = {
+          members : {
+            'd' : true
+          },
+          user: {
+            uid : 'a'
+          }
+        };
+        var dummyTask = {
+          name: 'test',
+          to: 'd'
         }
-      };
-      var dummyTask = {
-        name: 'test',
-        to: 'd'
-      }
 
-      // do the test
-      Phased.META_SET_UP = true;
-      Phased.TEAM_SET_UP = true;
-      Phased.PROFILE_SET_UP = true;
-      Phased.addTask(dummyTask).should.be.resolved;
+        Phased.META_SET_UP = true;
+        Phased.TEAM_SET_UP = true;
+        Phased.PROFILE_SET_UP = true;
+        Phased.addTask(dummyTask).should.be.resolved;
 
-      assert(FBRefStub.push.called, 'did not try to push to FB');
-      var taskKeys = Object.keys(lastPushed);
-      expect(taskKeys).to.be.an('array');
+        assert(FBRefStub.push.called, 'did not try to push to FB');
+        var taskKeys = Object.keys(lastPushed);
+        expect(taskKeys).to.be.an('array');
 
-      // check all required keys are present
-      for (var i in requiredKeys)
-        taskKeys.should.include(requiredKeys[i], 'new task is missing a key');
-    });
-  });
+        // check that all keys are valid
+        for (var i in taskKeys)
+          validKeys.should.include(taskKeys[i], 'new task had invalid keys');
+      });
 
-  // EDITING A TASK
-  describe('#editTask', function () {
-    // fill out some dummy tasks
-    beforeEach(function () {
-      Phased.META_SET_UP = true;
-      Phased.TEAM_SET_UP = true;
-      Phased.PROFILE_SET_UP = true;
-      Phased.TASKS_SET_UP = true;
-
-      Phased.team.tasks = {
-        'A1' : {
-          name : 'test task'
+      it('should ensure the new task has all the required keys', function () {
+        var requiredKeys = ['name', 'created', 'assignment', 'status'];
+        Phased.meta = phasedMeta;
+        Phased.team = {
+          members : {
+            'd' : true
+          }
+        };
+        var dummyTask = {
+          name: 'test',
+          to: 'd'
         }
-      };
-      Phased.team.members = {
-        'yourID' : {
-          currentTask : 'asdf'
-        },
-        'billsID' : {
-          currentTask : 'asdf'
-        }
-      };
-      Phased.user.uid = 'myID';
+
+        // do the test
+        Phased.META_SET_UP = true;
+        Phased.TEAM_SET_UP = true;
+        Phased.PROFILE_SET_UP = true;
+        Phased.addTask(dummyTask).should.be.resolved;
+
+        assert(FBRefStub.push.called, 'did not try to push to FB');
+        var taskKeys = Object.keys(lastPushed);
+        expect(taskKeys).to.be.an('array');
+
+        // check all required keys are present
+        for (var i in requiredKeys)
+          taskKeys.should.include(requiredKeys[i], 'new task is missing a key');
+      });
     });
 
-    it('should return a promise', function () {
-      Phased.editTask('taskID', {name: 'test...'}).should.be.an.instanceOf(Promise);
+    // EDITING A TASK
+    describe('#editTask', function () {
+      // fill out some dummy tasks
+      beforeEach(function () {
+        Phased.META_SET_UP = true;
+        Phased.TEAM_SET_UP = true;
+        Phased.PROFILE_SET_UP = true;
+        Phased.TASKS_SET_UP = true;
+
+        Phased.team.tasks = {
+          'A1' : {
+            name : 'test task'
+          }
+        };
+        Phased.team.members = {
+          'yourID' : {
+            currentTask : 'asdf'
+          },
+          'billsID' : {
+            currentTask : 'asdf'
+          }
+        };
+        Phased.user.uid = 'myID';
+      });
+
+      it('should return a promise', function () {
+        Phased.editTask('taskID', {name: 'test...'}).should.be.an.instanceOf(Promise);
+      });
+
+      it('should fail if not passed an ID and an object', function () {
+        Phased.editTask().should.be.rejected;
+        Phased.editTask('test...').should.be.rejected;
+        Phased.editTask(123).should.be.rejected;
+
+        Phased.editTask('A1', 12).should.be.rejected;
+        Phased.editTask('A1', 'purple').should.be.rejected;
+        Phased.editTask('A1', false).should.be.rejected;
+      });
+
+      it('should fail if the ID is not a task', function () {
+        Phased.editTask('not a task ID', {name: 'asd'}).should.be.rejected;
+      });
+
+      it('should update the data in firebase', function () {
+        Phased.editTask('A1', {
+          name: 'test'
+        }).should.be.resolved;
+
+        assert(FBRefStub.update.called, 'did not call FBRef.update');
+      });
+
+      it('should silently ignore malformed data', function () {
+        Phased.editTask('A1', {
+          name: 'a valid task name will be updated, but',
+          description: {
+            this_object: 'will not be updated'
+          },
+          nor: 'will this one'
+        }).should.be.resolved;
+
+        expect(lastUpdated).to.be.an('object');
+        expect(lastUpdated).to.have.property('name').and.to.equal('a valid task name will be updated, but');
+        expect(lastUpdated).to.not.have.property('description');
+      });
+
+      it('should fail if assigned to someone not on current team', function () {
+        Phased.editTask('A1', {
+          assignment : {
+            to : 'notAnID'
+          }
+        }).should.be.rejected;
+      });
+
+      it('should set task.assignment.by to the current user if reassigned without an assigner', function () {
+        Phased.editTask('A1', {
+          assignment : {
+            to : 'yourID'
+          }
+        }).should.be.resolved;
+
+        expect(lastUpdated).to.have.property('assignment') // task.assignment
+          .and.to.have.property('by')     // task.assignment.by
+          .and.to.equal('myID');          // task.assignment.by == Phased.user.uid
+      });
     });
-
-    it('should fail if not passed an ID and an object', function () {
-      Phased.editTask().should.be.rejected;
-      Phased.editTask('test...').should.be.rejected;
-      Phased.editTask(123).should.be.rejected;
-
-      Phased.editTask('A1', 12).should.be.rejected;
-      Phased.editTask('A1', 'purple').should.be.rejected;
-      Phased.editTask('A1', false).should.be.rejected;
-    });
-
-    it('should fail if the ID is not a task', function () {
-      Phased.editTask('not a task ID', {name: 'asd'}).should.be.rejected;
-    });
-
-    it('should update the data in firebase', function () {
-      Phased.editTask('A1', {
-        name: 'test'
-      }).should.be.resolved;
-
-      assert(FBRefStub.update.called, 'did not call FBRef.update');
-    });
-
-    it('should silently ignore malformed data', function () {
-      Phased.editTask('A1', {
-        name: 'a valid task name will be updated, but',
-        description: {
-          this_object: 'will not be updated'
-        },
-        nor: 'will this one'
-      }).should.be.resolved;
-
-      expect(lastUpdated).to.be.an('object');
-      expect(lastUpdated).to.have.property('name').and.to.equal('a valid task name will be updated, but');
-      expect(lastUpdated).to.not.have.property('description');
-    });
-
-    it('should fail if assigned to someone not on current team', function () {
-      Phased.editTask('A1', {
-        assignment : {
-          to : 'notAnID'
-        }
-      }).should.be.rejected;
-    });
-
-    it('should set task.assignment.by to the current user if reassigned without an assigner', function () {
-      Phased.editTask('A1', {
-        assignment : {
-          to : 'yourID'
-        }
-      }).should.be.resolved;
-
-      expect(lastUpdated).to.have.property('assignment') // task.assignment
-        .and.to.have.property('by')     // task.assignment.by
-        .and.to.equal('myID');          // task.assignment.by == Phased.user.uid
-    });
-  });
+  }
 });
