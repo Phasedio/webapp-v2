@@ -973,7 +973,12 @@ angular.module('webappV2App')
 			}
 
 			// ensure assignment.by is the current user if assignment.to has changed and assignment.by is not set
-			if (!!update.assignment.to && !update.assignment.by && update.assignment.to !== Phased.team.tasks[taskID].assignment.to) {
+			// registering the conditions as functions in order to avoid variable reference errors
+			var updateHasAssignment = !!update.assignment;
+			var taskHasAssignment = !!Phased.team.tasks[taskID].assignment;
+			var updateAssignmentDiffThanCurrent = () => !!update.assignment.to && update.assignment.to !== Phased.team.tasks[taskID].assignment.to;
+			var updateHasNoAssigner = () => !update.assignment.by;
+			if (updateHasAssignment && updateHasNoAssigner() && (!taskHasAssignment || (taskHasAssignment && updateAssignmentDiffThanCurrent()))) {
 				update.assignment.by = Phased.user.uid;
 			}
 
