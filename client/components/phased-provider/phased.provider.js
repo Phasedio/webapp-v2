@@ -896,4 +896,131 @@ angular.module('webappV2App')
 
 			_FBRef.child(`team/${Phased.team.uid}/tasks`).push(newTask).then(fulfill, reject);
 		}
+
+		/*
+		*	Generic task editing
+		*/
+		Phased.editTask = function editTask(taskID = '', vals = {}) {
+			return _registerAfter(['TASKS_SET_UP', 'TEAM_SET_UP', 'META_SET_UP', 'PROFILE_SET_UP'], _doEditTask, {taskID : taskID, vals : vals});
+		}
+
+		/*
+			Tries to update all valid key-values in args.vals for the task with ID args.taskID
+			
+
+		*/
+		var _doEditTask = function doEditTask(args = {}, fulfill = ()=>{}, reject = ()=>{}) {
+			const {vals, taskID} = args;
+			const params = {
+				string 	: ['name', 'description'],
+				date 		: ['dueDate'],
+				user 		: ['assignment.to', 'assignment.by'],
+				meta 		: [{
+					path : 'status',
+					metaLocation : 'task.STATUS',
+					metaIDLocation : 'task.STATUS_ID'
+				}]
+			};
+
+			var update = {};
+
+			// check all strings
+			for (var i = params.string.length - 1; i >= 0; i--) {
+				let path = params.string[i];
+				let val = _.get(vals, path);
+				if (typeof val == 'string') {
+					_.set(update, path, val);
+				}
+			}
+
+			// check all dates
+			for (var i = params.date.length - 1; i >= 0; i--) {
+				let path = params.date[i];
+				let val = _.get(vals, path);
+
+				if (!!val) {
+					let timecode = _getUTCTimecode(val);
+					if (!!timecode)
+						_.set(update, path, timecode);
+					else
+						console.warn(`${typeof val} "${val}" at ${path} is not a valid date-like object; ignoring`);
+				}
+			}
+
+			// check all strings
+			for (var i = params.user.length - 1; i >= 0; i--) {
+				let path = params.user[i];
+				let val = _.get(vals, path);
+				if (typeof val == 'string' && val in Phased.team.members)
+					_.set(update, path, val);
+				else if (val !== undefined)
+					console.warn(`${typeof val} "${val}" at ${path} is not the ID of a current team member; ignoring`);
+			}
+
+			// check all meta
+			for (var i = params.meta.length - 1; i >= 0; i--) {
+				let path = params.meta[i].path;
+				let val = _.get(vals, path);
+				let metaLocation = _.get(Phased.meta, params.meta[i].metaLocation);
+				let metaIDLocation = _.get(Phased.meta, params.meta[i].metaIDLocation);
+				
+				if (typeof val == 'string') {
+					let maybeID = _.findKey(metaLocation, (o) => o === val );
+					if (val in metaIDLocation) {
+						// val is valid name of meta ID (eg, 'ASSIGNED' for Phased.meta.task.STATUS_ID.ASSIGNED)
+						_.set(update, path, metaIDLocation[val]);
+					} else if (!!maybeID) {
+						// val is valid description of meta (eg, 'In progress' for Phased.meta.task.STATUS[0])
+						_.set(update, path, maybeID);
+					}
+				} else if (typeof val == 'number' && val in metaLocation) {
+					// val is valid ID of meta
+					_.set(update, path, val);
+				} else if (val !== undefined) {
+					// invalid
+					console.warn(`${typeof val} "${val}" at ${path} is neither a valid meta ID nor meta name; ignoring`);
+				}
+			}
+
+			console.log('cleaned task update', update);
+			fulfill(update);
+		}
+
+		/*
+		*	The user starts/resumes working on a task
+		*
+		*	Alias for _doEditTask
+		*/
+		Phased.workOnTask = function workOnTask(taskID = '') {
+
+		}
+
+		/*
+		*	The user has completed working on a task and submits it for review
+		*
+		*	Alias for _doEditTaskd
+		*/
+		Phased.submitTaskForReview = function submitTaskForReview(taskID = '') {
+
+		}
+
+		/*
+		*	The user (if admin) approves of a task that has been submit for review
+		*
+		*	Alias for _doEditTask
+		*/
+		Phased.approveTaskInReview = function approveTaskInReview(taskID = '') {
+
+		}
+
+		/*
+		*	The user (if admin) denies a task that has been submit for review
+		*
+		*	Alias for _doEditTask
+		*/
+		Phased.denyTaskInReview = function denyTaskInReview(taskID = '', comment = '') {
+
+		}
+
+		
 	})
