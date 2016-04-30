@@ -957,6 +957,11 @@ angular.module('webappV2App')
 					console.warn(`${typeof val} "${val}" at ${path} is not the ID of a current team member; ignoring`);
 			}
 
+			// ensure assignment.by is the current user if assignment.to has changed and assignment.by is not set
+			if (!!update.assignment.to && !update.assignment.by && update.assignment.to !== Phased.team.tasks[taskID].assignment.to) {
+				update.assignment.by = Phased.user.uid;
+			}
+
 			// check all meta
 			for (var i = params.meta.length - 1; i >= 0; i--) {
 				let path = params.meta[i].path;
