@@ -8,6 +8,7 @@ angular.module('webappV2App')
 			$window,
 			_FBRef,
 			_FURL,
+			_appConfig,
 			_INIT_EVENTS = {
 				SET_UP : 'Phased:setup',
 				META_SET_UP : 'Phased:meta',
@@ -79,13 +80,14 @@ angular.module('webappV2App')
 		*	2. init FB objects
 		*	3. add event handlers for FB auth and connection states
 		*/
-		this.$get = ['$rootScope', '$http', '$location', '$window', 'getUTCTimecode',
-			function $get(_$rootScope_, _$http_, _$location_, _$window_, _getUTCTimecode_) {
+		this.$get = ['$rootScope', '$http', '$location', '$window', 'getUTCTimecode', 'appConfig',
+			function $get(_$rootScope_, _$http_, _$location_, _$window_, _getUTCTimecode_, _appConfig_) {
 			$rootScope = _$rootScope_;
 			$http = _$http_;
 			$location = _$location_;
 			$window = _$window_;
 			_getUTCTimecode = _getUTCTimecode_;
+			_appConfig = _appConfig_;
 
 			_FBRef = new Firebase(_FURL);
 
@@ -1021,16 +1023,38 @@ angular.module('webappV2App')
 		*	Alias for _doEditTask
 		*/
 		Phased.workOnTask = function workOnTask(taskID = '') {
+			return _registerAfter(['TASKS_SET_UP', 'TEAM_SET_UP', 'META_SET_UP', 'PROFILE_SET_UP'], 
+				_doWorkOnTask, taskID);
+		}
 
+		var _doWorkOnTask = function doWorkOnTask(taskID, fulfill, reject) {
+			Phased.editTask(taskID, {
+				status: Phased.meta.task.STATUS_ID.IN_PROGRESS
+			})
+			.then(() => {
+				Phased.postStatus(`${_appConfig.strings.status.prefix.task.inProgress}: ${Phased.team.tasks[taskID].name}`)
+				.then(fulfill, reject);
+			}, reject);
 		}
 
 		/*
 		*	The user has completed working on a task and submits it for review
 		*
-		*	Alias for _doEditTaskd
+		*	Alias for _doEditTask
 		*/
 		Phased.submitTaskForReview = function submitTaskForReview(taskID = '') {
+			return _registerAfter(['TASKS_SET_UP', 'TEAM_SET_UP', 'META_SET_UP', 'PROFILE_SET_UP'], 
+				_doSubmitTaskForReview, taskID);
+		}
 
+		var _doSubmitTaskForReview = function doSubmitTaskForReview(taskID, fulfill, reject) {
+			Phased.editTask(taskID, {
+				status: Phased.meta.task.STATUS_ID.IN_REVIEW
+			})
+			.then(() => {
+				Phased.postStatus(`${_appConfig.strings.status.prefix.task.inReview}: ${Phased.team.tasks[taskID].name}`)
+				.then(fulfill, reject);
+			}, reject);
 		}
 
 		/*
@@ -1039,17 +1063,62 @@ angular.module('webappV2App')
 		*	Alias for _doEditTask
 		*/
 		Phased.approveTaskInReview = function approveTaskInReview(taskID = '') {
+			return _registerAfter(['TASKS_SET_UP', 'TEAM_SET_UP', 'META_SET_UP', 'PROFILE_SET_UP'], 
+				_doApproveTaskInReview, taskID);
+		}
 
+		var _doApproveTaskInReview = function doApproveTaskInReview(taskID, fulfill, reject) {
+			if (Phased.team.members[Phased.user.uid].role != Phased.meta.ROLE_ID.ADMIN) {
+				reject(new Error('User must be admin to approve or reject task completion'));
+				return;
+			}
+
+			if (Phased.team.tasks[taskID].status != Phased.meta.task.STATUS_ID.IN_REVIEW) {
+				var msg = 'Task must be in review before approval or rejection';
+				console.warn(msg);
+				reject(new Error(msg));
+				return;
+			}
+
+			Phased.editTask(taskID, {
+				status: Phased.meta.task.STATUS_ID.COMPLETE
+			})
+			.then(() => {
+				Phased.postStatus(`${_appConfig.strings.status.prefix.task.approvedReview}: ${Phased.team.tasks[taskID].name}`)
+				.then(fulfill, reject);
+			}, reject);
 		}
 
 		/*
-		*	The user (if admin) denies a task that has been submit for review
+		*	The user (if admin) rejects a task that has been submit for review
 		*
 		*	Alias for _doEditTask
 		*/
-		Phased.denyTaskInReview = function denyTaskInReview(taskID = '', comment = '') {
-
+		Phased.rejectTaskInReview = function rejectTaskInReview(taskID = '', comment = '') {
+			return _registerAfter(['TASKS_SET_UP', 'TEAM_SET_UP', 'META_SET_UP', 'PROFILE_SET_UP'], 
+				_doRejectTaskInReview, taskID);
 		}
 
+		var _doRejectTaskInReview = function doRejectTaskInReview(taskID, fulfill, reject) {
+			if (Phased.team.members[Phased.user.uid].role != Phased.meta.ROLE_ID.ADMIN) {
+				reject(new Error('User must be admin to approve or reject task completion'));
+				return;
+			}
+
+			if (Phased.team.tasks[taskID].status != Phased.meta.task.STATUS_ID.IN_REVIEW) {
+				var msg = 'Task must be in review before approval or rejection';
+				console.warn(msg);
+				reject(new Error(msg));
+				return;
+			}
+
+			Phased.editTask(taskID, {
+				status: Phased.meta.task.STATUS_ID.REJECTED
+			})
+			.then(() => {
+				Phased.postStatus(`${_appConfig.strings.status.prefix.task.rejectedReview}: ${Phased.team.tasks[taskID].name}`)
+				.then(fulfill, reject);
+			}, reject);
+		}
 		
 	})
