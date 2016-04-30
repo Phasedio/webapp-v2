@@ -921,8 +921,23 @@ angular.module('webappV2App')
 					metaIDLocation : 'task.STATUS_ID'
 				}]
 			};
-
 			var update = {};
+
+			// reject if bad inputs
+			if (typeof taskID != 'string' || typeof vals != 'object') {
+				var msg = `Phased.editTask expects a taskID and an object; got ${typeof taskID} and ${typeof vals}`;
+				console.warn(msg);
+				reject(new Error(msg));
+				return;
+			}
+
+			// reject if task doesn't exist
+			if (!(taskID in Phased.team.tasks)) {
+				var msg = `${taskID} is not an extant task for the current team (did you mean to call Phased.addTask?)`;
+				console.warn(msg);
+				reject(new Error(msg));
+				return;
+			}
 
 			// check all strings
 			for (var i = params.string.length - 1; i >= 0; i--) {
