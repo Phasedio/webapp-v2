@@ -26,7 +26,7 @@ module.exports = function(config) {
       'client/bower_components/angular-sanitize/angular-sanitize.js',
       'client/bower_components/angular-route/angular-route.js',
       'client/bower_components/angular-bootstrap/ui-bootstrap-tpls.js',
-      'client/bower_components/lodash/dist/lodash.compat.js',
+      'client/bower_components/lodash/lodash.js',
       'client/bower_components/promise-polyfill/promise.js',
       'client/bower_components/firebase/firebase.js',
       'client/bower_components/phoneformat/phoneformat.min.js',

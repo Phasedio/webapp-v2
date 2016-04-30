@@ -424,4 +424,90 @@ describe('Component: PhasedProvider', function() {
         taskKeys.should.include(requiredKeys[i], 'new task is missing a key');
     });
   });
+
+  // EDITING A TASK
+  describe('#editTask', function () {
+    // fill out some dummy tasks
+    beforeEach(function () {
+      Phased.META_SET_UP = true;
+      Phased.TEAM_SET_UP = true;
+      Phased.PROFILE_SET_UP = true;
+      Phased.TASKS_SET_UP = true;
+
+      Phased.team.tasks = {
+        'A1' : {
+          name : 'test task'
+        }
+      };
+      Phased.team.members = {
+        'yourID' : {
+          currentTask : 'asdf'
+        },
+        'billsID' : {
+          currentTask : 'asdf'
+        }
+      };
+      Phased.user.uid = 'myID';
+    });
+
+    it('should return a promise', function () {
+      Phased.editTask('taskID', {name: 'test...'}).should.be.an.instanceOf(Promise);
+    });
+
+    it('should fail if not passed an ID and an object', function () {
+      Phased.editTask().should.be.rejected;
+      Phased.editTask('test...').should.be.rejected;
+      Phased.editTask(123).should.be.rejected;
+
+      Phased.editTask('A1', 12).should.be.rejected;
+      Phased.editTask('A1', 'purple').should.be.rejected;
+      Phased.editTask('A1', false).should.be.rejected;
+    });
+
+    it('should fail if the ID is not a task', function () {
+      Phased.editTask('not a task ID', {name: 'asd'}).should.be.rejected;
+    });
+
+    it('should update the data in firebase', function () {
+      Phased.editTask('A1', {
+        name: 'test'
+      }).should.be.resolved;
+
+      assert(FBRefStub.update.called, 'did not call FBRef.update');
+    });
+
+    it('should silently ignore malformed data', function () {
+      Phased.editTask('A1', {
+        name: 'a valid task name will be updated, but',
+        description: {
+          this_object: 'will not be updated'
+        },
+        nor: 'will this one'
+      }).should.be.resolved;
+
+      expect(lastUpdated).to.be.an('object');
+      expect(lastUpdated).to.have.property('name').and.to.equal('a valid task name will be updated, but');
+      expect(lastUpdated).to.not.have.property('description');
+    });
+
+    it('should fail if assigned to someone not on current team', function () {
+      Phased.editTask('A1', {
+        assignment : {
+          to : 'notAnID'
+        }
+      }).should.be.rejected;
+    });
+
+    it('should set task.assignment.by to the current user if reassigned without an assigner', function () {
+      Phased.editTask('A1', {
+        assignment : {
+          to : 'yourID'
+        }
+      }).should.be.resolved;
+
+      expect(lastUpdated).to.have.property('assignment') // task.assignment
+        .and.to.have.property('by')     // task.assignment.by
+        .and.to.equal('myID');          // task.assignment.by == Phased.user.uid
+    });
+  });
 });
