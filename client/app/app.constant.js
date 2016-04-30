@@ -6,7 +6,8 @@
 		"guest",
 		"user",
 		"admin"
-	]
+	],
+	"FURL": "https://phased-dev2.firebaseio.com/"
 })
 
 ;
