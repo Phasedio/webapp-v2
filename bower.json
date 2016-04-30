@@ -13,7 +13,7 @@
     "angular-route": "~1.5.0",
     "angular-bootstrap": "~1.1.2",
     "font-awesome": ">=4.1.0",
-    "lodash": "~2.4.1",
+    "lodash": ">=2.4.1",
     "promise-polyfill": "^4.0.3",
     "firebase": "^2.4.2",
     "phoneformat": "^0.0.7",
@@ -23,5 +23,8 @@
   },
   "devDependencies": {
     "angular-mocks": "~1.5.0"
+  },
+  "resolutions": {
+    "angular": "~1.5.0"
   }
 }
