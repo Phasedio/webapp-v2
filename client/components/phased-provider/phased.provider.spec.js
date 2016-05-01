@@ -74,13 +74,13 @@ describe('Component: PhasedProvider', function() {
   // data fed to update gets stashed here
   var lastUpdated;
 
-  beforeEach(function (){
+  beforeEach(function() {
     sandbox.spy(window, 'Firebase'); // constructor
 
     // stub some firebase methods to return some dummy data
     sandbox.spy(Firebase.prototype, 'onAuth');
     sandbox.spy(Firebase.prototype, 'unauth');
-    sandbox.stub(Firebase.prototype, 'child', function () {
+    sandbox.stub(Firebase.prototype, 'child', function() {
       return FBRefStub;
     });
 
@@ -89,11 +89,11 @@ describe('Component: PhasedProvider', function() {
     snapStub.val = sandbox.stub();
 
     FBRefStub = {
-      push: function (data) {
+      push: function(data) {
         lastPushed = data;
         return snapStub;
       },
-      update: function (data) {
+      update: function(data) {
         lastUpdated = data;
         return snapStub;
       },
@@ -106,9 +106,9 @@ describe('Component: PhasedProvider', function() {
 
     // create the dummy module
     angular.module('dummyModule', [])
-    .config(['PhasedProvider', function(_PhasedProvider) {
-      PhasedProvider = _PhasedProvider;
-    }]);
+      .config(['PhasedProvider', function(_PhasedProvider) {
+        PhasedProvider = _PhasedProvider;
+      }]);
 
     // inject into our module and stash some other modules
     // this will instantiate the Phased factory by calling PhasedProvider.$get
@@ -120,43 +120,47 @@ describe('Component: PhasedProvider', function() {
       _$window_,
       _$firebaseAuth_,
       _Phased_) {
-        $rootScope = _$rootScope_;
-        $http = _$http_;
-        $location = _$location_;
-        $window = _$window_;
-        $firebaseAuth = _$firebaseAuth_,
+      $rootScope = _$rootScope_;
+      $http = _$http_;
+      $location = _$location_;
+      $window = _$window_;
+      $firebaseAuth = _$firebaseAuth_,
         Phased = _Phased_;
     });
   });
-  
+
+  afterEach(function() {
+    sandbox.reset();
+  });
+
   //
   //  TESTS
   //
 
   // CONFIG & CONSTRUCTION
-  describe('construction and construction ($get)', function () {
-    it('should be an object', function () {
+  describe('construction and construction ($get)', function() {
+    it('should be an object', function() {
       PhasedProvider.should.be.an('object');
     });
 
     // CONFIG
-    describe('#config', function () {
-      it('should return a promise', function () {
+    describe('#config', function() {
+      it('should return a promise', function() {
         PhasedProvider.config().should.be.an.instanceOf(Promise);
       });
 
-      it('should fail without a Firebase URL', function () {
+      it('should fail without a Firebase URL', function() {
         PhasedProvider.config().should.be.rejected;
       });
     });
 
     // CONSTRUCTION
-    describe('#construction', function () {
-      it('should provide Phased factory', function () {
+    describe('#construction', function() {
+      it('should provide Phased factory', function() {
         expect(Phased).to.be.an('object');
       });
 
-      it('should handle FB auth changes', function () {
+      it('should handle FB auth changes', function() {
         window.Firebase.should.be.a('function');
         assert(window.Firebase.called, 'FB was not instantiated');
         assert(Firebase.prototype.onAuth.called, 'onAuth was not called');
@@ -165,22 +169,22 @@ describe('Component: PhasedProvider', function() {
   });
 
   // LOGIN AND LOGOUT
-  describe('login and logout', function () {
-    it('should attempt to log in with FB', function () {
+  describe('login and logout', function() {
+    it('should attempt to log in with FB', function() {
       sandbox.spy(Firebase.prototype, 'authWithPassword');
       Phased.login('d', 'a');
       assert(Firebase.prototype.authWithPassword.called, 'did not call authWithPassword');
       Firebase.prototype.authWithPassword.reset();
     });
 
-    it('should return a FB promise', function () {
+    it('should return a FB promise', function() {
       // strictly speaking, this is a "then-able" and not a promise; since the return value of 
       // FB.authWithPassword isn't an instance of Promise
       // (so we check to see that "then" is a function rather than if it's a Promise)
       Phased.login('a', 'e').then.should.be.a('function');
     });
 
-    it('should attempt to log out with FB', function () {
+    it('should attempt to log out with FB', function() {
       Phased.logout();
       assert(Firebase.prototype.unauth.called, 'did not call unauth');
       Firebase.prototype.unauth.reset();
@@ -188,12 +192,12 @@ describe('Component: PhasedProvider', function() {
   });
 
   // POSTING A STATUS
-  describe('#postStatus', function () {
-    it('should return a promise', function () {
+  describe('#postStatus', function() {
+    it('should return a promise', function() {
       Phased.postStatus('test...').should.be.an.instanceOf(Promise);
     });
 
-    it('should only post if meta, team, and profile are set up', function () {
+    it('should only post if meta, team, and profile are set up', function() {
       Phased.meta = phasedMeta;
 
       // 1. neither meta nor team
@@ -201,7 +205,7 @@ describe('Component: PhasedProvider', function() {
       Phased.TEAM_SET_UP = false;
       Phased.PROFILE_SET_UP = false;
       Phased.postStatus('test...');
-      
+
       assert(!Firebase.prototype.child.called, 'attempted to call child before team or meta set up');
       assert(!FBRefStub.push.called, 'attempted to call push before team or meta set up');
       assert(!FBRefStub.set.called, 'attempted to call set before team or meta set up');
@@ -215,7 +219,7 @@ describe('Component: PhasedProvider', function() {
       Phased.TEAM_SET_UP = false;
       Phased.PROFILE_SET_UP = false;
       Phased.postStatus('test...');
-      
+
       assert(!Firebase.prototype.child.called, 'attempted to call child before team set up');
       assert(!FBRefStub.push.called, 'attempted to call push before team set up');
       assert(!FBRefStub.set.called, 'attempted to call set before team set up');
@@ -229,7 +233,7 @@ describe('Component: PhasedProvider', function() {
       Phased.TEAM_SET_UP = true;
       Phased.PROFILE_SET_UP = false;
       Phased.postStatus('test...');
-      
+
       assert(!Firebase.prototype.child.called, 'attempted to call child before meta set up');
       assert(!FBRefStub.push.called, 'attempted to call push before meta set up');
       assert(!FBRefStub.set.called, 'attempted to call set before meta set up');
@@ -243,13 +247,13 @@ describe('Component: PhasedProvider', function() {
       Phased.TEAM_SET_UP = true;
       Phased.PROFILE_SET_UP = true;
       Phased.postStatus('test...');
-      
+
       assert(Firebase.prototype.child.called, 'failed to call child after set up');
       assert(FBRefStub.push.called, 'failed to call push after set up');
       assert(FBRefStub.set.called, 'failed to call set after set up');
     });
 
-    it('should ensure the new status has no invalid keys', function () {
+    it('should ensure the new status has no invalid keys', function() {
       var validKeys = ['user', 'name', 'type', 'projectID', 'taskID', 'startTime', 'endTime', 'time'];
       var statusKeys;
       Phased.meta = phasedMeta;
@@ -258,7 +262,7 @@ describe('Component: PhasedProvider', function() {
       Phased.TEAM_SET_UP = true;
       Phased.PROFILE_SET_UP = true;
       Phased.postStatus('test...');
-      
+
       assert(FBRefStub.push.called, 'did not try to push to FB');
       var statusKeys = Object.keys(lastPushed);
       expect(statusKeys).to.be.an('array');
@@ -269,7 +273,7 @@ describe('Component: PhasedProvider', function() {
         validKeys.should.include(statusKeys[i], 'new status had invalid keys');
     });
 
-    it('should ensure the new status has all of the required properties', function () {
+    it('should ensure the new status has all of the required properties', function() {
       var requiredKeys = ['user', 'name', 'type', 'time'];
       var statusKeys;
       Phased.meta = phasedMeta;
@@ -290,14 +294,16 @@ describe('Component: PhasedProvider', function() {
   });
 
 
-  describe('task manipulation', function () {
+  describe('task manipulation', function() {
     // ADDING A TASK
-    describe('#addTask', function () {
-      it('should return a promise', function () {
-        Phased.addTask({name: 'test...'}).should.be.an.instanceOf(Promise);
+    describe('#addTask', function() {
+      it('should return a promise', function() {
+        Phased.addTask({
+          name: 'test...'
+        }).should.be.an.instanceOf(Promise);
       });
 
-      it('should fail if not passed an object', function () {
+      it('should fail if not passed an object', function() {
         Phased.META_SET_UP = true;
         Phased.TEAM_SET_UP = true;
         Phased.PROFILE_SET_UP = true;
@@ -307,11 +313,11 @@ describe('Component: PhasedProvider', function() {
         Phased.addTask(123).should.be.rejected;
       });
 
-      it('should not run if any of meta, team, and profile are not set up', function () {
+      it('should not run if any of meta, team, and profile are not set up', function() {
         Phased.meta = phasedMeta;
         Phased.team = {
-          members : {
-            'd' : true
+          members: {
+            'd': true
           }
         };
         var dummyTask = {
@@ -320,7 +326,7 @@ describe('Component: PhasedProvider', function() {
         }
         var runTest = (setup) => {
           Phased.addTask(dummyTask);
-        
+
           assert(!Firebase.prototype.child.called, 'attempted to call child with setup: ' + setup);
           assert(!FBRefStub.push.called, 'attempted to call push with setup: ' + setup);
           assert(!FBRefStub.set.called, 'attempted to call set with setup: ' + setup);
@@ -374,16 +380,16 @@ describe('Component: PhasedProvider', function() {
         runTest('only team and profile');
       });
 
-      it('should ensure the new task has no invalid keys', function () {
+      it('should ensure the new task has no invalid keys', function() {
         var validKeys = ['name', 'created', 'status', 'dueDate', 'description', 'assignment', 'tags'];
         var taskKeys;
         Phased.meta = phasedMeta;
         Phased.team = {
-          members : {
-            'd' : true
+          members: {
+            'd': true
           },
           user: {
-            uid : 'a'
+            uid: 'a'
           }
         };
         var dummyTask = {
@@ -405,12 +411,12 @@ describe('Component: PhasedProvider', function() {
           validKeys.should.include(taskKeys[i], 'new task had invalid keys');
       });
 
-      it('should ensure the new task has all the required keys', function () {
+      it('should ensure the new task has all the required keys', function() {
         var requiredKeys = ['name', 'created', 'assignment', 'status'];
         Phased.meta = phasedMeta;
         Phased.team = {
-          members : {
-            'd' : true
+          members: {
+            'd': true
           }
         };
         var dummyTask = {
@@ -435,35 +441,37 @@ describe('Component: PhasedProvider', function() {
     });
 
     // EDITING A TASK
-    describe('#editTask', function () {
+    describe('#editTask', function() {
       // fill out some dummy tasks
-      beforeEach(function () {
+      beforeEach(function() {
         Phased.META_SET_UP = true;
         Phased.TEAM_SET_UP = true;
         Phased.PROFILE_SET_UP = true;
         Phased.TASKS_SET_UP = true;
 
         Phased.team.tasks = {
-          'A1' : {
-            name : 'test task'
+          'A1': {
+            name: 'test task'
           }
         };
         Phased.team.members = {
-          'yourID' : {
-            currentTask : 'asdf'
+          'yourID': {
+            currentTask: 'asdf'
           },
-          'billsID' : {
-            currentTask : 'asdf'
+          'billsID': {
+            currentTask: 'asdf'
           }
         };
         Phased.user.uid = 'myID';
       });
 
-      it('should return a promise', function () {
-        Phased.editTask('taskID', {name: 'test...'}).should.be.an.instanceOf(Promise);
+      it('should return a promise', function() {
+        Phased.editTask('taskID', {
+          name: 'test...'
+        }).should.be.an.instanceOf(Promise);
       });
 
-      it('should fail if not passed an ID and an object', function () {
+      it('should fail if not passed an ID and an object', function() {
         Phased.editTask().should.be.rejected;
         Phased.editTask('test...').should.be.rejected;
         Phased.editTask(123).should.be.rejected;
@@ -473,11 +481,13 @@ describe('Component: PhasedProvider', function() {
         Phased.editTask('A1', false).should.be.rejected;
       });
 
-      it('should fail if the ID is not a task', function () {
-        Phased.editTask('not a task ID', {name: 'asd'}).should.be.rejected;
+      it('should fail if the ID is not a task', function() {
+        Phased.editTask('not a task ID', {
+          name: 'asd'
+        }).should.be.rejected;
       });
 
-      it('should update the data in firebase', function () {
+      it('should update the data in firebase', function() {
         Phased.editTask('A1', {
           name: 'test'
         }).should.be.resolved;
@@ -485,7 +495,7 @@ describe('Component: PhasedProvider', function() {
         assert(FBRefStub.update.called, 'did not call FBRef.update');
       });
 
-      it('should silently ignore malformed data', function () {
+      it('should silently ignore malformed data', function() {
         Phased.editTask('A1', {
           name: 'a valid task name will be updated, but',
           description: {
@@ -499,25 +509,261 @@ describe('Component: PhasedProvider', function() {
         expect(lastUpdated).to.not.have.property('description');
       });
 
-      it('should fail if assigned to someone not on current team', function () {
+      it('should fail if assigned to someone not on current team', function() {
         Phased.editTask('A1', {
-          assignment : {
-            to : 'notAnID'
+          assignment: {
+            to: 'notAnID'
           }
         }).should.be.rejected;
       });
 
-      it('should set task.assignment.by to the current user if reassigned without an assigner', function () {
+      it('should set task.assignment.by to the current user if reassigned without an assigner', function() {
         Phased.editTask('A1', {
-          assignment : {
-            to : 'yourID'
+          assignment: {
+            to: 'yourID'
           }
         }).should.be.resolved;
 
         expect(lastUpdated).to.have.property('assignment') // task.assignment
-          .and.to.have.property('by')     // task.assignment.by
-          .and.to.equal('myID');          // task.assignment.by == Phased.user.uid
+          .and.to.have.property('by') // task.assignment.by
+          .and.to.equal('myID'); // task.assignment.by == Phased.user.uid
       });
     });
-  }
+
+    // WORKING ON A TASK
+    describe('#workOnTask', function() {
+      beforeEach(function() {
+        Phased.META_SET_UP = true;
+        Phased.TEAM_SET_UP = true;
+        Phased.PROFILE_SET_UP = true;
+        Phased.TASKS_SET_UP = true;
+        Phased.meta = phasedMeta;
+
+        Phased.team.tasks = {
+          'A1': {
+            name: 'test task',
+            status: Phased.meta.task.STATUS_ID.CREATED
+          }
+        };
+        Phased.team.members = {
+          'yourID': {
+            currentTask: 'asdf'
+          },
+          'billsID': {
+            currentTask: 'asdf'
+          }
+        };
+        Phased.user.uid = 'myID';
+
+        sandbox.stub(Phased, 'editTask', function(taskID, vals) {
+          _.assign(Phased.team.tasks[taskID], vals);
+          return sandbox.stub().returnsPromise().resolves({})();
+        });
+
+        sandbox.stub(Phased, 'postStatus', sandbox.stub().returnsPromise().resolves({}))
+      });
+
+      afterEach(function() {
+        Phased.editTask.restore();
+      });
+
+      //
+      //  tests
+      //
+
+      it('should set the task status to Phased.meta.task.STATUS_ID.IN_PROGRESS', function() {
+        Phased.workOnTask('A1').should.be.resolved;
+        expect(Phased.team.tasks.A1).to.exist
+          .and.to.have.property('status')
+          .and.to.equal(Phased.meta.task.STATUS_ID.IN_PROGRESS);
+      });
+
+      it('should update the user\'s status', function () {
+        Phased.workOnTask('A1').should.be.resolved;
+        assert(Phased.postStatus.called);
+      });
+    });
+
+    // SUBMIT TASK FOR REVIEW
+    describe('#submitTaskForReview', function() {
+      beforeEach(function() {
+        Phased.META_SET_UP = true;
+        Phased.TEAM_SET_UP = true;
+        Phased.PROFILE_SET_UP = true;
+        Phased.TASKS_SET_UP = true;
+        Phased.meta = phasedMeta;
+
+        Phased.team.tasks = {
+          'A1': {
+            name: 'test task',
+            status: Phased.meta.task.STATUS_ID.IN_PROGRESS
+          }
+        };
+        Phased.team.members = {
+          'yourID': {
+            currentTask: 'asdf'
+          },
+          'billsID': {
+            currentTask: 'asdf'
+          }
+        };
+        Phased.user.uid = 'myID';
+
+        sandbox.stub(Phased, 'editTask', function(taskID, vals) {
+          _.assign(Phased.team.tasks[taskID], vals);
+          return sandbox.stub().returnsPromise().resolves({})();
+        });
+
+        sandbox.stub(Phased, 'postStatus', sandbox.stub().returnsPromise().resolves({}))
+      });
+
+      afterEach(function() {
+        Phased.editTask.restore();
+      });
+
+      //
+      //  tests
+      //
+
+      it('should set the task status to Phased.meta.task.STATUS_ID.IN_REVIEW', function() {
+        Phased.submitTaskForReview('A1').should.be.resolved;
+        expect(Phased.team.tasks.A1).to.exist
+          .and.to.have.property('status')
+          .and.to.equal(Phased.meta.task.STATUS_ID.IN_REVIEW);
+      });
+
+      it('should update the user\'s status', function () {
+        Phased.submitTaskForReview('A1').should.be.resolved;
+        assert(Phased.postStatus.called);
+      });
+    });
+
+    // APPROVE A TASK FOR REVIEW
+    describe('#approveTaskInReview', function() {
+      beforeEach(function() {
+        Phased.META_SET_UP = true;
+        Phased.TEAM_SET_UP = true;
+        Phased.PROFILE_SET_UP = true;
+        Phased.TASKS_SET_UP = true;
+        Phased.meta = phasedMeta;
+
+        Phased.team.tasks = {
+          'A1': {
+            name: 'test task',
+            status: Phased.meta.task.STATUS_ID.IN_REVIEW
+          }
+        };
+        Phased.team.members = {
+          'myID': {
+            currentTask: 'asdf',
+            role: Phased.meta.ROLE_ID.ADMIN
+          },
+          'billsID': {
+            currentTask: 'asdf'
+          }
+        };
+        Phased.user.uid = 'myID';
+
+        sandbox.stub(Phased, 'editTask', function(taskID, vals) {
+          _.assign(Phased.team.tasks[taskID], vals);
+          return sandbox.stub().returnsPromise().resolves({})();
+        });
+
+        sandbox.stub(Phased, 'postStatus', sandbox.stub().returnsPromise().resolves({}))
+      });
+
+      afterEach(function() {
+        Phased.editTask.restore();
+      });
+
+      //
+      //  tests
+      //
+      it('should fail if the user is not admin', function() {
+        Phased.team.members.myID.role = Phased.meta.ROLE_ID.MEMBER;
+        Phased.approveTaskInReview('A1').should.be.rejected;
+      });
+
+      it('should fail if the task is not in review', function() {
+        Phased.team.tasks.A1.status = Phased.meta.task.STATUS_ID.IN_PROGRESS;
+        Phased.approveTaskInReview('A1').should.be.rejected;
+      });
+
+      it('should set the task status to Phased.meta.task.STATUS_ID.COMPLETE', function() {
+        Phased.approveTaskInReview('A1').should.be.resolved;
+        expect(Phased.team.tasks.A1).to.exist
+          .and.to.have.property('status')
+          .and.to.equal(Phased.meta.task.STATUS_ID.COMPLETE);
+      });
+
+      it('should update the user\'s status', function () {
+        Phased.approveTaskInReview('A1').should.be.resolved;
+        assert(Phased.postStatus.called);
+      });
+    });
+
+    // REJECT A TASK FOR REVIEW
+    describe('#rejectTaskInReview', function() {
+      beforeEach(function() {
+        Phased.META_SET_UP = true;
+        Phased.TEAM_SET_UP = true;
+        Phased.PROFILE_SET_UP = true;
+        Phased.TASKS_SET_UP = true;
+        Phased.meta = phasedMeta;
+
+        Phased.team.tasks = {
+          'A1': {
+            name: 'test task',
+            status: Phased.meta.task.STATUS_ID.IN_REVIEW
+          }
+        };
+        Phased.team.members = {
+          'myID': {
+            currentTask: 'asdf',
+            role: Phased.meta.ROLE_ID.ADMIN
+          },
+          'billsID': {
+            currentTask: 'asdf'
+          }
+        };
+        Phased.user.uid = 'myID';
+
+        sandbox.stub(Phased, 'editTask', function(taskID, vals) {
+          _.assign(Phased.team.tasks[taskID], vals);
+          return sandbox.stub().returnsPromise().resolves({})();
+        });
+
+        sandbox.stub(Phased, 'postStatus', sandbox.stub().returnsPromise().resolves({}))
+      });
+
+      afterEach(function() {
+        Phased.editTask.restore();
+      });
+
+      //
+      //  tests
+      //
+      it('should fail if the user is not admin', function() {
+        Phased.team.members.myID.role = Phased.meta.ROLE_ID.MEMBER;
+        Phased.rejectTaskInReview('A1').should.be.rejected;
+      });
+
+      it('should fail if the task is not in review', function() {
+        Phased.team.tasks.A1.status = Phased.meta.task.STATUS_ID.IN_PROGRESS;
+        Phased.rejectTaskInReview('A1').should.be.rejected;
+      });
+
+      it('should set the task status to Phased.meta.task.STATUS_ID.REJECTED', function() {
+        Phased.rejectTaskInReview('A1').should.be.resolved;
+        expect(Phased.team.tasks.A1).to.exist
+          .and.to.have.property('status')
+          .and.to.equal(Phased.meta.task.STATUS_ID.REJECTED);
+      });
+
+      it('should update the user\'s status', function () {
+        Phased.rejectTaskInReview('A1').should.be.resolved;
+        assert(Phased.postStatus.called);
+      });
+    });
+  });
 });
