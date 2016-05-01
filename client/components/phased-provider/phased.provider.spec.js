@@ -12,51 +12,58 @@ describe('Component: PhasedProvider', function() {
     Phased;
 
   var phasedMeta = {
-    status : {
-      "SOURCE" : [ "webapp", "mobile_app", "github", "google_calendar", "slack" ],
-      "SOURCE_ID" : {
-        "GITHUB" : 2,
-        "GOOGLE_CALENDAR" : 3,
-        "MOBILE_APP" : 1,
-        "SLACK" : 4,
-        "WEBAPP" : 0
+    status: {
+      "SOURCE": ["webapp", "mobile_app", "github", "google_calendar", "slack"],
+      "SOURCE_ID": {
+        "GITHUB": 2,
+        "GOOGLE_CALENDAR": 3,
+        "MOBILE_APP": 1,
+        "SLACK": 4,
+        "WEBAPP": 0
       },
-      "TYPE" : [ "update", "repo_push", "task_event", "calendar_event" ],
-      "TYPE_ID" : {
-        "CALENDAR_EVENT" : 3,
-        "REPO_PUSH" : 1,
-        "TASK_EVENT" : 2,
-        "UPDATE" : 0
+      "TYPE": ["update", "repo_push", "task_event", "calendar_event"],
+      "TYPE_ID": {
+        "CALENDAR_EVENT": 3,
+        "REPO_PUSH": 1,
+        "TASK_EVENT": 2,
+        "UPDATE": 0
       }
     },
-    task : {
-      "HISTORY_ID" : {
-        "ARCHIVED" : 1,
-        "ASSIGNEE" : 5,
-        "CATEGORY" : 7,
-        "CREATED" : 0,
-        "DEADLINE" : 6,
-        "DESCRIPTION" : 4,
-        "NAME" : 3,
-        "PRIORITY" : 8,
-        "STATUS" : 9,
-        "UNARCHIVED" : 2
+    task: {
+      "HISTORY_ID": {
+        "ARCHIVED": 1,
+        "ASSIGNEE": 5,
+        "CATEGORY": 7,
+        "CREATED": 0,
+        "DEADLINE": 6,
+        "DESCRIPTION": 4,
+        "NAME": 3,
+        "PRIORITY": 8,
+        "STATUS": 9,
+        "UNARCHIVED": 2
       },
-      "PRIORITY" : [ "high", "medium", "low" ],
-      "PRIORITY_ID" : {
-        "HIGH" : 0,
-        "LOW" : 2,
-        "MEDIUM" : 1
+      "PRIORITY": ["high", "medium", "low"],
+      "PRIORITY_ID": {
+        "HIGH": 0,
+        "LOW": 2,
+        "MEDIUM": 1
       },
-      "STATUS" : [ "In progress", "Complete", "Assigned", "Created" ],
-      "STATUS_ID" : {
-        "ASSIGNED" : 2,
-        "COMPLETE" : 1,
-        "CREATED" : 3,
-        "IN_PROGRESS" : 0
+      "STATUS": ["In progress", "Complete", "Assigned", "Created", "In review", "Rejected"],
+      "STATUS_ID": {
+        "ASSIGNED": 2,
+        "COMPLETE": 1,
+        "CREATED": 3,
+        "IN_PROGRESS": 0,
+        "IN_REVIEW": 4,
+        "REJECTED": 5
       }
-    }
-  }
+    },
+    ROLE_ID : {
+     "ADMIN": 1,
+     "MEMBER": 0,
+     "OWNER": 2
+   }
+ }
 
   // a stub data snapshot
   var snapStub;
