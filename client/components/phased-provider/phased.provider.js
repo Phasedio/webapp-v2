@@ -684,8 +684,9 @@ angular.module('webappV2App')
 		/*
 		*	Posts a generic status update
 		*/
-		Phased.postStatus = function postStatus(name, args = {}) {
-			args.name = name; // to allow simple syntax: Phased.postStatus('my status');
+		Phased.postStatus = function postStatus(args = {}) {
+			if (typeof args == 'string')
+				args = {name : args};
 			return _registerAfter(['TEAM_SET_UP', 'META_SET_UP', 'PROFILE_SET_UP'], _doPostStatus, args);
 		}
 
