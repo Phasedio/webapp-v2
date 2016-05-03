@@ -6,6 +6,7 @@ angular.module('webappV2App')
 		$http,
 		$location,
 		$window,
+		StatusFactory,
 		_FBRef,
 		_FURL,
 		_appConfig,
@@ -83,14 +84,16 @@ angular.module('webappV2App')
 		*	2. init FB objects
 		*	3. add event handlers for FB auth and connection states
 		*/
-		this.$get = ['$rootScope', '$http', '$location', '$window', 'getUTCTimecode', 'appConfig',
-		function $get(_$rootScope_, _$http_, _$location_, _$window_, _getUTCTimecode_, _appConfig_) {
+		this.$get = ['$rootScope', '$http', '$location', '$window', 'getUTCTimecode', 'appConfig', 'StatusFactory',
+		function $get(_$rootScope_, _$http_, _$location_, _$window_, _getUTCTimecode_, _appConfig_, _StatusFactory_) {
 			Phased.rootScope = $rootScope = _$rootScope_;
 			$http = _$http_;
 			$location = _$location_;
 			$window = _$window_;
 			_getUTCTimecode = _getUTCTimecode_;
 			_appConfig = _appConfig_;
+			StatusFactory = _StatusFactory_;
+			StatusFactory.setPhased(Phased);
 
 			Phased._FBRef = _FBRef = new Firebase(_FURL);
 
@@ -465,7 +468,7 @@ angular.module('webappV2App')
     		let statuses = snap.val();
     		// find oldest status time and save val for pagination
     		for (var i in statuses) {
-    			Phased.team.statuses[i] = new Status(i, statuses[i], Phased, $rootScope);
+    			Phased.team.statuses[i] = new StatusFactory.Status(i, statuses[i], Phased, $rootScope);
     			if (Phased.team.statuses[i].time < _oldestStatusTime)
     				_oldestStatusTime = Phased.team.statuses[i].time;
     		}
@@ -479,7 +482,7 @@ angular.module('webappV2App')
 			.on('child_added', snap => {
 				$rootScope.$evalAsync(() => {
 					let id = snap.key();
-					Phased.team.statuses[id] = new Status(id, snap.val(), Phased, $rootScope)
+					Phased.team.statuses[id] = new StatusFactory.Status(id, snap.val(), Phased, $rootScope)
 				});
 			});
 
