@@ -42,7 +42,17 @@ class Status {
 		this._FBRef.off('child_changed');
 		this._Phased.rootScope.$broadcast(this._Phased.RUNTIME_EVENTS.STATUS_DELETED);
 		// if this status is a user's most current, find their next-most-recent and set it as their current status
-		// ...
+		var is_user_currentStatus = this._Phased.team.members[this.user].currentStatus == this.ID;
+		if (is_user_currentStatus) {
+			var userStatuses = _.sortBy(this._Phased.team.statuses, 'id', (o) => {
+				if (o.ID == this.ID) return false;
+				return o.user == this.user ? o.startTime : false;
+			});
+			var last = _.last(userStatuses);
+			this._Phased.rootScope.$evalAsync(()=>{
+				this._Phased.team.members[this.user].currentStatus = last.ID;
+			});
+		}
 	}
 
 	/*
