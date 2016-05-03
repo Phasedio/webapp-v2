@@ -765,5 +765,60 @@ describe('Component: PhasedProvider', function() {
         assert(Phased.postStatus.called);
       });
     });
+
+    // COMMENT ON A TASK
+    describe('#commentOnTask', function() {
+      beforeEach(function() {
+        Phased.PROFILE_SET_UP = true;
+        Phased.TASKS_SET_UP = true;
+        Phased.meta = phasedMeta;
+
+        Phased.team.tasks = {
+          'A1': {
+            name: 'test task',
+            status: Phased.meta.task.STATUS_ID.IN_REVIEW
+          }
+        };
+        Phased.team.members = {
+          'myID': {
+            currentTask: 'asdf',
+            role: Phased.meta.ROLE_ID.ADMIN
+          }
+        };
+        Phased.user.uid = 'myID';
+      });
+
+      //
+      //  tests
+      //
+      it('should return a promise', function() {
+        Phased.commentOnTask().should.be.an.instanceOf(Promise);
+      });
+
+      it('should fail if the task does not exist', function() {
+        Phased.commentOnTask('A2', 'textextext').should.be.rejected;
+      });
+
+      it('should push the comment if the task does exist', function() {
+        var text = 'asdfasdf';
+        Phased.commentOnTask('A1', text).should.be.resolved;
+        assert(FBRefStub.push.called);
+      });
+      
+      it('should push an object with text, user, and time properties', function() {
+        var text = 'asdfasdf';
+        Phased.commentOnTask('A1', text).should.be.resolved;
+
+        expect(lastPushed).to.have.property('text')
+          .and.to.equal(text);
+
+        expect(lastPushed).to.have.property('user')
+          .and.to.equal(Phased.user.uid);
+
+        expect(lastPushed).to.have.property('time')
+          .and.to.equal(window.Firebase.ServerValue.TIMESTAMP);
+      });
+
+    });
   });
 });
