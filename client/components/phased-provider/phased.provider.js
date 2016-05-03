@@ -1130,6 +1130,13 @@ angular.module('webappV2App')
 
 		var _doCommentOnTask = function doCommentOnTask(args, fulfill = ()=>{}, reject = ()=>{}) {
 			const {taskID, text} = args;
+
+			if (!(taskID in Phased.team.tasks)) {
+				var msg = `Cannot comment on task that may or may not exist (${taskID})`;
+				console.warn(msg);
+				return reject(new Error(msg));
+			}
+
 			var comment = {
 				text : text,
 				user : Phased.user.uid,
