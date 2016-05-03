@@ -57,6 +57,9 @@ angular.module('webappV2App')
 
 		// public-facing object
 		var Phased = {
+			// events
+			INIT_EVENTS : _INIT_EVENTS,
+			RUNTIME_EVENTS : _RUNTIME_EVENTS,
 			// init status flags
 			SET_UP : false,
 			LOGGED_IN : false,
@@ -82,14 +85,14 @@ angular.module('webappV2App')
 		*/
 		this.$get = ['$rootScope', '$http', '$location', '$window', 'getUTCTimecode', 'appConfig',
 		function $get(_$rootScope_, _$http_, _$location_, _$window_, _getUTCTimecode_, _appConfig_) {
-			$rootScope = _$rootScope_;
+			Phased.rootScope = $rootScope = _$rootScope_;
 			$http = _$http_;
 			$location = _$location_;
 			$window = _$window_;
 			_getUTCTimecode = _getUTCTimecode_;
 			_appConfig = _appConfig_;
 
-			_FBRef = new Firebase(_FURL);
+			Phased._FBRef = _FBRef = new Firebase(_FURL);
 
 			// listeners for changes in auth and connection state go here
 			_FBRef.onAuth(_onAuth);
@@ -458,9 +461,11 @@ angular.module('webappV2App')
     	// get most recent 30
     	_FBRef.child(`team/${teamID}/statuses`)
     	.limitToLast(_DEFAULTS.STATUS_LIMIT).once('value', snap => {
-    		_.assign(Phased.team.statuses, snap.val());
+    		// _.assign(Phased.team.statuses, snap.val());
+    		let statuses = snap.val();
     		// find oldest status time and save val for pagination
-    		for (var i in Phased.team.statuses) {
+    		for (var i in statuses) {
+    			Phased.team.statuses[i] = new Status(i, statuses[i], Phased, $rootScope);
     			if (Phased.team.statuses[i].time < _oldestStatusTime)
     				_oldestStatusTime = Phased.team.statuses[i].time;
     		}
@@ -473,17 +478,8 @@ angular.module('webappV2App')
 			.orderByChild('time').startAt(new Date().getTime())
 			.on('child_added', snap => {
 				$rootScope.$evalAsync(() => {
-					Phased.team.statuses[snap.key()] = snap.val();
-					$rootScope.$broadcast(_RUNTIME_EVENTS.STATUS_ADDED);
-				});
-			});
-
-			// watch for changes
-			_FBRef.child(`team/${teamID}/statuses`)
-			.limitToLast(_DEFAULTS.STATUS_LIMIT).on('child_changed', snap => {
-				$rootScope.$evalAsync(() => {
-					Phased.team.statuses[snap.key()] = snap.val();
-					$rootScope.$broadcast(_RUNTIME_EVENTS.STATUS_CHANGED);
+					let id = snap.key();
+					Phased.team.statuses[id] = new Status(id, snap.val(), Phased, $rootScope)
 				});
 			});
 
@@ -493,8 +489,9 @@ angular.module('webappV2App')
 				let key = snap.key();
 				if (key in Phased.team.statuses) {
 					$rootScope.$evalAsync(() => {
+						var status = Phased.team.statuses[key]
 						delete Phased.team.statuses[key];
-						$rootScope.$broadcast(_RUNTIME_EVENTS.STATUS_DELETED);
+						status.destroy();
 					});
 				}
 			});
