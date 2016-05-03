@@ -467,7 +467,7 @@ angular.module('webappV2App')
     		_doAfter('STATUSES_SET_UP');
     		maybeTeamComplete('statuses');
     	});
-    	
+
 			// watch for statuses added after what we've already collected are added
 			_FBRef.child(`team/${teamID}/statuses`)
 			.orderByChild('time').startAt(new Date().getTime())
@@ -907,23 +907,21 @@ angular.module('webappV2App')
 		}
 
 		/*
-			Tries to update all valid key-values in args.vals for the task with ID args.taskID
-			
-
-			*/
-			var _doEditTask = function doEditTask(args = {}, fulfill = ()=>{}, reject = ()=>{}) {
-				const {vals, taskID} = args;
-				const params = {
-					string 	: ['name', 'description'],
-					date 		: ['dueDate'],
-					user 		: ['assignment.to', 'assignment.by'],
-					meta 		: [{
-						path : 'status',
-						metaLocation : 'task.STATUS',
-						metaIDLocation : 'task.STATUS_ID'
-					}]
-				};
-				var update = {};
+		*	Tries to update all valid key-values in args.vals for the task with ID args.taskID
+		*/
+		var _doEditTask = function doEditTask(args = {}, fulfill = ()=>{}, reject = ()=>{}) {
+			const {vals, taskID} = args;
+			const params = {
+				string 	: ['name', 'description'],
+				date 		: ['dueDate'],
+				user 		: ['assignment.to', 'assignment.by'],
+				meta 		: [{
+					path : 'status',
+					metaLocation : 'task.STATUS',
+					metaIDLocation : 'task.STATUS_ID'
+				}]
+			};
+			var update = {};
 
 			// reject if bad inputs
 			if (typeof taskID != 'string' || typeof vals != 'object') {
@@ -1121,4 +1119,23 @@ angular.module('webappV2App')
 			}, reject);
 		}
 		
+		/*
+		*	Comment on a task as the current user
+		*
+		*/
+		Phased.commentOnTask = function commentOnTask(taskID, text) {
+			return _registerAfter(['TASKS_SET_UP', 'PROFILE_SET_UP'], 
+				_doCommentOnTask, {taskID:taskID, text: text});
+		}
+
+		var _doCommentOnTask = function doCommentOnTask(args, fulfill = ()=>{}, reject = ()=>{}) {
+			const {taskID, text} = args;
+			var comment = {
+				text : text,
+				user : Phased.user.uid,
+				time : Firebase.ServerValue.TIMESTAMP
+			}
+			_FBRef.child(`team/${Phased.team.uid}/tasks/${taskID}/comments`).push(comment).then(fulfill, reject);
+		}
+
 	})
