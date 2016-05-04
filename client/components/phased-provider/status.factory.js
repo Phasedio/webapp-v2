@@ -12,8 +12,6 @@ angular.module('webappV2App')
 
 		/** Class representing a status */
 		class Status extends DBObject {
-			_ = {}; // holds own pseudo-private properties
-
 			/**
 			*		Constructs a status that already exists in the database
 			*
@@ -25,7 +23,7 @@ angular.module('webappV2App')
 				// fail if Phased team ID or member IDs aren't available
 
 				// call super
-				super(`/team/${Phased.team.uid}/statuses/${ID}`);
+				super(FBRef.child(`/team/${Phased.team.uid}/statuses/${ID}`));
 
 				// expand relevant mutable properties from cfg to pseudo-privates
 				({
@@ -90,7 +88,7 @@ angular.module('webappV2App')
 				} else if (val.length < 1) {
 					throw new TypeError('Status name cannot be empty');
 				} else { 
-					super.editProperty('name', val);
+					super.setProperty('name', val);
 					return val;
 				}
 			}
@@ -104,7 +102,7 @@ angular.module('webappV2App')
 				if (typeof val != 'string' || val !== null) {
 					throw new TypeError('Status description must be string or null');
 				} else {
-					super.editProperty('description', val);
+					super.setProperty('description', val);
 					return val;
 				}
 			}
@@ -121,9 +119,9 @@ angular.module('webappV2App')
 				} else if (!!this._.endTime && val > this._.endTime) {
 					throw new Error('startTime cannot be after endTime');
 				} else {
-					super.editProperty('startTime', val);
+					super.setProperty('startTime', val);
 					if (!!this._.endTime) {
-						super.editProperty('totalTime', this._.endTime - val);
+						super.setProperty('totalTime', this._.endTime - val);
 					}
 					return val;
 				}
@@ -143,8 +141,8 @@ angular.module('webappV2App')
 				} else if (val < this._.startTime) {
 					throw new Error('endTime cannot be before startTime');
 				} else {
-					super.editProperty('endTime', val);
-					super.editProperty('totalTime', val - this._.startTime);
+					super.setProperty('endTime', val);
+					super.setProperty('totalTime', val - this._.startTime);
 					return val;
 				}
 			}
