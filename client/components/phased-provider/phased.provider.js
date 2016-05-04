@@ -16,8 +16,8 @@ angular.module('webappV2App')
 			PROFILE_SET_UP : 'Phased:profileComplete',
 			TEAM_SET_UP : 'Phased:teamComplete',
 			MEMBERS_SET_UP : 'Phased:membersComplete',
-			TASKS_SET_UP : 'Phased:tasksComplete',
-			STATUSES_SET_UP : 'Phased:statusesComplete'
+			// TASKS_SET_UP : 'Phased:tasksComplete',
+			// STATUSES_SET_UP : 'Phased:statusesComplete'
 		},
 		_RUNTIME_EVENTS = {
 			// NB: Phased:login is broadcast immediately after firebase auth
@@ -68,8 +68,8 @@ angular.module('webappV2App')
 			PROFILE_SET_UP : false,
 			TEAM_SET_UP : false,
 			MEMBERS_SET_UP : false,
-			TASKS_SET_UP : false,
-			STATUSES_SET_UP : false,
+			// TASKS_SET_UP : false,
+			// STATUSES_SET_UP : false,
 			meta : {},						// copy of metadata from server. do not overwrite.
 			authData : false,			// copy of authData from firebase authentication callback.
 			user : {},						// copy of user profile from server with additional uid key
@@ -500,37 +500,37 @@ angular.module('webappV2App')
 			//
 			// tasks
     	// get list of members on team currently
-    	_FBRef.child(`team/${teamID}/tasks`)
-    	.orderByChild('created').endAt(now)
-    	.once('value', snap => {
-    		_.assign(Phased.team.tasks, snap.val());
+    	// _FBRef.child(`team/${teamID}/tasks`)
+    	// .orderByChild('created').endAt(now)
+    	// .once('value', snap => {
+    	// 	_.assign(Phased.team.tasks, snap.val());
     		
-    		for (let uid in Phased.team.tasks)
-    			_watchTask(uid);
+    	// 	for (let uid in Phased.team.tasks)
+    	// 		_watchTask(uid);
 
-    		_doAfter('TASKS_SET_UP');
-    		maybeTeamComplete('tasks');
-    	});
+    	// 	_doAfter('TASKS_SET_UP');
+    	// 	maybeTeamComplete('tasks');
+    	// });
 
-    	// watch tasks
-    	_FBRef.child(`team/${teamID}/tasks`)
-    	.orderByChild('created').startAt(now)
-    	.on('child_added', snap => {
-    		let uid = snap.key();
-    		Phased.team.tasks[uid] = snap.val();
-    		_watchTask(uid);
-    		$rootScope.$broadcast(_RUNTIME_EVENTS.TASK_ADDED);
-    	});
+    	// // watch tasks
+    	// _FBRef.child(`team/${teamID}/tasks`)
+    	// .orderByChild('created').startAt(now)
+    	// .on('child_added', snap => {
+    	// 	let uid = snap.key();
+    	// 	Phased.team.tasks[uid] = snap.val();
+    	// 	_watchTask(uid);
+    	// 	$rootScope.$broadcast(_RUNTIME_EVENTS.TASK_ADDED);
+    	// });
 
-    	// delete and unwatch tasks
-    	_FBRef.child(`team/${teamID}/tasks`).on('child_removed', snap => {
-    		let uid = snap.key();
-    		_FBRef.child(`team/${teamID}/tasks/${uid}`).off('value'); // unwatch
-    		$rootScope.$evalAsync(() => {
-  				delete Phased.team.tasks[uid]; // delete from team	
-  				$rootScope.$broadcast(_RUNTIME_EVENTS.TASK_DELETED);
-  			});
-    	});
+    	// // delete and unwatch tasks
+    	// _FBRef.child(`team/${teamID}/tasks`).on('child_removed', snap => {
+    	// 	let uid = snap.key();
+    	// 	_FBRef.child(`team/${teamID}/tasks/${uid}`).off('value'); // unwatch
+    	// 	$rootScope.$evalAsync(() => {
+  			// 	delete Phased.team.tasks[uid]; // delete from team	
+  			// 	$rootScope.$broadcast(_RUNTIME_EVENTS.TASK_DELETED);
+  			// });
+    	// });
     }
 
     /*
@@ -554,7 +554,7 @@ angular.module('webappV2App')
 	    		if (!Phased.MEMBERS_SET_UP) {
 		    		// if any member doesn't have their profile data, don't fire event
 		    		for (let i in Phased.team.members) {
-		    			if (!Phased.team.members[i].name) return;
+		    			if (!Phased.team.members[i].profile) return;
 		    		}
 
 		    		_doAfter('MEMBERS_SET_UP');
