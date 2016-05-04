@@ -84,16 +84,14 @@ angular.module('webappV2App')
 		*	2. init FB objects
 		*	3. add event handlers for FB auth and connection states
 		*/
-		this.$get = ['$rootScope', '$http', '$location', '$window', 'getUTCTimecode', 'appConfig', 'StatusFactory',
-		function $get(_$rootScope_, _$http_, _$location_, _$window_, _getUTCTimecode_, _appConfig_, _StatusFactory_) {
+		this.$get = ['$rootScope', '$http', '$location', '$window', 'getUTCTimecode', 'appConfig',
+		function $get(_$rootScope_, _$http_, _$location_, _$window_, _getUTCTimecode_, _appConfig_) {
 			Phased.rootScope = $rootScope = _$rootScope_;
 			$http = _$http_;
 			$location = _$location_;
 			$window = _$window_;
 			_getUTCTimecode = _getUTCTimecode_;
 			_appConfig = _appConfig_;
-			StatusFactory = _StatusFactory_;
-			StatusFactory.setPhased(Phased);
 
 			Phased._FBRef = _FBRef = new Firebase(_FURL);
 
@@ -414,7 +412,7 @@ angular.module('webappV2App')
     */
     var _watchTeam = function watchTeam() {
     	var teamID = Phased.team.uid = Phased.user.currentTeam,
-    	props = ['details', 'members', 'statuses'],
+    	props = ['details', 'members'],
     	completed = [],
     	now = moment.utc().unix();
 
@@ -462,42 +460,42 @@ angular.module('webappV2App')
     	//
     	// statuses (limited to 30 and newer)
     	// get most recent 30
-    	_FBRef.child(`team/${teamID}/statuses`)
-    	.limitToLast(_DEFAULTS.STATUS_LIMIT).once('value', snap => {
-    		// _.assign(Phased.team.statuses, snap.val());
-    		let statuses = snap.val();
-    		// find oldest status time and save val for pagination
-    		for (var i in statuses) {
-    			Phased.team.statuses[i] = new StatusFactory.Status(i, statuses[i], Phased, $rootScope);
-    			if (Phased.team.statuses[i].time < _oldestStatusTime)
-    				_oldestStatusTime = Phased.team.statuses[i].time;
-    		}
-    		_doAfter('STATUSES_SET_UP');
-    		maybeTeamComplete('statuses');
-    	});
+   //  	_FBRef.child(`team/${teamID}/statuses`)
+   //  	.limitToLast(_DEFAULTS.STATUS_LIMIT).once('value', snap => {
+   //  		// _.assign(Phased.team.statuses, snap.val());
+   //  		let statuses = snap.val();
+   //  		// find oldest status time and save val for pagination
+   //  		for (var i in statuses) {
+   //  			Phased.team.statuses[i] = new StatusFactory.Status(i, statuses[i], Phased, $rootScope);
+   //  			if (Phased.team.statuses[i].time < _oldestStatusTime)
+   //  				_oldestStatusTime = Phased.team.statuses[i].time;
+   //  		}
+   //  		_doAfter('STATUSES_SET_UP');
+   //  		maybeTeamComplete('statuses');
+   //  	});
 
-			// watch for statuses added after what we've already collected are added
-			_FBRef.child(`team/${teamID}/statuses`)
-			.orderByChild('time').startAt(new Date().getTime())
-			.on('child_added', snap => {
-				$rootScope.$evalAsync(() => {
-					let id = snap.key();
-					Phased.team.statuses[id] = new StatusFactory.Status(id, snap.val(), Phased, $rootScope)
-				});
-			});
+			// // watch for statuses added after what we've already collected are added
+			// _FBRef.child(`team/${teamID}/statuses`)
+			// .orderByChild('time').startAt(new Date().getTime())
+			// .on('child_added', snap => {
+			// 	$rootScope.$evalAsync(() => {
+			// 		let id = snap.key();
+			// 		Phased.team.statuses[id] = new StatusFactory.Status(id, snap.val(), Phased, $rootScope)
+			// 	});
+			// });
 
-			// watch for removed statuses
-			_FBRef.child(`team/${teamID}/statuses`)
-			.limitToLast(_DEFAULTS.STATUS_LIMIT).on('child_removed', snap => {
-				let key = snap.key();
-				if (key in Phased.team.statuses) {
-					$rootScope.$evalAsync(() => {
-						var status = Phased.team.statuses[key]
-						delete Phased.team.statuses[key];
-						status.destroy();
-					});
-				}
-			});
+			// // watch for removed statuses
+			// _FBRef.child(`team/${teamID}/statuses`)
+			// .limitToLast(_DEFAULTS.STATUS_LIMIT).on('child_removed', snap => {
+			// 	let key = snap.key();
+			// 	if (key in Phased.team.statuses) {
+			// 		$rootScope.$evalAsync(() => {
+			// 			var status = Phased.team.statuses[key]
+			// 			delete Phased.team.statuses[key];
+			// 			status.destroy();
+			// 		});
+			// 	}
+			// });
 
 			//
 			// tasks
@@ -679,104 +677,6 @@ angular.module('webappV2App')
 		*/
 		Phased.logout = function logout() {
 			_FBRef.unauth();
-		}
-
-		/*
-		*	Posts a generic status update
-		*/
-		Phased.postStatus = function postStatus(args = {}) {
-			if (typeof args == 'string')
-				args = {name : args};
-			return _registerAfter(['TEAM_SET_UP', 'META_SET_UP', 'PROFILE_SET_UP'], _doPostStatus, args);
-		}
-
-		/*
-		*	Post a generic status update
-		*	ALL STATUS UPDATES SHOLD USE THIS METHOD
-		*
-		*	1. check that properties are valid
-		*	2. post to team
-		*	3. update own currentStatus
-		*/
-		var _doPostStatus = function doPostStatus(args = {}, fulfill, reject) {
-			const {name, type, projectID, taskID, startTime, endTime} = args;
-
-			var newStatus = {
-				user: Phased.user.uid,
-				time: Firebase.ServerValue.TIMESTAMP // always posted as now
-			};
-
-			// 1. PROP VALIDATION
-			// name
-			if (!('name' in args) || typeof args.name != 'string') {
-				console.warn('Cannot post a blank status update!');
-				reject();
-				return;
-			} else {
-				newStatus.name = name;
-			}
-
-			// type (should be, eg, Phased.meta.status.TYPE_ID.REPO_PUSH)
-			if (type) {
-				if (!(type in Phased.meta.status.TYPE))
-					console.warn('Status type not available; posting plain status.');
-				else
-					newStatus.type = type;
-			} else {
-				newStatus.type = Phased.meta.status.TYPE_ID.UPDATE
-			}
-
-			// startTime
-			if (startTime) {
-				if (typeof startTime != 'number') {
-					console.warn('Status startTime should be a timeStamp or null; posting as now.');
-					newStatus.startTime = Firebase.ServerValue.TIMESTAMP;
-				}  else {
-					newStatus.startTime = startTime;
-				}
-			} else {
-				console.warn('No startTime for status; posting as now.');
-				newStatus.startTime = Firebase.ServerValue.TIMESTAMP;
-			}
-
-			// endTime
-			if (endTime) {
-				if (typeof endTime != 'number') {
-					console.warn('Status endTime should be a timeStamp or null; posting without.');
-				}  else {
-					newStatus.endTime = endTime;
-				}
-			}
-
-			// projectID
-			if (projectID) {
-				if (typeof projectID != 'string')
-					console.warn('Status projectID should be a string or null; posting without.');
-				else
-					newStatus.projectID = projectID;
-			}
-			
-			// taskID
-			if (taskID) {
-				if (typeof taskID != 'string')
-					console.warn('Status taskID should be a string or null; posting without.');
-				else
-					newStatus.taskID = taskID;
-			}
-
-			// 2. POST TO TEAM
-			var statusRef = _FBRef.child(`team/${Phased.team.uid}/statuses`).push(newStatus);
-
-			// 3. POST TO USER
-			statusRef.then(() => {
-				_FBRef.child(`team/${Phased.team.uid}/members/${Phased.user.uid}/currentStatus`).set(statusRef.key(), (err) => {
-					if (err) {
-						reject(err);
-					} else {
-						fulfill();
-					}
-				});
-			}, reject);
 		}
 
 		/*

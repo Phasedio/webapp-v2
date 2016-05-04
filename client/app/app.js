@@ -41,7 +41,7 @@ angular.module('webappV2App', [
       WATCH_TEAM: true
     });
   })
-  .run(function run($rootScope, $location, Phased) {
+  .run(function run($rootScope, $location, Phased, StatusFactory, TaskFactory, ProjectFactory) {
     /*
       ROUTE MGMT
     */
