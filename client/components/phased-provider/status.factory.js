@@ -7,7 +7,7 @@
 *		
 */
 angular.module('webappV2App')
-	.factory('StatusFactory', ['Phased', '$rootScope', 'getUTCTimecode', function(Phased, $rootScope, getUTCTimecode) {
+	.factory('StatusFactory', ['Phased', 'DBObject', '$rootScope', 'getUTCTimecode', function(Phased, DBObject, $rootScope, getUTCTimecode) {
 		var FBRef; // root FBRef
 
 		/** Class representing a status */
@@ -18,9 +18,17 @@ angular.module('webappV2App')
 			*		@param	{string}	ID 		ID of the status
 			*		@param	{object}	cfg		object with properties of the status (irrelevant props will be ignored)
 			*		@fires 	Phased#STATUS_ADDED
+			*		@throws	Error 					if Phased isn't ready or args are invalid
 			*/
 			constructor(ID, cfg) {
 				// fail if Phased team ID or member IDs aren't available
+				if (!ID || typeof ID != 'string' || !cfg || typeof cfg != 'object' || cfg == undefined) {
+					throw new Error('Invalid arguments supplied to Status');
+				}
+
+				if (!Phased.SET_UP) {
+					throw new Error('Cannot create statuses before Phased is set up');
+				}
 
 				// call super
 				super(FBRef.child(`/team/${Phased.team.uid}/statuses/${ID}`));
@@ -36,16 +44,18 @@ angular.module('webappV2App')
 				} = cfg);
 
 				// register read-only properties
-				Object.defineProperty( this, 'user', {value: cfg.user, configurable:false, writable:false} );
-				Object.defineProperty( this, 'time', {value: cfg.time, configurable:false, writable:false} );
-				Object.defineProperty( this, 'ID', {value: ID, configurable:false, writable:false} );
+				Object.defineProperty( this, 'user', {value: cfg.user, configurable:false, writable:false, enumerable: true} );
+				Object.defineProperty( this, 'time', {value: cfg.time, configurable:false, writable:false, enumerable: true} );
+				Object.defineProperty( this, 'ID', {value: ID, configurable:false, writable:false, enumerable: true} );
 				
+				// update scope
+				$rootScope.$evalAsync(() => {
+					// maybe link to Phased.team.statuses, Phased.team.tasks[cfg.task], Phased.team.projects[cfg.project]
+					Phased.team.statuses[ID] = this;
 
-				// maybe link to Phased.team.statuses, Phased.team.tasks[cfg.task], Phased.team.projects[cfg.project]
-				Phased.team.statuses[ID] = this;
-
-				// broadcast STATUS_ADDED 
-				$rootScope.$broadcast(Phased.RUNTIME_EVENTS.STATUS_ADDED);
+					// broadcast STATUS_ADDED 
+					$rootScope.$broadcast(Phased.RUNTIME_EVENTS.STATUS_ADDED);
+				});
 			}
 
 			/*
@@ -54,24 +64,29 @@ angular.module('webappV2App')
 			*		@fires 	Phased#STATUS_DELETED
 			*/
 			destroy() {
-				// if this status is a user's most current, find their next-most-recent and set it as their current status
-				/*var is_user_currentStatus = _Phased.team.members[this.user].currentStatus == this.ID;
-				if (is_user_currentStatus) {
-					var userStatuses = _.sortBy(_Phased.team.statuses, 'id', (o) => {
-						if (o.ID == this.ID) return false;
-						return o.user == this.user ? o.startTime : false;
-					});
-					var last = _.last(userStatuses);
-					_Phased.rootScope.$evalAsync(()=>{
-						_Phased.team.members[this.user].currentStatus = last.ID;
-					});
-				}*/
+				$rootScope.$evalAsync(() => {
+					// if this status is a user's most current, find their next-most-recent and set it as their current status
+					var is_user_currentStatus = Phased.team.members[this.user].currentStatus == this.ID;
+					if (is_user_currentStatus) {
+						let userStatuses = _.sortBy(Phased.team.statuses, 'ID', (o) => {
+							if (o.ID == this.ID) return false;
+							return o.user == this.user ? o.startTime : false;
+						});
+						let last = _.last(userStatuses);
+						Phased.rootScope.$evalAsync(()=>{
+							Phased.team.members[this.user].currentStatus = last.ID;
+						});
+					}
 
-				// delete reference in Phased.team.statuses
+					// delete reference in Phased.team.statuses
+					delete Phased.team.statuses[this.ID];
 
-				// fire STATUS_DELETED
+					// fire STATUS_DELETED
+					$rootScope.$broadcast(Phased.RUNTIME_EVENTS.STATUS_DELETED);
 
-				// call super.destroy()
+					// call super.destroy()
+					super.destroy();
+				});
 			}
 
 			// 	ACCESSORS
@@ -155,6 +170,24 @@ angular.module('webappV2App')
 			set totalTime(val) {
 				throw new Error('Cannot edit totalTime directly; set startTime or endTime instead');
 			}
+
+			/** 	taskID 	*/
+			get taskID() {
+				return this._.taskID;
+			}
+
+			set taskID(val) {
+				throw new Error('Setting taskID not yet implemented');
+			}
+
+			/** 	projectID 	*/
+			get projectID() {
+				return this._.projectID;
+			}
+
+			set projectID(val) {
+				throw new Error('Setting projectID not yet implemented');
+			}
 		}
 
 		/**	The status factory object */
@@ -173,13 +206,13 @@ angular.module('webappV2App')
 						args = {name : args};
 					const {name, type, projectID, taskID, startTime, endTime} = args;
 
-					if (!_Phased || typeof _Phased != 'object') {
+					if (!Phased || typeof Phased != 'object' || !Phased.SET_UP) {
 						reject(Error('Cannot post status without Phased!'));
 						return;
 					}
 
 					var newStatus = {
-						user: _Phased.user.uid,
+						user: Phased.user.uid,
 						time: Firebase.ServerValue.TIMESTAMP // always posted as now
 					};
 
@@ -192,14 +225,14 @@ angular.module('webappV2App')
 						newStatus.name = name;
 					}
 
-					// type (should be, eg, _Phased.meta.status.TYPE_ID.REPO_PUSH)
+					// type (should be, eg, Phased.meta.status.TYPE_ID.REPO_PUSH)
 					if (type) {
-						if (!(type in _Phased.meta.status.TYPE))
+						if (!(type in Phased.meta.status.TYPE))
 							console.warn('Status type not available; posting plain status.');
 						else
 							newStatus.type = type;
 					} else {
-						newStatus.type = _Phased.meta.status.TYPE_ID.UPDATE
+						newStatus.type = Phased.meta.status.TYPE_ID.UPDATE
 					}
 
 					// startTime
@@ -241,12 +274,12 @@ angular.module('webappV2App')
 					}
 
 					// 2. POST TO TEAM
-					var statusRef = _Phased._FBRef.child(`team/${_Phased.team.uid}/statuses`).push(newStatus);
+					var statusRef = Phased._FBRef.child(`team/${Phased.team.uid}/statuses`).push(newStatus);
 					var statusID = statusRef.key();
 
 					// 3. POST TO USER
 					statusRef.then(() => {
-						_Phased._FBRef.child(`team/${_Phased.team.uid}/members/${_Phased.user.uid}/currentStatus`)
+						Phased._FBRef.child(`team/${Phased.team.uid}/members/${Phased.user.uid}/currentStatus`)
 						.set(statusID).then(fulfill, reject);
 					}, reject);
 
