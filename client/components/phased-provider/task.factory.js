@@ -7,7 +7,8 @@
 *		
 */
 angular.module('webappV2App')
-	.factory('TaskFactory', ['Phased', 'StatusFactory', '$rootScope', function(Phased, StatusFactory, $rootScope) {
+	.factory('TaskFactory', ['Phased', 'DBObject', 'StatusFactory', '$rootScope', function(Phased, DBObject, StatusFactory, $rootScope) {
+		var FBRef;
 
 		/** Class representing a task */
 		class Task extends DBObject {
@@ -16,7 +17,7 @@ angular.module('webappV2App')
 			*
 			*		@param	{string}	ID 		ID of the task
 			*		@param	{object}	cfg		object with properties of the task (irrelevant props will be ignored)
-			*		@fires 	Phased#STATUS_ADDED
+			*		@fires 	Phased#TASK_ADDED
 			*/
 			constructor(ID, cfg) {
 				// fail if Phased team ID or member IDs aren't available
@@ -24,13 +25,25 @@ angular.module('webappV2App')
 				// expand relevant properties from cfb
 
 				// call super
-				super(`/team/${Phased.team.uid}/tasks/${ID}`);
+				super(FBRef(`/team/${Phased.team.uid}/tasks/${ID}`));
 
-				// maybe link to Phased.team.tasks and Phased.team.projects[this.project]
+				// link to Phased.team.tasks
+				Phased.team.tasks[ID] = this;
+
+				// maybe link to Phased.team.projects[this.project]
+				if (cfg.projectID) {
+					Phased.team.projects[projectID].tasks[ID] = this;
+				}
 
 				// link existing statuses
+				for (let id = Phased.statuses.length - 1; i >= 0; i--) {
+					if (!!Phased.statuses[id].taskID && Phased.statuses[id].taskID == ID) {
+						this.statuses[id] = Phased.statuses[id];
+					}
+				}
 
 				// broadcast TASK_ADDED
+				$rootScope.$broadcast(Phased.RUNTIME_EVENTS.TASK_ADDED);
 			}
 
 			/*
@@ -60,6 +73,11 @@ angular.module('webappV2App')
 			create : function create (args) {
 			}
 		} 
+
+		// set FBRef
+		$rootScope.$on('Phased:meta', () => {
+			FBRef = Phased._FBRef;
+		});
 
 		// watch for new tasks added to the DB and create them here
 		// Phased.FBRef.child(`team/${Phased.team.uid}/tasks`).on('child_added', (snap) => {

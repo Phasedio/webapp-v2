@@ -7,10 +7,14 @@
 *		
 */
 angular.module('webappV2App')
-	.factory('ProjectFactory', ['Phased', 'StatusFactory', 'TaskFactory', '$rootScope', function(Phased, StatusFactory, TaskFactory, $rootScope) {
+	.factory('ProjectFactory', ['Phased', 'DBObject', 'StatusFactory', 'TaskFactory', '$rootScope', function(Phased, DBObject, StatusFactory, TaskFactory, $rootScope) {
+		var FBRef;
 
 		/** Class representing a project */
 		class Project extends DBObject {
+			statuses = {};		// references to statuses associated with this project
+			tasks = {};				// references to tasks associated with this project
+
 			/**
 			*		Constructs a project that already exists in the database
 			*
@@ -24,13 +28,27 @@ angular.module('webappV2App')
 				// expand relevant properties from cfb
 
 				// call super
-				super(`/team/${Phased.team.uid}/projects/${ID}`);
+				super(FBRef(`/team/${Phased.team.uid}/projects/${ID}`));
 
-				// maybe link to Phased.team.tasks and Phased.team.projects[this.project]
+				// link this to Phased.team.projects
+				Phased.team.projects[ID] = this;
+				
+				// link existing statuses
+				for (let id = Phased.statuses.length - 1; i >= 0; i--) {
+					if (!!Phased.statuses[id].projectID && Phased.statuses[id].projectID == ID) {
+						this.statuses[id] = Phased.statuses[id];
+					}
+				}
 
-				// link existing statuses and tasks
+				// link existing tasks
+				for (let id = Phased.tasks.length - 1; i >= 0; i--) {
+					if (!!Phased.tasks[id].projectID && Phased.tasks[id].projectID == ID) {
+						this.tasks[id] = Phased.tasks[id];
+					}
+				}
 
 				// broadcast PROJECT_ADDED
+				$rootScope.$broadcast(Phased.RUNTIME_EVENTS.PROJECT_ADDED);
 			}
 
 			/*
@@ -60,6 +78,11 @@ angular.module('webappV2App')
 			create : function create (args) {
 			}
 		} 
+
+		// set FBRef
+		$rootScope.$on('Phased:meta', () => {
+			FBRef = Phased._FBRef;
+		});
 
 		// watch for new projects added to the DB and create them here
 		// Phased.FBRef.child(`team/${Phased.team.uid}/projects`).on('child_added', (snap) => {
