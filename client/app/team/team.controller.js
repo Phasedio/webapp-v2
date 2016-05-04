@@ -2,7 +2,7 @@
 
 (function() {
 
-var TeamController = function TeamController($http, $scope, Phased) {
+var TeamController = function TeamController($http, $scope, Phased, StatusFactory) {
 
   /*
   * mimics Yeoman's controller class constructor function
@@ -10,6 +10,14 @@ var TeamController = function TeamController($http, $scope, Phased) {
   (function constructor() {
     $scope.Phased = Phased;
   })();
+
+  $scope.postStatus = function postStatus(name) {
+    StatusFactory.create(name).then(()=>{
+      console.log('status created');
+    }, (e) => {
+      console.log(e);
+    })
+  }
 }
 
 angular.module('webappV2App')
