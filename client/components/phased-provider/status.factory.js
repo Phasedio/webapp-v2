@@ -77,8 +77,12 @@ angular.module('webappV2App')
 						});
 					}
 
-					// delete reference in Phased.team.statuses
+					// delete reference in Phased.team.statuses, Phased.team.tasks, Phased.team.projects
 					delete Phased.team.statuses[this.ID];
+					if (this.taskID)
+						delete Phased.team.tasks[this.taskID].statuses[this.ID]
+					if (this.projectID)
+						delete Phased.team.projects[this.projectID].statuses[this.ID]
 
 					// fire STATUS_DELETED
 					$rootScope.$broadcast(Phased.RUNTIME_EVENTS.STATUS_DELETED);
@@ -252,10 +256,6 @@ angular.module('webappV2App')
 						Phased._FBRef.child(`team/${Phased.team.uid}/members/${Phased.user.uid}/currentStatus`)
 						.set(statusID).then(fulfill, reject);
 					}, reject);
-
-					// 4. RETURN NEW STATUS OBJ -- don't need to do this, as team set up will watch for this already
-					// newStatus.time = moment().unix();
-					// return new Status(statusID, newStatus, _Phased, FBRef);
 				});
 			}
 		} 
