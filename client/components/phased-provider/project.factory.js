@@ -179,9 +179,20 @@ angular.module('webappV2App')
 			/**
 			*		Adds an existing task to the project
 			*
+			*		@param	{string}	taskID 		ID of the task to associate with the project
+			*		@throws	TypeError						if taskID isn't a string
+			*		@throws	ReferenceError			if the task at taskID doesn't exist
 			*/
 			addTask(taskID) {
+				if (typeof taskID != 'string') {
+					throw new TypeError('taskID should be String, got ' + (typeof taskID));
+				}
 
+				if (!taskID || !(taskID in Phased.team.tasks)) {
+					throw new ReferenceError(`Could not find task ${taskID} in team`);
+				}
+
+				super.pushVal('taskIDs', taskID);
 			}
 
 			/**
@@ -195,9 +206,20 @@ angular.module('webappV2App')
 			/**
 			*		Removes a task from the project
 			*
+			*		@param	{string}	taskID 		ID of the task to remove from the project
+			*		@throws	TypeError						if taskID isn't a string
+			*		@throws	ReferenceError			if the task at taskID isn't linked to the project
 			*/
 			removeTask(taskID) {
-				
+				if (typeof taskID != 'string') {
+					throw new TypeError('taskID should be String, got ' + (typeof taskID));
+				}
+
+				if (!taskID || !(taskID in this._.taskIDs)) {
+					throw new ReferenceError(`Could not find task ${taskID} in team`);
+				}
+
+				super.setProperty(`taskIDs/${taskID}`, null);
 			}
 
 			//	COMMENT MANIP
