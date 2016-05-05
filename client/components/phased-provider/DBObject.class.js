@@ -46,7 +46,19 @@ angular.module('webappV2App')
 			let val = snap.val();
 
 			$rootScope.$evalAsync(() => {
-				this._[id] = val;
+				if (typeof val == 'object') {
+					// merge without losing references
+					// a) remove all current members not in new collection
+					for (let i in this._[id]) {
+						if (!(i in val))
+							delete this._[id][i];
+					}
+					// b) add new members and synce current members
+					_.merge(this._[id], val);
+				} else {
+					// simple assign
+					this._[id] = val;
+				}
 			});
 		}
 
