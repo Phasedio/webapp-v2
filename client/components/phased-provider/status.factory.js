@@ -44,9 +44,8 @@ angular.module('webappV2App')
 				} = cfg);
 
 				// register read-only properties
-				Object.defineProperty( this, 'user', {value: cfg.user, configurable:false, writable:false, enumerable: true} );
-				Object.defineProperty( this, 'time', {value: cfg.time, configurable:false, writable:false, enumerable: true} );
-				Object.defineProperty( this, 'ID', {value: ID, configurable:false, writable:false, enumerable: true} );
+				Object.defineProperty( this, 'user', {value: cfg.user, configurable:false, writeable:false, enumerable: true} );
+				Object.defineProperty( this, 'time', {value: cfg.time, configurable:false, writeable:false, enumerable: true} );
 				
 				// update scope
 				$rootScope.$evalAsync(() => {
@@ -91,36 +90,7 @@ angular.module('webappV2App')
 
 			// 	ACCESSORS
 			//	(get prop() needs to return this._.prop to avoid recursion)
-
-			/** 	this.name 	*/
-			get name() {
-				return this._.name;
-			}
-
-			set name(val = '') {
-				if (typeof val != 'string') {
-					throw new TypeError('Status description must be string');
-				} else if (val.length < 1) {
-					throw new TypeError('Status name cannot be empty');
-				} else { 
-					super.setProperty('name', val);
-					return val;
-				}
-			}
-
-			/** 	description 	*/
-			get description() {
-				return this._.description;
-			}
-
-			set description(val = '') {
-				if (typeof val != 'string' || val !== null) {
-					throw new TypeError('Status description must be string or null');
-				} else {
-					super.setProperty('description', val);
-					return val;
-				}
-			}
+			//	(use setProperty to ensure DB sync)
 
 			/** 	startTime 	*/
 			get startTime() {
@@ -301,7 +271,7 @@ angular.module('webappV2App')
 				let cfg = snap.val();
 				let id = snap.key();
 
-				let newStatus = new Status(id, cfg);
+				new Status(id, cfg);
 			});
 		});
 
