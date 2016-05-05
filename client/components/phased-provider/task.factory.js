@@ -74,10 +74,17 @@ angular.module('webappV2App')
 			*/
 			destroy() {
 				// delete reference in Phased.team.tasks
+				delete Phased.team.tasks[this.ID];
+
+				// delete reference in Phased.team.projects
+				if (this.projectID && !!Phased.team.projects[this.projectID].tasks[this.ID])
+					delete Phased.team.projects[this.projectID].tasks[this.ID];
 
 				// fire TASK_DELETED
+				$rootScope.$broadcast(Phased.RUNTIME_EVENTS.TASK_DELETED);
 
 				// call super.destroy()
+				super.destroy();
 			}
 
 			// 	ACCESSORS
