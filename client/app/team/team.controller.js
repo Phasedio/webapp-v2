@@ -13,7 +13,7 @@ var TeamController = function TeamController($http, $scope, Phased, StatusFactor
 
   $scope.postStatus = function postStatus(name) {
     StatusFactory.create(name).then(()=>{
-      console.log('status created');
+      $scope.newStatus = '';
     }, (e) => {
       console.log(e);
     })

@@ -8,6 +8,10 @@ header#banner.hero-unit
 .container
 	.row
 		.col-lg-12
+			form(name="statusUpdate" ng-submit="postStatus(newStatus)")
+				input(name="newStatus" ng-model="newStatus" placeholder="What are you up to?")
+	.row
+		.col-lg-12
 			.team-member(ng-repeat="member in Phased.team.members")
 				img(ng-src="{{member.profile.gravatar}}" class="circular" title="{{member.profile.name}}")
 				p.status-name {{Phased.team.statuses[member.currentStatus].name}}
