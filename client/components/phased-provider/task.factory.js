@@ -21,29 +21,50 @@ angular.module('webappV2App')
 			*/
 			constructor(ID, cfg) {
 				// fail if Phased team ID or member IDs aren't available
+				if (!ID || typeof ID != 'string' || !cfg || typeof cfg != 'object' || cfg == undefined) {
+					throw new Error('Invalid arguments supplied to Status');
+				}
 
-				// expand relevant properties from cfb
+				if (!Phased.SET_UP) {
+					throw new Error('Cannot create statuses before Phased is set up');
+				}
 
 				// call super
 				super(FBRef.child(`/team/${Phased.team.uid}/tasks/${ID}`));
 
-				// link to Phased.team.tasks
-				Phased.team.tasks[ID] = this;
+				// expand relevant properties from cfg
+				({
+					name : this._.name,
+					projectID : this._.projectID,
+					dueDate : this._.dueDate,
+					assignment : this._.assignment,
+					comments : this._.comments,
+					status : this._.status
+				} = cfg);
 
-				// maybe link to Phased.team.projects[this.project]
-				if (cfg.projectID) {
-					Phased.team.projects[projectID].tasks[ID] = this;
-				}
+				// register read-only properties
+				Object.defineProperty( this, 'created', {value: cfg.created, configurable:false, writeable:false, enumerable: true} );
 
 				// link existing statuses
-				for (let id = Phased.statuses.length - 1; i >= 0; i--) {
+				for (let id in Phased.team.statuses) {
 					if (!!Phased.statuses[id].taskID && Phased.statuses[id].taskID == ID) {
 						this.statuses[id] = Phased.statuses[id];
 					}
 				}
 
-				// broadcast TASK_ADDED
-				$rootScope.$broadcast(Phased.RUNTIME_EVENTS.TASK_ADDED);
+				// update scope
+				$rootScope.$evalAsync(() => {
+					// link to Phased.team.tasks
+					Phased.team.tasks[ID] = this;
+
+					// maybe link to Phased.team.projects[this.project]
+					if (cfg.projectID) {
+						Phased.team.projects[projectID].tasks[ID] = this;
+					}
+
+					// broadcast TASK_ADDED
+					$rootScope.$broadcast(Phased.RUNTIME_EVENTS.TASK_ADDED);
+				});
 			}
 
 			/*
