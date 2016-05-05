@@ -177,13 +177,13 @@ angular.module('webappV2App')
 			// 	TASK MANIP
 
 			/**
-			*		Adds an existing task to the project
+			*		Links an existing task to the project
 			*
 			*		@param	{string}	taskID 		ID of the task to associate with the project
 			*		@throws	TypeError						if taskID isn't a string
 			*		@throws	ReferenceError			if the task at taskID doesn't exist
 			*/
-			addTask(taskID) {
+			linkTask(taskID) {
 				if (typeof taskID != 'string') {
 					throw new TypeError('taskID should be String, got ' + (typeof taskID));
 				}
