@@ -64,7 +64,25 @@ angular.module('webappV2App')
 				super.destroy();
 			}
 
+			/**
+			*		Delete this status here and in the DB
+			*
+			*/
+			delete() {
+				// if this status is a user's most current, find their next-most-recent and set it as their current status
+				var is_user_currentStatus = Phased.team.members[this.user].currentStatus == this.ID;
+				if (is_user_currentStatus) {
+					// get last status
+					let userStatuses = _.sortBy(Phased.team.statuses, 'ID', (o) => {
+						if (o.ID == this.ID) return false;
+						return o.user == this.user ? o.startTime : false;
+					});
+					let last = _.last(userStatuses);
+					// update db
+					FBRef.root().child(`team/${Phased.team.uid}/members/${Phased.user.uid}/currentStatus`).set(last.ID).then(() => $rootScope.$apply());
+				}
 
+				super.delete();
 			}
 
 			// 	ACCESSORS
