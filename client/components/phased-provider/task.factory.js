@@ -209,17 +209,40 @@ angular.module('webappV2App')
 			/**
 			*		Adds a new status linked to the task 
 			*
+			*		@param 		{object}	args 	attributes for the new status
+			*		@returns 	{Promise}
 			*/
-			postStatus(text = '') {
+			postStatus(args) {
+				if (typeof args == 'string') {
+					args = {
+						name : args
+					}
+				} else if (typeof args != 'object' || !!args) {
+					throw new TypeError('args should be String or Object, got ' + typeof args);
+				} 
 
+				args.taskID = this.ID;
+
+				return StatusFactory.create(args);
 			}
 
 			/**
 			*		Links an existing status to the task
 			*
+			*		@param 	{string}	statusID 	ID of the status to link
+			*		@throws	TypeError 					if statusID isn't a string
+			*		@throws	ReferenceError			if status doesn't exist
 			*/
 			linkStatus(statusID) {
+				if (!(typeof statusID == 'string')) {
+					throw new TypeError('statusID should be string, got ' + (typeof statusID));
+				}
+
+				if (!(statusID in Phased.team.statuses)) {
+					throw new ReferenceError(`Could not find ${statusID} in team statuses`);
+				}
 				
+				super.pushVal('statusIDs', statusID);
 			}
 		}
 
@@ -257,6 +280,17 @@ angular.module('webappV2App')
 			delete Phased.team.tasks[taskID];
 			if (!!projectID && !!Phased.team.projects[projectID])
 				delete Phased.team.projects[projectID].tasks[taskID];
+		});
+
+		// manage added statuses that might be relevant to a task
+		$rootScope.$on(Phased.RUNTIME_EVENTS.STATUS_ADDED, ({statusID, taskID}) => {
+			if (!!taskID) {
+				try {
+					Phased.team.tasks[taskID].linkStatus(statusID);
+				} catch (e) {
+					console.log(e);
+				}
+			}
 		});
 
 		return TaskFactory;
