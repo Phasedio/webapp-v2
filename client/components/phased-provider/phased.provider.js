@@ -93,7 +93,7 @@ angular.module('webappV2App')
 		*/
 		this.$get = ['$rootScope', '$http', '$location', '$window', 'getUTCTimecode', 'appConfig',
 		function $get(_$rootScope_, _$http_, _$location_, _$window_, _getUTCTimecode_, _appConfig_) {
-			Phased.rootScope = $rootScope = _$rootScope_;
+			$rootScope = _$rootScope_;
 			$http = _$http_;
 			$location = _$location_;
 			$window = _$window_;
