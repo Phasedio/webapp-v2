@@ -24,14 +24,29 @@ angular.module('webappV2App')
 			*/
 			constructor(ID, cfg) {
 				// fail if Phased team ID or member IDs aren't available
+				if (!ID || typeof ID != 'string' || !cfg || typeof cfg != 'object' || cfg == undefined) {
+					throw new Error('Invalid arguments supplied to Project');
+				}
 
-				// expand relevant properties from cfb
+				if (!Phased.SET_UP) {
+					throw new Error('Cannot create projects before Phased is set up');
+				}
 
 				// call super
 				super(FBRef.child(`/team/${Phased.team.uid}/projects/${ID}`));
 
-				// link this to Phased.team.projects
-				Phased.team.projects[ID] = this;
+				// expand relevant properties from cfb
+				({
+					name : this._.name,
+					taskID : this._.taskID,
+					dueDate : this._.dueDate,
+					assignment : this._.assignment,
+					comments : this._.comments,
+					status : this._.status
+				} = cfg);
+
+				// register read-only properties
+				Object.defineProperty( this, 'created', {value: cfg.created, configurable:false, writeable:false, enumerable: true} );
 				
 				// link existing statuses
 				for (let id = Phased.statuses.length - 1; i >= 0; i--) {
@@ -47,8 +62,14 @@ angular.module('webappV2App')
 					}
 				}
 
-				// broadcast PROJECT_ADDED
-				$rootScope.$broadcast(Phased.RUNTIME_EVENTS.PROJECT_ADDED);
+				// update scope
+				$rootScope.$evalAsync(() => {
+					// link this to Phased.team.projects
+					Phased.team.projects[ID] = this;
+					
+					// broadcast PROJECT_ADDED
+					$rootScope.$broadcast(Phased.RUNTIME_EVENTS.PROJECT_ADDED);
+				});
 			}
 
 			/*
@@ -58,10 +79,13 @@ angular.module('webappV2App')
 			*/
 			destroy() {
 				// delete reference in Phased.team.projects
+				delete Phased.team.projects[this.ID];
 
 				// fire PROJECT_DELETED
+				$rootScope.$broadcast(Phased.RUNTIME_EVENTS.PROJECT_DELETED);
 
 				// call super.destroy()
+				super.destroy();
 			}
 		}
 
@@ -85,12 +109,15 @@ angular.module('webappV2App')
 		});
 
 		// watch for new projects added to the DB and create them here
-		// Phased.FBRef.child(`team/${Phased.team.uid}/projects`).on('child_added', (snap) => {
-		// 	let cfg = snap.val();
-		// 	let id = snap.key();
+		$rootScope.$on('Phased:teamComplete', () => {
+			FBRef.child(`team/${Phased.team.uid}/projects`).on('child_added', (snap) => {
+				let cfg = snap.val();
+				let id = snap.key();
 
-		// 	let newProject = new Project(id, cfg);
-		// });
+				new Project(id, cfg);
+			});
+		});
+
 
 		return ProjectFactory;
 	}]);
