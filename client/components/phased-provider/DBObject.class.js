@@ -11,7 +11,7 @@ angular.module('webappV2App')
 		/**
 		*		Constructs an object that syncs intself with firebase
 		*
-		*		@param	address		complete FireBase address for the object
+		*		@param	FBRef			FireBase reference to the object
 		*		@throws Error			if class is directly instantiated or if FBRef isn't set
 		*/
 		constructor(FBRef) {
@@ -24,7 +24,10 @@ angular.module('webappV2App')
 			}
 
 			// create hidden _ pseudo-private property holder
-			Object.defineProperty( this, '_', {value: {}, configurable:false, writable:true, enumerable: false} );
+			Object.defineProperty( this, '_', {value: {}, configurable:false, writeable:true, enumerable: false} );
+
+			// define immutable ID property
+			Object.defineProperty( this, 'ID', {value: FBRef.key(), configurable:false, writeable:false, enumerable: true} );
 
 			// set up _FBRef handlers for child_changed
 			this._.FBRef = FBRef;
@@ -74,6 +77,39 @@ angular.module('webappV2App')
 		setProperty(address, val) {
 			// only need to set DB val; FB sync will edit own prop
 			this._.FBRef.child(address).set(val);
+		}
+
+		// 	DEFAULT ACCESSORS
+		//	(get prop() needs to return this._.prop to avoid recursion)
+
+		/** 	this.name 	*/
+		get name() {
+			return this._.name;
+		}
+
+		set name(val = '') {
+			if (typeof val != 'string') {
+				throw new TypeError((typeof this) + ' description must be string');
+			} else if (val.length < 1) {
+				throw new TypeError((typeof this) + ' name cannot be empty');
+			} else { 
+				this.setProperty('name', val);
+				return val;
+			}
+		}
+
+		/** 	description 	*/
+		get description() {
+			return this._.description;
+		}
+
+		set description(val = '') {
+			if (typeof val != 'string' || val !== null) {
+				throw new TypeError((typeof this) + ' description must be string or null');
+			} else {
+				this.setProperty('description', val);
+				return val;
+			}
 		}
 	}
 
