@@ -22,11 +22,11 @@ angular.module('webappV2App')
 			constructor(ID, cfg) {
 				// fail if Phased team ID or member IDs aren't available
 				if (!ID || typeof ID != 'string' || !cfg || typeof cfg != 'object' || cfg == undefined) {
-					throw new Error('Invalid arguments supplied to Status');
+					throw new Error('Invalid arguments supplied to Task');
 				}
 
 				if (!Phased.SET_UP) {
-					throw new Error('Cannot create statuses before Phased is set up');
+					throw new Error('Cannot create tasks before Phased is set up');
 				}
 
 				// call super
