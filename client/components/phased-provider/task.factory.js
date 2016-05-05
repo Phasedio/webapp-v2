@@ -25,7 +25,7 @@ angular.module('webappV2App')
 				// expand relevant properties from cfb
 
 				// call super
-				super(FBRef(`/team/${Phased.team.uid}/tasks/${ID}`));
+				super(FBRef.child(`/team/${Phased.team.uid}/tasks/${ID}`));
 
 				// link to Phased.team.tasks
 				Phased.team.tasks[ID] = this;
