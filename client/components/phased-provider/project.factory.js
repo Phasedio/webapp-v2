@@ -75,7 +75,13 @@ angular.module('webappV2App')
 			}
 
 			set dueDate(val) {
-				super.setProperty('dueDate', val);
+				val = getUTCTimecode(val);
+				if (!val) {
+					throw new TypeError('Task dueDate could not be parsed');
+				} else {
+					super.setProperty('dueDate', val);
+					return val;
+				}
 			}
 
 			/**		status		*/
@@ -84,7 +90,12 @@ angular.module('webappV2App')
 			}
 
 			set status(val) {
-				super.setProperty('status', val);
+				if (!val in Phased.meta.project.STATUS_ID) {
+					throw new TypeError('Project status should be one of Phased.meta.project.STATUS_ID');
+				} else {
+					super.setProperty('status', val);
+					return val;
+				}
 			}
 
 			/**		comments 	*/
