@@ -229,12 +229,14 @@ angular.module('webappV2App')
 		});
 
 		// watch for new tasks added to the DB and create them here
-		// Phased.FBRef.child(`team/${Phased.team.uid}/tasks`).on('child_added', (snap) => {
-		// 	let cfg = snap.val();
-		// 	let id = snap.key();
+		$rootScope.$on('Phased:teamComplete', () => {
+			FBRef.child(`team/${Phased.team.uid}/tasks`).on('child_added', (snap) => {
+				let cfg = snap.val();
+				let id = snap.key();
 
-		// 	let newTask = new Task(id, cfg);
-		// });
+				new Task(id, cfg);
+			});
+		});
 
 		return TaskFactory;
 	}]);
