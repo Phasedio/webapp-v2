@@ -284,6 +284,24 @@ angular.module('webappV2App')
 
 				super.setProperty(`comments/${commentID}/text`, text);
 			}
+
+			//	STATUS MANIP
+
+			/**
+			*		Adds a new status linked to the project 
+			*
+			*/
+			postStatus(text = '') {
+
+			}
+
+			/**
+			*		Links an existing status to the project
+			*
+			*/
+			linkStatus(statusID) {
+				
+			}
 		}
 
 		/**	The status factory object */

@@ -203,6 +203,24 @@ angular.module('webappV2App')
 
 				super.setProperty(`comments/${commentID}/text`, text);
 			}
+
+			//	STATUS MANIP
+
+			/**
+			*		Adds a new status linked to the task 
+			*
+			*/
+			postStatus(text = '') {
+
+			}
+
+			/**
+			*		Links an existing status to the task
+			*
+			*/
+			linkStatus(statusID) {
+				
+			}
 		}
 
 		/**	The task factory object */
