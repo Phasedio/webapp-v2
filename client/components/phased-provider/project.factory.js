@@ -198,9 +198,21 @@ angular.module('webappV2App')
 			/**
 			*		Creates a new task linked to the project
 			*
+			*		@param 		{object}	args 	attributes for the new task
+			*		@returns 	{Promise}
 			*/
-			createTask(cfg) {
+			createTask(args) {
+				if (typeof args == 'string') {
+					args = {
+						name : args
+					}
+				} else if (typeof args != 'object' || !!args) {
+					throw new TypeError('args should be String or Object, got ' + typeof args);
+				} 
 
+				args.projectID = this.ID;
+
+				return TaskFactory.create(args);
 			}
 
 			/**
@@ -366,6 +378,17 @@ angular.module('webappV2App')
 			if (!!projectID) {
 				try {
 					Phased.team.projects[projectID].linkStatus(statusID);
+				} catch (e) {
+					console.log(e);
+				}
+			}
+		});
+
+		// manage added tasks that might be relevant to a project
+		$rootScope.$on(Phased.RUNTIME_EVENTS.TASK_ADDED, ({taskID, projectID}) => {
+			if (!!projectID) {
+				try {
+					Phased.team.projects[projectID].linkTask(taskID);
 				} catch (e) {
 					console.log(e);
 				}
