@@ -79,6 +79,17 @@ angular.module('webappV2App')
 			this._.FBRef.child(address).set(val);
 		}
 
+		/**
+		*		Pushes a value to an object/array attribute (on this and FB)
+		*
+		*		@param 	{string}	address	address of the array where the new value will be pushed
+		*		@param	{mixed}		val 		value that will be pushed
+		*		@returns {string}					new key for the value
+		*/
+		pushVal(address, val) {
+			return this._.FBRef.child(address).push(val).key();
+		}
+
 		// 	DEFAULT ACCESSORS
 		//	(get prop() needs to return this._.prop to avoid recursion)
 
