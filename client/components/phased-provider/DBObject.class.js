@@ -56,6 +56,16 @@ angular.module('webappV2App')
 		}
 
 		/**
+		*		Delete this object from the DB and the DOM
+		*
+		*/
+		delete() {
+			this._.FBRef.set(null).then(()=>{
+				this.destroy();
+			});
+		}
+
+		/**
 		*		Edits the property of this object to match val exactly
 		*
 		*		@param	address		address of the property relative to the object
