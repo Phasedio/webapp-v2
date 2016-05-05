@@ -47,6 +47,12 @@ angular.module('webappV2App')
 					memberIDs : this._.memberIDs
 				} = cfg);
 
+				// ensure props exist
+				this._.comments = this._.comments || {};
+				this._.taskIDs = this._.taskIDs || {};
+				this._.statusIDs = this._.statusIDs || {};
+				this._.memberIDs = this._.memberIDs || {};
+
 				// register read-only properties
 				Object.defineProperty( this, 'created', {value: cfg.created, configurable:false, writeable:false, enumerable: true} );
 				

@@ -42,6 +42,9 @@ angular.module('webappV2App')
 					status : this._.status
 				} = cfg);
 
+				// ensure props exist
+				this._.comments = this._.comments || {};
+
 				// register read-only properties
 				Object.defineProperty( this, 'created', {value: cfg.created, configurable:false, writeable:false, enumerable: true} );
 
