@@ -28,10 +28,17 @@ angular.module('webappV2App')
 			STATUS_ADDED : 'Phased:newStatus',
 			STATUS_CHANGED : 'Phased:changedStatus',
 			STATUS_DELETED : 'Phased:deletedStatus',
+			STATUS_DESTROYED : 'Phased:destroyedStatus',
 
 			TASK_ADDED : 'Phased:newTask',
 			TASK_CHANGED : 'Phased:changedTask',
-			TASK_DELETED : 'Phased:deletedTask'
+			TASK_DELETED : 'Phased:deletedTask',
+			TASK_DESTROYED : 'Phased:destroyedTask',
+
+			PROJECT_ADDED : 'Phased:newProject',
+			PROJECT_CHANGED : 'Phased:changedProject',
+			PROJECT_DELETED : 'Phased:deletedProject',
+			PROJECT_DESTROYED : 'Phased:destroyedProject'
 		},
 		// tasks to do after the indicated events
 		_toDoAfter = {
