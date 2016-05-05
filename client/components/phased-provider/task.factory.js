@@ -52,36 +52,18 @@ angular.module('webappV2App')
 					}
 				}
 
-				// update scope
-				$rootScope.$evalAsync(() => {
-					// link to Phased.team.tasks
-					Phased.team.tasks[ID] = this;
-
-					// maybe link to Phased.team.projects[this.project]
-					if (cfg.projectID) {
-						Phased.team.projects[projectID].tasks[ID] = this;
-					}
-
-					// broadcast TASK_ADDED
-					$rootScope.$broadcast(Phased.RUNTIME_EVENTS.TASK_ADDED);
-				});
+				// broadcast TASK_ADDED
+				$rootScope.$broadcast(Phased.RUNTIME_EVENTS.TASK_ADDED, ID);
 			}
 
 			/*
 			*		Remove references that this task knows about
 			*		
-			*		@fires 	Phased#TASK_DELETED
+			*		@fires 	Phased#TASK_DESTROYED
 			*/
 			destroy() {
-				// delete reference in Phased.team.tasks
-				delete Phased.team.tasks[this.ID];
-
-				// delete reference in Phased.team.projects
-				if (this.projectID && !!Phased.team.projects[this.projectID].tasks[this.ID])
-					delete Phased.team.projects[this.projectID].tasks[this.ID];
-
-				// fire TASK_DELETED
-				$rootScope.$broadcast(Phased.RUNTIME_EVENTS.TASK_DELETED);
+				// fire TASK_DESTROYED
+				$rootScope.$broadcast(Phased.RUNTIME_EVENTS.TASK_DESTROYED, {taskID: this.ID, projectID : this.projectID});
 
 				// call super.destroy()
 				super.destroy();
@@ -241,8 +223,15 @@ angular.module('webappV2App')
 				let cfg = snap.val();
 				let id = snap.key();
 
-				new Task(id, cfg);
+				$rootScope.$evalAsync( () => Phased.team.tasks[id] = new Task(id, cfg) );
 			});
+		});
+
+		// manage deleted task references
+		$rootScope.$on(Phased.RUNTIME_EVENTS.TASK_DESTROYED, ({taskID, projectID}) => {
+			delete Phased.team.tasks[taskID];
+			if (!!projectID && !!Phased.team.projects[projectID])
+				delete Phased.team.projects[projectID].tasks[taskID];
 		});
 
 		return TaskFactory;

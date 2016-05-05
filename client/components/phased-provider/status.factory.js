@@ -47,49 +47,24 @@ angular.module('webappV2App')
 				Object.defineProperty( this, 'user', {value: cfg.user, configurable:false, writeable:false, enumerable: true} );
 				Object.defineProperty( this, 'time', {value: cfg.time, configurable:false, writeable:false, enumerable: true} );
 				
-				// update scope
-				$rootScope.$evalAsync(() => {
-					// maybe link to Phased.team.statuses, Phased.team.tasks[cfg.task], Phased.team.projects[cfg.project]
-					Phased.team.statuses[ID] = this;
-
-					// broadcast STATUS_ADDED 
-					$rootScope.$broadcast(Phased.RUNTIME_EVENTS.STATUS_ADDED);
-				});
+				// broadcast STATUS_ADDED 
+				$rootScope.$broadcast(Phased.RUNTIME_EVENTS.STATUS_ADDED, ID);
 			}
 
 			/*
 			*		Remove references that this status knows about
 			*		
-			*		@fires 	Phased#STATUS_DELETED
+			*		@fires 	Phased#STATUS_DESTROYED
 			*/
 			destroy() {
-				$rootScope.$evalAsync(() => {
-					// if this status is a user's most current, find their next-most-recent and set it as their current status
-					var is_user_currentStatus = Phased.team.members[this.user].currentStatus == this.ID;
-					if (is_user_currentStatus) {
-						let userStatuses = _.sortBy(Phased.team.statuses, 'ID', (o) => {
-							if (o.ID == this.ID) return false;
-							return o.user == this.user ? o.startTime : false;
-						});
-						let last = _.last(userStatuses);
-						Phased.rootScope.$evalAsync(()=>{
-							Phased.team.members[this.user].currentStatus = last.ID;
-						});
-					}
+				// fire STATUS_DESTROYED
+				$rootScope.$broadcast(Phased.RUNTIME_EVENTS.STATUS_DESTROYED, {statusID : this.ID, projectID : this.projectID, taskID : this.taskID});
 
-					// delete reference in Phased.team.statuses, Phased.team.tasks, Phased.team.projects
-					delete Phased.team.statuses[this.ID];
-					if (this.taskID)
-						delete Phased.team.tasks[this.taskID].statuses[this.ID]
-					if (this.projectID)
-						delete Phased.team.projects[this.projectID].statuses[this.ID]
+				// call super.destroy()
+				super.destroy();
+			}
 
-					// fire STATUS_DELETED
-					$rootScope.$broadcast(Phased.RUNTIME_EVENTS.STATUS_DELETED);
 
-					// call super.destroy()
-					super.destroy();
-				});
 			}
 
 			// 	ACCESSORS
@@ -271,8 +246,19 @@ angular.module('webappV2App')
 				let cfg = snap.val();
 				let id = snap.key();
 
-				new Status(id, cfg);
+				$rootScope.$evalAsync( () => Phased.team.statuses[id] = new Status(id, cfg) );
 			});
+		});
+
+		// manage deleted status references
+		$rootScope.$on(Phased.RUNTIME_EVENTS.STATUS_DESTROYED, ({statusID, projectID, taskID}) => {
+			delete Phased.team.statuses[statusID];
+
+			if (!!projectID && !!Phased.team.projects[projectID])
+				delete Phased.team.projects[projectID].statuses[statusID];
+
+			if (!!taskID && !!Phased.team.tasks[taskID])
+				delete Phased.team.tasks[taskID].statuses[statusID];
 		});
 
 		return StatusFactory;
