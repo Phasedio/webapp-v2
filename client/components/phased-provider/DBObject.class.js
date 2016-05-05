@@ -29,13 +29,21 @@ angular.module('webappV2App')
 			// set up _FBRef handlers for child_changed
 			this._.FBRef = FBRef;
 
-			FBRef.on('child_changed', snap => {
-				let id = snap.key();
-				let val = snap.val();
+			FBRef.on('child_changed', this.childChanged.bind(this));
+		}
 
-				$rootScope.$evalAsync(() => {
-					this._[id] = val;
-				});
+		/**
+		*		Fired whenever a child of this object changes in the DB.
+		*		Updates own property.
+		*
+		*		@param	{object}	snap		The relevant FireBase DataSnapshot
+		*/
+		childChanged(snap) {
+			let id = snap.key();
+			let val = snap.val();
+
+			$rootScope.$evalAsync(() => {
+				this._[id] = val;
 			});
 		}
 
