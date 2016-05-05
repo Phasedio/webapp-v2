@@ -45,13 +45,6 @@ angular.module('webappV2App')
 				// register read-only properties
 				Object.defineProperty( this, 'created', {value: cfg.created, configurable:false, writeable:false, enumerable: true} );
 
-				// link existing statuses
-				for (let id in Phased.team.statuses) {
-					if (!!Phased.statuses[id].taskID && Phased.statuses[id].taskID == ID) {
-						this.statuses[id] = Phased.statuses[id];
-					}
-				}
-
 				// broadcast TASK_ADDED
 				$rootScope.$broadcast(Phased.RUNTIME_EVENTS.TASK_ADDED, ID);
 			}
