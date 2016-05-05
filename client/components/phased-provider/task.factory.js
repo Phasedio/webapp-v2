@@ -120,7 +120,7 @@ angular.module('webappV2App')
 			*	
 			*		@param	{string}	uid 	UID for a member on the team or null to un-assign
 			*		@throws TypeError				if uid is not a string
-			*		@throws	ReferenceError 					if uid is not a member of the team
+			*		@throws	ReferenceError 	if uid is not a member of the team
 			*/
 			assignTo(uid) {
 				if (!(typeof uid == 'string' || uid == null)) {

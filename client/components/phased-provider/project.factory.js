@@ -133,17 +133,39 @@ angular.module('webappV2App')
 			/**
 			*		Adds a team member to the project
 			*
+			*		@param	{string}	uid 	UID for a member on the team
+			*		@throws TypeError				if uid is not a string
+			*		@throws	ReferenceError 	if uid is not a member of the team
 			*/
-			addMember(memberID) {
+			addMember(uid) {
+				if (!(typeof uid == 'string')) {
+					throw new TypeError('uid should be String, got ' + (typeof uid));
+				}
 
+				if (!uid || !(uid in Phased.team.members)) {
+					throw new ReferenceError(`Could not find member ${uid} in team`);
+				}
+
+				super.pushVal('members', uid);
 			}
 
 			/**
 			*		Removes a team member from the project
 			*
+			*		@param	{string}	uid 	UID for a member on the project
+			*		@throws TypeError				if uid is not a string
+			*		@throws	ReferenceError 	if uid is not a member of the project
 			*/
-			removeMember(memberID) {
+			removeMember(uid) {
+				if (!(typeof uid == 'string')) {
+					throw new TypeError('uid should be String, got ' + (typeof uid));
+				}
 
+				if (!uid || !(_.includes(this.memberIDs, uid))) {
+					throw new ReferenceError(`Could not find member ${uid} in team`);
+				}
+
+				super.setProperty(`memberIDs/${uid}`, null);
 			}
 
 			// 	TASK MANIP
