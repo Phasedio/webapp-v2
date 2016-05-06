@@ -7,7 +7,7 @@
 *		
 */
 angular.module('webappV2App')
-	.factory('TaskFactory', ['Phased', 'DBObject', 'StatusFactory', '$rootScope', function(Phased, DBObject, StatusFactory, $rootScope) {
+	.factory('TaskFactory', ['appConfig', 'Phased', 'DBObject', 'StatusFactory', '$rootScope', function(appConfig, Phased, DBObject, StatusFactory, $rootScope) {
 		var FBRef;
 
 		/** Class representing a task */
@@ -243,6 +243,90 @@ angular.module('webappV2App')
 				}
 				
 				super.pushVal('statusIDs', statusID);
+			}
+
+			//	LIFETIME METHODS
+
+			/**
+			*		User starts / resumes working on this task
+			*
+			*		@returns {Promise}
+			*/
+			workOn() {
+				this.status = Phased.meta.task.STATUS_ID.IN_PROGRESS;
+				return StatusFactory.create({
+					name : `${appConfig.strings.status.prefix.task.inProgress}: ${this.name}`,
+					taskID : this.ID
+				});
+			}
+
+			/**
+			*		The user has completed working on a task and submits it for review
+			*
+			*		@returns {Promise}
+			*/
+			submitForReview() {
+				this.status = Phased.meta.task.STATUS_ID.IN_REVIEW;
+				return StatusFactory.create({
+					name : `${appConfig.strings.status.prefix.task.inReview}: ${this.name}`,
+					taskID : this.ID
+				});
+			}
+
+			/**
+			*		The user (if admin) approves of a task that has been submit for review
+			*
+			*		@returns {Promise}
+			*/
+			approve() {
+				return new Promise((fulfill, reject) => {
+					if (Phased.team.members[Phased.user.uid].role != Phased.meta.ROLE_ID.ADMIN) {
+						reject(new Error('User must be admin to approve or reject task completion'));
+						return;
+					}
+
+					if (this.status != Phased.meta.task.STATUS_ID.IN_REVIEW) {
+						var msg = 'Task must be in review before approval or rejection';
+						console.warn(msg);
+						reject(new Error(msg));
+						return;
+					}
+
+					this.status = Phased.meta.task.STATUS_ID.COMPLETE;
+					
+					StatusFactory.create({
+						name : `${appConfig.strings.status.prefix.task.approvedReview}: ${this.name}`,
+						taskID : this.ID
+					}).then(fulfill, reject);
+				});
+			}
+
+			/**
+			*		The user (if admin) rejects a task that has been submit for review
+			*
+			*		@returns {Promise}
+			*/
+			reject() {
+				return new Promise((fulfill, reject) => {
+					if (Phased.team.members[Phased.user.uid].role != Phased.meta.ROLE_ID.ADMIN) {
+						reject(new Error('User must be admin to approve or reject task completion'));
+						return;
+					}
+
+					if (this.status != Phased.meta.task.STATUS_ID.IN_REVIEW) {
+						var msg = 'Task must be in review before approval or rejection';
+						console.warn(msg);
+						reject(new Error(msg));
+						return;
+					}
+
+					this.status = Phased.meta.task.STATUS_ID.REJECTED;
+					
+					StatusFactory.create({
+						name : `${appConfig.strings.status.prefix.task.approvedReview}: ${this.name}`,
+						taskID : this.ID
+					}).then(fulfill, reject);
+				});
 			}
 		}
 
