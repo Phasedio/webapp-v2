@@ -92,6 +92,23 @@ angular.module('webappV2App')
 		}
 
 		/**
+		*		Removes the given value from a collection (array or FB-array)
+		*	
+		*		@param	address		address of the collection
+		*		@param	val 			value to remove
+		*/
+		removeFromCollection(address, val) {
+			var coll = _.get(this, address.replace(/\//g, '.'));
+			var key = _.findKey(coll, val);
+
+			if (!!key) {
+				this.setProperty(`${address}/${key}`, null);
+			} else {
+				console.warn(`Cannot find value ${val} at address ${address}`);
+			}
+		}
+
+		/**
 		*		Pushes a value to an object/array attribute (on this and FB)
 		*
 		*		@param 	{string}	address	address of the array where the new value will be pushed
