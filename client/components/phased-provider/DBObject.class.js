@@ -102,7 +102,7 @@ angular.module('webappV2App')
 			var key = _.findKey(coll, o => _.isEqual(o, val));
 
 			if (!!key) {
-				this.setProperty(`${address}[${key}]`, null);
+				this.setProperty(`${address}/${key}`, null);
 			} else {
 				console.warn(`Cannot find value ${val} at address ${address}`);
 			}
