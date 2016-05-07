@@ -39,11 +39,15 @@ angular.module('webappV2App')
 					dueDate : this._.dueDate,
 					assignment : this._.assignment,
 					comments : this._.comments,
-					status : this._.status
+					status : this._.status,
+					statusIDs : this._.statusIDs
 				} = cfg);
 
 				// ensure props exist
 				this._.comments = this._.comments || {};
+				this._.statusIDs = this._.statusIDs || {};
+
+				this.statusIDs = this._.statusIDs;
 
 				// register read-only properties
 				Object.defineProperty( this, 'created', {value: cfg.created, configurable:false, writeable:false, enumerable: true} );
