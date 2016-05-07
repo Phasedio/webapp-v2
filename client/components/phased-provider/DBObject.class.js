@@ -98,8 +98,8 @@ angular.module('webappV2App')
 		*		@param	val 			value to remove
 		*/
 		removeFromCollection(address, val) {
-			var coll = _.get(this, address.replace(/\//g, '.'));
-			var key = _.findKey(coll, val);
+			var coll = _.get(this._, address.replace(/\//g, '.'));
+			var key = _.findKey(coll, o => _.isEqual(o, val));
 
 			if (!!key) {
 				this.setProperty(`${address}/${key}`, null);
