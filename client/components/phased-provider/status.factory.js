@@ -247,7 +247,14 @@ angular.module('webappV2App')
 					// 3. POST TO USER
 					statusRef.then(() => {
 						Phased._FBRef.child(`team/${Phased.team.uid}/members/${Phased.user.uid}/currentStatus`)
-						.set(statusID).then(fulfill, reject);
+						.set(statusID).then(err => {
+							if (err) {
+								statusRef.set(null);
+								reject(err);
+							}
+							else
+								fulfill(statusID);
+						}, reject);
 					}, reject);
 				});
 			}
