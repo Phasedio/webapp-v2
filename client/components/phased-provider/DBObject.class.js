@@ -32,7 +32,7 @@ angular.module('webappV2App')
 			// set up _FBRef handlers for child_changed
 			this._.FBRef = FBRef;
 
-			FBRef.on('child_changed', this.childChanged.bind(this));
+			this._.FBRef.on('child_changed', this.childChanged.bind(this));
 		}
 
 		/**
@@ -87,7 +87,15 @@ angular.module('webappV2App')
 		*		@param	val				the new value for the property
 		*/
 		setProperty(address, val) {
-			// only need to set DB val; FB sync will edit own prop
+			// update own data until FB child_changed is fired
+			let path = address.split('/');
+			
+			if (val === null) // delete if null
+				_.unset(this._, path);
+			else 
+				_.set(this._, path, val);
+
+			// update DB val
 			this._.FBRef.child(address).set(val);
 		}
 
@@ -116,7 +124,15 @@ angular.module('webappV2App')
 		*		@returns {string}					new key for the value
 		*/
 		pushVal(address, val) {
-			return this._.FBRef.child(address).push(val).key();
+			// update DB
+			let key = this._.FBRef.child(address).push(val).key();
+			
+			// update own data until FB child_changed is fired
+			let path = address.split('/');
+			path.push(key);
+			_.set(this._, path, val);
+
+			return key;
 		}
 
 		// 	DEFAULT ACCESSORS
