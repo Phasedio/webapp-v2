@@ -333,14 +333,129 @@ angular.module('webappV2App')
 		/**	The task factory object */
 		var TaskFactory = {
 			Task : Task,
-			/*
+			/**
 			*		Factory method for creating a new task and posting to the DB
 			*		Does NOT return the task object
 			*
-			*		@param		{object}	args	attributes for the new task
+			*		ALL TASK CREATION SHOLD USE THIS METHOD
+			*
+			*		1. check that properties are valid
+			*			- supplies "created" timestamp and CREATED status
+			*			- requires "name" and either "to" or "assignment"
+			*				- when using "to", will assume current user as "by". use "assignment" obj to bypass.
+			*			- optionally "dueDate", "description", "tags"
+			*				- "dueDate" can be Date, Moment, or timestamp
+			*					- when Date or timestamp, assumed to be in local time
+			*					- when Moment, can be either (Moment keeps track internally - see documentation for moment#utc)
+			*					- does NOT check if due date is in the future
+			*				- "tags" can be either an array of tags or an object with tags as keys and truthy values
+			*					- not yet implemented
+			*		2. post to team
+			*
+			*		@param		{object}	args	attributes for the new task (or string name)
 			*		@returns	{Promise}
 			*/
 			create : function create (args) {
+				return new Promise((fulfill, reject) => {
+					if (typeof args == 'string') {
+						args = {name: args};
+					} else if (typeof args != 'object') {
+						var msg = 'TaskFactory.createTask expects an object or string; got ' + (typeof args);
+						console.warn(msg);
+						reject(new Error(msg));
+						return;
+					}
+
+					if (!Phased || typeof Phased != 'object' || !Phased.SET_UP) {
+						reject(Error('Cannot make a task without Phased!'));
+						return;
+					}
+
+					// destructure args
+					const { name, dueDate, description, to, assignment, tags } = args;
+
+					// simplest object
+					var newTask = {
+						created: Firebase.ServerValue.TIMESTAMP, // now
+						status: Phased.meta.task.STATUS_ID.CREATED
+					}
+
+					// 1. PROP VALIDATION
+					// name
+					if (!('name' in args) || typeof name != 'string') {
+						var msg = 'Cannot post a nameless task!';
+						console.warn(msg);
+						reject(new Error(msg));
+						return;
+					} else {
+						newTask.name = name;
+					}
+
+					// description
+					if (!!description) {
+						if (typeof description == 'string')
+							newTask.description = description;
+						else
+							console.warn('task.description should be a string; got ' + (typeof description));
+					}
+
+					// assignment or to
+					// prefer to
+					if (!!to) {	// if to is set
+						if (typeof to == 'string' && to in Phased.team.members) { // and it's a member's UID
+							// assignment is to that person, by the current user
+							newTask.assignment = {
+								to: to,
+								by: Phased.user.uid
+							};
+						} else {
+							var msg = 'task.to must be the UID for a team member; got ' + (typeof to);
+							console.warn(msg, to);
+							reject(new Error(msg));
+							return;
+						}
+					} else if (!!assignment) { // if to isn't set and assignment is
+						if (typeof assignment == 'object' && // and the assignment is an object
+							'to' in assignment && 'by' in assignment && // and it has to and by keys
+							assignment.to in Phased.team.members && assignment.by in Phased.team.members) { // and they're valid member UIDS
+							// specific assignment
+							newTask.assignment = {
+								to: assignment.to,
+								by: assignment.by
+							}
+						} else {
+							var msg = 'task.assignment should be an object with "to" and "by" keys; got ' + (typeof assignment);
+							console.warn(msg);
+							reject(new Error(msg));
+							return;
+						}
+					} else {
+						var msg = 'Neither task.to nor task.assignment were set; one or the other is required.';
+						console.warn(msg);
+						reject(new Error(msg));
+						return;
+					}
+
+					// dueDate (could be Date, Moment, or timestamp)
+					if (dueDate) {
+						let timecode = _getUTCTimecode(dueDate);
+						if (!!timecode) {
+							newTask.dueDate = timecode;
+						} else {
+							console.warn('"dueDate" should be a Date, Moment, or numeric timestamp. Not using supplied value (' + typeof dueDate + ')');
+						}
+					}
+
+					// tags
+					if (tags) {
+						console.warn('Task tags are not implemented yet.');
+					}
+
+					// 2. SEND TO SERVER
+					console.log('new task', newTask);
+
+					FBRef.child(`team/${Phased.team.uid}/tasks`).push(newTask).then(fulfill, reject);
+				});
 			}
 		} 
 
