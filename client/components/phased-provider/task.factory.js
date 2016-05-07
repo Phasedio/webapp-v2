@@ -261,6 +261,24 @@ angular.module('webappV2App')
 			}
 
 			/**
+			*		Self-assign a task
+			*		shorthand for this.assignTo(me);
+			*/
+			take() {
+				this.assignTo(Phased.user.uid);
+			}
+
+			/**
+			*		Self-assign a task and immediately start working on it
+			*		Shorthand for this.assignTo(me); this.workOn()
+			*		
+			*/
+			takeAndWorkOn() {
+				this.take();
+				return this.workOn();
+			}
+
+			/**
 			*		The user has completed working on a task and submits it for review
 			*
 			*		@returns {Promise}
