@@ -430,10 +430,11 @@ angular.module('webappV2App')
 							return;
 						}
 					} else {
-						var msg = 'Neither task.to nor task.assignment were set; one or the other is required.';
-						console.warn(msg);
-						reject(new Error(msg));
-						return;
+						var msg = 'Neither task.to nor task.assignment were set; task will be created as unassigned.';
+						console.log(msg);
+						newTask.assignment = {
+							by: Phased.user.uid
+						}
 					}
 
 					// dueDate (could be Date, Moment, or timestamp)
