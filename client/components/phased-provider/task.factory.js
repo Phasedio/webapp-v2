@@ -246,7 +246,7 @@ angular.module('webappV2App')
 					throw new ReferenceError(`Could not find ${statusID} in team statuses`);
 				}
 				
-				super.pushVal('statusIDs', statusID);
+				return super.pushVal('statusIDs', statusID);
 			}
 
 			/**
@@ -258,11 +258,6 @@ angular.module('webappV2App')
 			unlinkStatus(statusID) {
 				if (!(typeof statusID == 'string')) {
 					throw new TypeError('statusID should be string, got ' + (typeof statusID));
-				}
-
-				if (!(statusID in this._.statusIDs)) {
-					console.warn(`Status ${statusID} does not seem to be linked to this task...`);
-					return false;
 				}
 
 				super.removeFromCollection('statusIDs', statusID);
