@@ -2,7 +2,7 @@
 
 (function() {
 
-var TeamController = function TeamController($http, $scope, Phased, StatusFactory) {
+var TeamController = function TeamController($http, $scope, Phased, StatusFactory, TaskFactory) {
 
   /*
   * mimics Yeoman's controller class constructor function
@@ -17,6 +17,14 @@ var TeamController = function TeamController($http, $scope, Phased, StatusFactor
     }, (e) => {
       console.log(e);
     })
+  }
+
+  $scope.makeTask = function makeTask(name) {
+    TaskFactory.create(name).then(()=>{
+      console.log('made task!');
+    }, (e) => {
+      console.log(e);
+    });
   }
 }
 
