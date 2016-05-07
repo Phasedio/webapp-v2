@@ -245,6 +245,16 @@ angular.module('webappV2App')
 				if (!(statusID in Phased.team.statuses)) {
 					throw new ReferenceError(`Could not find ${statusID} in team statuses`);
 				}
+
+				let status = Phased.team.statuses[statusID];
+				if (!!status.taskID && status.taskID != this.ID) {
+					console.log('Status currently linked to a task; unlinking from other task...');
+					let oldTask = Phased.team.tasks[Phased.team.statuses[statusID].taskID];
+					oldTask.unlinkStatus(statusID);
+				}
+
+				// set status' taskID
+				Phased.team.statuses[statusID].taskID = this.ID;
 				
 				return super.pushVal('statusIDs', statusID);
 			}
@@ -259,6 +269,8 @@ angular.module('webappV2App')
 				if (!(typeof statusID == 'string')) {
 					throw new TypeError('statusID should be string, got ' + (typeof statusID));
 				}
+
+				Phased.team.statuses[statusID].taskID = undefined;
 
 				super.removeFromCollection('statusIDs', statusID);
 			}
