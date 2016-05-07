@@ -245,6 +245,25 @@ angular.module('webappV2App')
 				super.pushVal('statusIDs', statusID);
 			}
 
+			/**
+			*		Unlinks a status from the task
+			*
+			*		@param 	{string}	statusID 	ID of the status to unlink
+			*		@throws	TypeError 					if statusID isn't a string
+			*/
+			unlinkStatus(statusID) {
+				if (!(typeof statusID == 'string')) {
+					throw new TypeError('statusID should be string, got ' + (typeof statusID));
+				}
+
+				if (!(statusID in this._.statusIDs)) {
+					console.warn(`Status ${statusID} does not seem to be linked to this task...`);
+					return false;
+				}
+
+				super.removeFromCollection('statusIDs', statusID);
+			}
+
 			//	LIFETIME METHODS
 
 			/**
