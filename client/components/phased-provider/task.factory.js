@@ -7,7 +7,7 @@
 *		
 */
 angular.module('webappV2App')
-	.factory('TaskFactory', ['appConfig', 'Phased', 'DBObject', 'StatusFactory', '$rootScope', function(appConfig, Phased, DBObject, StatusFactory, $rootScope) {
+	.factory('TaskFactory', ['appConfig', 'getUTCTimecode', 'Phased', 'DBObject', 'StatusFactory', '$rootScope', function(appConfig, getUTCTimecode, Phased, DBObject, StatusFactory, $rootScope) {
 		var FBRef;
 
 		/** Class representing a task */
@@ -476,7 +476,7 @@ angular.module('webappV2App')
 
 					// dueDate (could be Date, Moment, or timestamp)
 					if (dueDate) {
-						let timecode = _getUTCTimecode(dueDate);
+						let timecode = getUTCTimecode(dueDate);
 						if (!!timecode) {
 							newTask.dueDate = timecode;
 						} else {
