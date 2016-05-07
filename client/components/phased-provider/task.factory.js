@@ -280,14 +280,16 @@ angular.module('webappV2App')
 
 			/**
 			*		User starts / resumes working on this task
-			*
-			*		@returns {Promise}
 			*/
 			workOn() {
 				this.status = Phased.meta.task.STATUS_ID.IN_PROGRESS;
-				return StatusFactory.create({
+				StatusFactory.create({
 					name : `${appConfig.strings.status.prefix.task.inProgress}: ${this.name}`,
 					taskID : this.ID
+				}).then(statusID => {
+					this.linkStatus(statusID);
+				}, err => {
+					console.warn('Posting status for task failed!', err);
 				});
 			}
 
@@ -311,70 +313,64 @@ angular.module('webappV2App')
 
 			/**
 			*		The user has completed working on a task and submits it for review
-			*
-			*		@returns {Promise}
 			*/
 			submitForReview() {
 				this.status = Phased.meta.task.STATUS_ID.IN_REVIEW;
-				return StatusFactory.create({
+				StatusFactory.create({
 					name : `${appConfig.strings.status.prefix.task.inReview}: ${this.name}`,
 					taskID : this.ID
+				}).then(statusID => {
+					this.linkStatus(statusID);
+				}, err => {
+					console.warn('Posting status for task failed!', err);
 				});
 			}
 
 			/**
 			*		The user (if admin) approves of a task that has been submit for review
-			*
-			*		@returns {Promise}
 			*/
 			approve() {
-				return new Promise((fulfill, reject) => {
-					if (Phased.team.members[Phased.user.uid].role != Phased.meta.ROLE_ID.ADMIN) {
-						reject(new Error('User must be admin to approve or reject task completion'));
-						return;
-					}
+				if (Phased.team.members[Phased.user.uid].role != Phased.meta.ROLE_ID.ADMIN) {
+					throw new Error('User must be admin to approve or reject task completion');
+				}
 
-					if (this.status != Phased.meta.task.STATUS_ID.IN_REVIEW) {
-						var msg = 'Task must be in review before approval or rejection';
-						console.warn(msg);
-						reject(new Error(msg));
-						return;
-					}
+				if (this.status != Phased.meta.task.STATUS_ID.IN_REVIEW) {
+					new Error('Task must be in review before approval or rejection');
+				}
 
-					this.status = Phased.meta.task.STATUS_ID.COMPLETE;
-					
-					StatusFactory.create({
-						name : `${appConfig.strings.status.prefix.task.approvedReview}: ${this.name}`,
-						taskID : this.ID
-					}).then(fulfill, reject);
+				this.status = Phased.meta.task.STATUS_ID.COMPLETE;
+				
+				StatusFactory.create({
+					name : `${appConfig.strings.status.prefix.task.approvedReview}: ${this.name}`,
+					taskID : this.ID
+				}).then(statusID => {
+					this.linkStatus(statusID);
+				}, err => {
+					console.warn('Posting status for task failed!', err);
 				});
 			}
 
 			/**
 			*		The user (if admin) rejects a task that has been submit for review
-			*
-			*		@returns {Promise}
 			*/
 			reject() {
-				return new Promise((fulfill, reject) => {
-					if (Phased.team.members[Phased.user.uid].role != Phased.meta.ROLE_ID.ADMIN) {
-						reject(new Error('User must be admin to approve or reject task completion'));
-						return;
-					}
+				if (Phased.team.members[Phased.user.uid].role != Phased.meta.ROLE_ID.ADMIN) {
+					throw new Error('User must be admin to approve or reject task completion');
+				}
 
-					if (this.status != Phased.meta.task.STATUS_ID.IN_REVIEW) {
-						var msg = 'Task must be in review before approval or rejection';
-						console.warn(msg);
-						reject(new Error(msg));
-						return;
-					}
+				if (this.status != Phased.meta.task.STATUS_ID.IN_REVIEW) {
+					throw new Error('Task must be in review before approval or rejection');
+				}
 
-					this.status = Phased.meta.task.STATUS_ID.REJECTED;
-					
-					StatusFactory.create({
-						name : `${appConfig.strings.status.prefix.task.approvedReview}: ${this.name}`,
-						taskID : this.ID
-					}).then(fulfill, reject);
+				this.status = Phased.meta.task.STATUS_ID.REJECTED;
+				
+				StatusFactory.create({
+					name : `${appConfig.strings.status.prefix.task.approvedReview}: ${this.name}`,
+					taskID : this.ID
+				}).then(statusID => {
+					this.linkStatus(statusID)
+				}, err => {
+					console.warn('Posting status for task failed!', err);
 				});
 			}
 		}
