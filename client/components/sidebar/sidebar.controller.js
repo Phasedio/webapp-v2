@@ -3,26 +3,26 @@
 class SidebarController {
   //start-non-standardv
    menu = [
-    // {
-    //     'title': 'Team',
-    //     'link': '/team'
-    // },
-    // {
-    //     'title': 'Tasks',
-    //     'link': '/assignments'
-    // },
-    // {
-    //     'title': 'Projects',
-    //     'link': '/team'
-    // },
-    // {
-    //     'title': 'Profile',
-    //     'link': '/team'
-    // },
-    // {
-    //     'title': 'Reports',
-    //     'link': '/reports'
-    // }
+    {
+        'title': 'Team',
+        'link': '/team'
+    },
+    {
+        'title': 'Tasks',
+        'link': '/assignments'
+    },
+    {
+        'title': 'Projects',
+        'link': '/team'
+    },
+    {
+        'title': 'Profile',
+        'link': '/team'
+    },
+    {
+        'title': 'Reports',
+        'link': '/reports'
+    }
   ];
 
   isCollapsed = true;

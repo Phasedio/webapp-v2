@@ -5,3 +5,8 @@
         ul
             li(ng-repeat='item in nav.menu', ng-if='!item.hideCondition' ng-class='{active: nav.isActive(item.link)}')
                 a(ng-href='{{item.link}}') {{item.title}}
+                
+        .sidebar-bottom
+            h4 Add member
+            h4 Switch teams
+            h4 Logout        
