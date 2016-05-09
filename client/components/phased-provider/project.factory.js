@@ -337,6 +337,30 @@ angular.module('webappV2App')
 				
 				super.pushVal('statusIDs', statusID);
 			}
+
+			/**
+			*		Unlinks a status from the project
+			*
+			*/
+			unlinkStatus(statusID) {
+				console.log('Project#unlinkStatus stub');
+			}
+
+			/**
+			*		Links an existing task to the project
+			*
+			*/
+			linkTask(taskID) {
+				console.log('Project#linkTask stub');
+			}
+
+			/**
+			*		Unlinks a task from the project
+			*
+			*/
+			unlinkTask(taskID) {
+				console.log('Project#unlinkTask stub');
+			}
 		}
 
 		/**	The status factory object */

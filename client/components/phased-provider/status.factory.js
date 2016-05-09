@@ -43,6 +43,9 @@ angular.module('webappV2App')
 					totalTime : this._.totalTime,
 				} = cfg);
 
+				this.taskID = this._.taskID;
+				this.projectID = this._.projectID;
+
 				// register read-only properties
 				Object.defineProperty( this, 'user', {value: cfg.user, configurable:false, writeable:false, enumerable: true} );
 				Object.defineProperty( this, 'time', {value: cfg.time, configurable:false, writeable:false, enumerable: true} );
@@ -137,24 +140,6 @@ angular.module('webappV2App')
 			set totalTime(val) {
 				throw new Error('Cannot edit totalTime directly; set startTime or endTime instead');
 			}
-
-			/** 	taskID 	*/
-			get taskID() {
-				return this._.taskID;
-			}
-
-			set taskID(val) {
-				throw new Error('Setting taskID not yet implemented');
-			}
-
-			/** 	projectID 	*/
-			get projectID() {
-				return this._.projectID;
-			}
-
-			set projectID(val) {
-				throw new Error('Setting projectID not yet implemented');
-			}
 		}
 
 		/**	The status factory object */
@@ -247,7 +232,14 @@ angular.module('webappV2App')
 					// 3. POST TO USER
 					statusRef.then(() => {
 						Phased._FBRef.child(`team/${Phased.team.uid}/members/${Phased.user.uid}/currentStatus`)
-						.set(statusID).then(fulfill, reject);
+						.set(statusID).then(err => {
+							if (err) {
+								statusRef.set(null);
+								reject(err);
+							}
+							else
+								fulfill(statusID);
+						}, reject);
 					}, reject);
 				});
 			}
