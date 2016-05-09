@@ -1,29 +1,31 @@
-include ../../layout/with-nav.jade
-header#banner.hero-unit
-  .container
-    h1 Reports
-    nav
-      a.today(href="#" ng-click="onToday($event)") Today
-      a.button.filter(href="#" ng-click="onFilter($event)") Filter
-      a.button.export(href="#" ng-click="onExport($event)") Export
+extends ../../layout/with-nav.jade
+//ddsddbsd
+block content
+  header#banner.hero-unit
+    .container
+      h1 Reports
+      nav
+        a.today(href="#" ng-click="onToday($event)") Today
+        a.button.filter(href="#" ng-click="onFilter($event)") Filter
+        a.button.export(href="#" ng-click="onExport($event)") Export
 
-.container
-  .row
-    .col-lg-12
-      //- in a list for semantic markup
-      ul.status-list
-        li.status(ng-repeat="status in Phased.team.statuses | orderObjectBy : 'startTime' : true" class="type-{{Phased.meta.status.TYPE[status.type]}}")
-          .top
-            img.user-img.circular(ng-src="{{Phased.team.members[status.user].profile.gravatar}}")
-            article
-              p.user-name {{Phased.team.members[status.user].profile.name}}
-              h1 {{status.name}} 
-              p.start-time
-                time {{status.startTime | date : 'short'}}
-          //- I'd use footer here but it looks like the fullstack generator wants it to be a directive
-          aside
-            .activity
-              a.likes(href="#" ng-click="onLikes($event, status)") Like
-                span.counter
-              a.comments(href="#" ng-click="onComments($event, status)") Comments
-                span.counter
+  .container
+    .row
+      .col-lg-12
+        //- in a list for semantic markup
+        ul.status-list
+          li.status(ng-repeat="status in Phased.team.statuses | orderObjectBy : 'startTime' : true" class="type-{{Phased.meta.status.TYPE[status.type]}}")
+            .top
+              img.user-img.circular(ng-src="{{Phased.team.members[status.user].profile.gravatar}}")
+              article
+                p.user-name {{Phased.team.members[status.user].profile.name}}
+                h1 {{status.name}} 
+                p.start-time
+                  time {{status.startTime | date : 'short'}}
+            //- I'd use footer here but it looks like the fullstack generator wants it to be a directive
+            aside
+              .activity
+                a.likes(href="#" ng-click="onLikes($event, status)") Like
+                  span.counter
+                a.comments(href="#" ng-click="onComments($event, status)") Comments
+                  span.counter

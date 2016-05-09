@@ -1,10 +1,12 @@
-include ../../layout/with-nav.jade
-header#banner.hero-unit
-  .container
-    h1 {{Phased.user.name}}
-    p.lead This is your profile page
+extends ../../layout/with-nav.jade
+//ddsddbsd
+block content
+  header#banner.hero-unit
+    .container
+      h1 {{Phased.user.name}}
+      p.lead This is your profile page
 
-.container
-  .row
-    .col-lg-12
-      p This is where some other stuff will go.
+  .container
+    .row
+      .col-lg-12
+        p This is where some other stuff will go.
