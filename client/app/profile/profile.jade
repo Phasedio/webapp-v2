@@ -35,3 +35,17 @@ block content
                   p.status-time
                     time {{member.startTime | date : 'short'}}
                   //Tags n context stuff here  
+        .profile-view-task(ng-show="profileView == 'task'")
+          .tasks(ng-repeat="task in Phased.team.tasks" ng-if="task.assignment.to == Phased.user.uid")
+            .task.clearfix
+              //img(ng-src="{{Phased.user.gravatar}}" class="circular" title="{{Phased.user.name}}")
+              .task-details
+                p.status-name {{task.name}}
+                .member-options
+                  a.like-status Like
+                  a.comment-status Comment
+                  p.status-time
+                    time {{task.dueDate | date : 'short'}}
+                  //Tags n context stuff here 
+          .no-tasks
+            h3 No tasks assigned to user                   
