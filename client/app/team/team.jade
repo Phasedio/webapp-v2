@@ -8,14 +8,41 @@ block content
 
 	.container		
 		.row
+			// Status update area
 			.col-lg-6
-				form(name="statusUpdate" ng-submit="postStatus(newStatus)")
-					input(name="newStatus" ng-model="newStatus" placeholder="What are you up to?")
+				.statusUpdate(ng-class="{active:statusActive}" ng-click="openStatus()")
+					img.circular(ng-src="{{Phased.user.gravatar}}")
+					form(name="statusUpdate" ng-submit="postStatus(newStatus)")
+						textarea(name="newStatus" ng-model="newStatus" placeholder="What are you up to?")
+						.status-options(ng-class="{active:statusActive}")
+							button.btn-phased-important-solid(type="submit") Post
+							
 				.team-member(ng-repeat="member in Phased.team.members")
 					.member-post.clearfix
 						img(ng-src="{{member.profile.gravatar}}" class="circular" title="{{member.profile.name}}")
 						.member-details
 							p.status-name {{Phased.team.statuses[member.currentStatus].name}}
-							p.status-time
-								time {{Phased.team.statuses[member.currentStatus].startTime | date : 'short'}}
-					
+							.member-options
+								a.like-status Like
+								a.comment-status Comment
+								p.status-time
+									time {{Phased.team.statuses[member.currentStatus].startTime | date : 'short'}}
+								//Tags n context stuff here
+			
+			// Announcement area		
+			.col-lg-4.col-lg-offset-2
+				.announcement.new-announcement
+					h2 This is a new announcement
+					p Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis egestas risus a lectus venenatis dapibus. Cras elit tortor, pretium eget fringilla eu, suscipit non arcu. Integer ex libero, volutpat vitae fermentum in, laoreet eget ex. Maecenas porttitor felis quis sem pulvinar, id vulputate nibh condimentum. In et convallis diam, vitae eleifend velit...
+					.announcement-meta
+						img.circular(ng-src="{{Phased.user.gravatar}}")
+						p.announcement-time Dec 12 12:00
+				.announcement
+					h2 This is a old announcement
+					p Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis egestas risus a lectus venenatis dapibus. Cras elit tortor, pretium eget fringilla eu, suscipit non arcu. Integer ex libero, volutpat vitae fermentum in, laoreet eget ex. Maecenas porttitor felis quis sem pulvinar, id vulputate nibh condimentum. In et convallis diam, vitae eleifend velit...
+					.announcement-meta
+						img.circular(ng-src="{{Phased.user.gravatar}}")
+						p.announcement-time Dec 12 12:00
+						
+				button.btn-phased-not-important-solid.add-announcement Add announcement				
+						

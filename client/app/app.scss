@@ -50,6 +50,7 @@ $fa-font-path: "../bower_components/font-awesome/fonts";
 // App colours
 $green: #00B572;
 $black:#333333;
+$gray: #8F8F8F;
 
 
 /**
@@ -108,6 +109,24 @@ body{
     &:hover{
       border-color: #333333;
     }
+}
+.btn-phased-important-solid{
+  background: $green;
+  font-weight: 200;
+  padding:8px;
+  border:0;
+  color:#fff;
+  position: relative;
+  
+}
+.btn-phased-not-important-solid{
+  background: #fff;
+  font-weight: 200;
+  padding:8px;
+  border:0;
+  color:$green;
+  position: relative;
+  
 }
 
 .sidebar{

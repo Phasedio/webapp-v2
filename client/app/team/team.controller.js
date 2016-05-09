@@ -9,6 +9,7 @@ var TeamController = function TeamController($http, $scope, Phased, StatusFactor
   */
   (function constructor() {
     $scope.Phased = Phased;
+    $scope.statusActive = false;
   })();
 
   $scope.postStatus = function postStatus(name) {
@@ -16,8 +17,8 @@ var TeamController = function TeamController($http, $scope, Phased, StatusFactor
       $scope.newStatus = '';
     }, (e) => {
       console.log(e);
-    })
-  }
+    });
+  };
 
   $scope.makeTask = function makeTask(name) {
     TaskFactory.create(name).then(()=>{
@@ -25,8 +26,13 @@ var TeamController = function TeamController($http, $scope, Phased, StatusFactor
     }, (e) => {
       console.log(e);
     });
-  }
-}
+  };
+  $scope.openStatus = function openStatus(){
+     $scope.statusActive  = true;
+  };
+};
+
+
 
 angular.module('webappV2App')
   .component('team', {
