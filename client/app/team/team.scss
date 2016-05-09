@@ -26,7 +26,11 @@ body{
 }
 
 .route-team {
-  .team-member {
+  
+  
+}
+
+.team-member {
     position: relative;
     display: block;
     //float: left;
@@ -97,8 +101,6 @@ body{
       font-size: 11px;
     }
   }
-  
-}
 .statusUpdate{
   background: #fff;
   position: relative;
@@ -229,6 +231,7 @@ body{
       width: 30px;
       margin: 0 auto;
       display: block;
+      margin-bottom:8px;
     }
     p{
       text-align: center;

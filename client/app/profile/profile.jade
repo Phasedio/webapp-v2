@@ -1,12 +1,37 @@
 extends ../../layout/with-nav.jade
 //ddsddbsd
 block content
-  header#banner.hero-unit
-    .container
-      h1 {{Phased.user.name}}
-      p.lead This is your profile page
-
   .container
     .row
-      .col-lg-12
-        p This is where some other stuff will go.
+      .col-lg-2
+        .profile-info
+          img.circular(ng-src="{{Phased.user.gravatar}}")
+          h2 {{Phased.user.name}}
+          hr
+          ul
+            li
+              span tel:
+              p 905 878 3623
+            li
+              span email:
+              p brian@phased.io
+            li
+              span slack:
+              p @brian
+      .col-lg-8
+        .profile-view-select
+          button.btn-phased-not-important-solid(ng-class="{active : profileView == 'status'}" ng-click="profileView = 'status'") Statuses
+          button.btn-phased-not-important-solid(ng-class="{active : profileView == 'task'}" ng-click="profileView = 'task'") Tasks
+        
+        .profile-view-statuses(ng-show="profileView == 'status'")
+          .team-member(ng-repeat="member in Phased.team.statuses" ng-if="member.user == Phased.user.uid")
+            .member-post.clearfix
+              img(ng-src="{{Phased.user.gravatar}}" class="circular" title="{{Phased.user.name}}")
+              .member-details
+                p.status-name {{member.name}}
+                .member-options
+                  a.like-status Like
+                  a.comment-status Comment
+                  p.status-time
+                    time {{member.startTime | date : 'short'}}
+                  //Tags n context stuff here  

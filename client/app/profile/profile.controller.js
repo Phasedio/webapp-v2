@@ -9,8 +9,10 @@ var ProfileController = function ProfileController($http, $scope, Phased) {
   */
   (function constructor() {
     $scope.Phased = Phased;
+    
+    console.log(Phased);
   })();
-
+  $scope.profileView = 'status';
 }
 
 angular.module('webappV2App')
