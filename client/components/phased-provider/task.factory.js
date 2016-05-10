@@ -515,6 +515,7 @@ angular.module('webappV2App')
 		});
 
 		// watch for new tasks added to the DB and create them here
+		// also watch for tasks that have been deleted from the DB
 		$rootScope.$on('Phased:teamComplete', () => {
 			FBRef.child(`team/${Phased.team.uid}/tasks`).on('child_added', (snap) => {
 				let cfg = snap.val();
@@ -522,6 +523,18 @@ angular.module('webappV2App')
 
 				$rootScope.$evalAsync( () => Phased.team.tasks[id] = new Task(id, cfg) );
 			});
+
+			FBRef.child(`team/${Phased.team.uid}/tasks`).on('child_removed', (snap) => {
+				let id = snap.key();
+				let task = Phased.team.tasks[id];
+
+				if (task instanceof Task) {
+					$rootScope.$evalAsync(() => {
+						task.destroy(); // remove all FB watches etc
+						delete Phased.team.tasks[id]; // delete reference in Phased service
+					});
+				}
+			})
 		});
 
 		// manage deleted task references

@@ -541,6 +541,18 @@ angular.module('webappV2App')
 
 				$rootScope.$evalAsync( () => Phased.team.projects[id] = new Project(id, cfg) );
 			});
+
+			FBRef.child(`team/${Phased.team.uid}/projects`).on('child_removed', (snap) => {
+				let id = snap.key();
+				let project = Phased.team.projects[id];
+
+				if (project instanceof Project) {
+					$rootScope.$evalAsync(() => {
+						project.destroy(); // remove all FB watches etc
+						delete Phased.team.projects[id]; // delete reference in Phased service
+					});
+				}
+			})
 		});
 
 		// manage deleted project references
