@@ -38,6 +38,7 @@ angular.module('webappV2App')
 				// expand relevant properties from cfg
 				({
 					name : this._.name,
+					description : this._.description,
 					dueDate : this._.dueDate,
 					assignment : this._.assignment,
 					comments : this._.comments,
