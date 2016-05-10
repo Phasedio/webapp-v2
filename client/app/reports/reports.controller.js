@@ -2,7 +2,7 @@
 
 (function() {
 
-var ReportsController = function ReportsController($http, $scope, Phased) {
+var ReportsController = function ReportsController($http, $scope, Phased, StatusFactory) {
 
   /*
   * mimics Yeoman's controller class constructor function
@@ -13,7 +13,7 @@ var ReportsController = function ReportsController($http, $scope, Phased) {
 
   // posts a simple status, then clears it
   $scope.postStatus = function postStatus() {
-    Phased.postStatus($scope.statusName).then(() => $scope.statusName = '');
+    StatusFactory.create($scope.statusName).then(() => $scope.statusName = '');
   }
 
   // when "Today" is clicked, choose a new date?
