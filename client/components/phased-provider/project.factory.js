@@ -7,7 +7,7 @@
 *		
 */
 angular.module('webappV2App')
-	.factory('ProjectFactory', ['Phased', 'DBObject', 'StatusFactory', 'TaskFactory', '$rootScope', function(Phased, DBObject, StatusFactory, TaskFactory, $rootScope) {
+	.factory('ProjectFactory', ['getUTCTimecode', 'Phased', 'DBObject', 'StatusFactory', 'TaskFactory', '$rootScope', function(getUTCTimecode, Phased, DBObject, StatusFactory, TaskFactory, $rootScope) {
 		var FBRef;
 
 		/** Class representing a project */
@@ -472,7 +472,7 @@ angular.module('webappV2App')
 					if (dueDate) {
 						let timecode = getUTCTimecode(dueDate);
 						if (!!timecode) {
-							newTask.dueDate = timecode;
+							newProject.dueDate = timecode;
 						} else {
 							console.warn('"dueDate" should be a Date, Moment, or numeric timestamp. Not using supplied value (' + typeof dueDate + ')');
 						}
