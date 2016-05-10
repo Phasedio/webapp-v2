@@ -460,7 +460,7 @@ angular.module('webappV2App')
 					}
 
 					// description
-					if (!!description) {
+					if (description) {
 						if (typeof description == 'string')
 							newProject.description = description;
 						else

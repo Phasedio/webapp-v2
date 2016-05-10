@@ -13,6 +13,9 @@ var ProjectsController = function ProjectsController ($http, $scope, Phased, Sta
       return false;
     }
   };
+  $scope.newProject = function newProject(){
+    
+  };
 };
 
 

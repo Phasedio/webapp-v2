@@ -1,0 +1,25 @@
+extends ../../layout/with-nav.jade
+//ddsddbsd
+block content
+    .container		
+        .row
+             .col-lg-8.col-lg-offset-2
+                .new-project.shadow
+                    h2 New project
+                    form(ng-submit="newProject(project)")
+                        .form-group
+                            label(for='projectTitle') Title
+                            input(type="text" name="projectTitle" ng-model="project.name" class="form-control" placeholder="Project title")
+                        .form-group    
+                            label(for='projectDescript') Description
+                            textarea(name="projectDescript" ng-model="project.description" class="form-control")
+                        .form-group
+                            label(for='projectDate') Due date
+                            input(type="date" name="projectDate" ng-model="project.dueDate" class="form-control")
+                        .form-group
+                            label(for='projectMembers') Add members
+                            select(multiple class="form-control" ng-model="project.memberIDs")
+                                option( ng-repeat="(key,member) in Phased.team.members" value="{{key}}") {{member.profile.name}}
+                                
+                        button(type="submit" class="btn btn-default btn-block") Submit
+                        button(type="button" class="btn btn-default btn-block") cancel   
