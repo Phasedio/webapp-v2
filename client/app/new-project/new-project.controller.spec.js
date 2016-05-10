@@ -10,12 +10,12 @@ describe('Component: NewProjectComponent', function () {
   // Initialize the controller and a mock scope
   beforeEach(inject(function ($componentController, $rootScope) {
     scope = $rootScope.$new();
-    NewProjectComponent = $componentController('NewProjectComponent', {
+    NewProjectComponent = $componentController('newProject', {
       $scope: scope
     });
   }));
 
   it('should ...', function () {
-    1.should.equal(1);
+    expect(1).to.equal(1);
   });
 });
