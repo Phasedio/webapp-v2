@@ -398,7 +398,7 @@ angular.module('webappV2App')
 			*		2. post to team
 			*
 			*		@param		{object}	args	attributes for the new task (or string name)
-			*		@returns	{Promise}
+			*		@returns	{Promise}				resolved with new task's ID; rejected with any error
 			*/
 			create : function create (args) {
 				return new Promise((fulfill, reject) => {
@@ -500,7 +500,11 @@ angular.module('webappV2App')
 					// 2. SEND TO SERVER
 					console.log('new task', newTask);
 
-					FBRef.child(`team/${Phased.team.uid}/tasks`).push(newTask).then(fulfill, reject);
+					var newTaskRef = FBRef.child(`team/${Phased.team.uid}/tasks`).push(newTask);
+					var newTaskID = newTaskRef.key();
+					newTaskRef.then(() => {
+						fulfill(newTaskID);
+					}, reject);
 				});
 			}
 		} 

@@ -150,7 +150,7 @@ angular.module('webappV2App')
 			*		Does NOT return the status object; status is created from FB.on set below
 			*
 			*		@param		{object}	args	attributes for the new status
-			*		@returns	{Promise}
+			*		@returns	{Promise}				resolved with new status' ID, rejected with any error
 			*/
 			create : function create(args) {
 				return new Promise((fulfill, reject) => {
