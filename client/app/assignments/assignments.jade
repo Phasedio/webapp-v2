@@ -12,18 +12,33 @@ block content
     .row
       .col-lg-3
         .filter-box.shadow
-          h3 Members
-      .col-lg-6
+          h3 Team
+          .team-holder.clearfix 
+            img(ng-repeat="member in Phased.team.members" ng-src="{{member.profile.gravatar}}" class="circular" title="{{member.profile.name}}")
+          h3 Project
+          ul
+            li Pork n Beans
+            li Buddy Holy
+            li Beverly Hills
+            li Memories
+            
+          h3 Date
+          
+             
+      .col-lg-9
         //- in a list for semantic markup
-        ul.task-list
-          li.task(ng-repeat="task in Phased.team.tasks | orderObjectBy : 'created' : true" class="type-{{Phased.meta.task.TYPE[task.type]}}")
-            h1 {{task.name}} 
-            p.due-date(ng-if="task.dueDate")
-              time {{task.dueDate | date : 'shortDate'}}
-            p.status {{Phased.meta.task.STATUS[task.status]}}
-            p.comments(href="#" ng-click="onComments($event, task)") Comments
-              ul.comments-list(ng-if="task.comments")
-                li.comment(ng-repeat="comment in task.comments") 
-                  p.text {{comment.text}}
-                  p.footer {{Phased.team.members[comment.user].profile.name}} at {{comment.time | date : 'MMM d y h:mma'}}
-            p.footer Work on this
+        ul.task-list.shadow
+          li.task.clearfix(ng-repeat="task in Phased.team.tasks | orderObjectBy : 'created' : true" class="type-{{Phased.meta.task.TYPE[task.type]}}")
+            .task-checkbox
+            .task-info
+              h3 {{task.name}}
+              .task-meta.clearfix 
+                p.due-date(ng-if="task.dueDate")
+                  time {{task.dueDate | date : 'shortDate'}}
+                p.status {{Phased.meta.task.STATUS[task.status]}}
+                p.comments(href="#" ng-click="onComments($event, task)") Comments
+                  ul.comments-list(ng-if="task.comments")
+                    li.comment(ng-repeat="comment in task.comments") 
+                      p.text {{comment.text}}
+                      p.footer {{Phased.team.members[comment.user].profile.name}} at {{comment.time | date : 'MMM d y h:mma'}}
+                p.footer Work on this

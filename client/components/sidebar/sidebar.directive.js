@@ -5,5 +5,5 @@ angular.module('webappV2App')
     templateUrl: 'components/sidebar/sidebar.html',
     restrict: 'E',
     controller: 'SidebarController',
-    controllerAs: 'nav'
+    controllerAs: 'sidebar'
   }));

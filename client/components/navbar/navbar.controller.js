@@ -2,19 +2,7 @@
 
 class NavbarController {
   //start-non-standard
-  menu = [
-  {
-    'title': 'Home',
-    'link': '/assignments'
-  },
-  {
-    'title': 'Reports',
-    'link': '/reports'
-  },
-  {
-    'title': 'Team',
-    'link': '/team'
-  }];
+ 
 
   isCollapsed = true;
   //end-non-standard
