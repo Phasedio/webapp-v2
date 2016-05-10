@@ -479,7 +479,12 @@ angular.module('webappV2App')
     	.limitToLast(_DEFAULTS.ANNOUNCEMENTS_LIMIT)
     	.on('value', snap => {
     		$rootScope.$evalAsync(() => {
-    			_.assign(Phased.team.announcements, snap.val());
+    			let ann = snap.val();
+					for (let i in Phased.team.announcements) {
+						if (!(i in ann))
+							delete Phased.team.announcements[i];
+					}
+    			_.assign(Phased.team.announcements, ann);
     		});
     		maybeTeamComplete('announcements');
     	});
@@ -653,5 +658,37 @@ angular.module('webappV2App')
 					fulfill(newID);
 				}, reject);
 			});
+		}
+
+		/**
+		*	Edit an announcement
+		*
+		*	@param	{string}	ID 	ID of the announcement to edit
+		*	@param	{object}	args		object with updated name and/or description attributes
+		*/
+		Phased.editAnnouncement = function editAnnouncement(ID, args = {}) {
+			var data = {};
+			if (args.name)
+				data.name = args.name;
+			if (args.description)
+				data.description = args.description;
+			
+			if (!ID || typeof ID != 'string') {
+				throw new Error('ID should be string, got ' + (typeof ID));
+			}
+
+			_FBRef.child(`team/${Phased.team.uid}/announcements/${ID}`).update(data);
+		}
+
+		/**
+		*	Deletes an announcemnet
+		*
+		*	@param	{string}	ID 	ID of the announcement to edit
+		*/
+		Phased.deleteAnnouncement = function deleteAnnouncement(ID) {
+			if (!ID || typeof ID != 'string') {
+				throw new Error('ID should be string, got ' + (typeof ID));
+			}
+			_FBRef.child(`team/${Phased.team.uid}/announcements/${ID}`).remove();
 		}
 	})
