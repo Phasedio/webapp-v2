@@ -10,6 +10,21 @@ angular.module('webappV2App')
 	.factory('StatusFactory', ['Phased', 'DBObject', '$rootScope', 'getUTCTimecode', function(Phased, DBObject, $rootScope, getUTCTimecode) {
 		var FBRef; // root FBRef
 
+		/**
+		*		Gets most recent status for a user other than statusID
+		*
+		*		@param		{string}	userID
+		*		@param		{string}	statusID
+		*		@return 	{Status}	
+		*/
+		var getNextMostRecentStatus = function getNextMostRecentStatus(userID, statusID) {
+				let userStatuses = _.filter(Phased.team.statuses, (o) => {
+					return o.user == userID && o.ID != statusID;
+				});
+				userStatuses = _.sortBy(userStatuses, 'startTime');
+				return _.last(userStatuses);
+		}
+
 		/** Class representing a status */
 		class Status extends DBObject {
 			/**
@@ -76,11 +91,7 @@ angular.module('webappV2App')
 				var is_user_currentStatus = Phased.team.members[this.user].currentStatus == this.ID;
 				if (is_user_currentStatus) {
 					// get last status
-					let userStatuses = _.sortBy(Phased.team.statuses, 'ID', (o) => {
-						if (o.ID == this.ID) return false;
-						return o.user == this.user ? o.startTime : false;
-					});
-					let last = _.last(userStatuses);
+					let last = getNextMostRecentStatus(this.user, this.ID);
 					// update db
 					FBRef.root().child(`team/${Phased.team.uid}/members/${Phased.user.uid}/currentStatus`).set(last.ID).then(() => $rootScope.$apply());
 				}
