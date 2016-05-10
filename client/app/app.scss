@@ -1,3 +1,19 @@
+//Mixin
+
+// Mixin itself
+@mixin clearfix() {
+  overflow:auto; 
+  &:before,
+  &:after {
+    content: " ";
+    display: table;
+  }
+  &:after {
+    clear: both;
+  }
+}
+
+
 // Load in San Fransisco font
 
 /** Ultra Light */
@@ -188,6 +204,7 @@ body{
 @import 'assignments/assignments';
 @import 'login/login';
 @import 'profile/profile';
+@import 'projects/projects';
 @import 'reports/reports';
 @import 'team/team';
 @import '../components/footer/footer';

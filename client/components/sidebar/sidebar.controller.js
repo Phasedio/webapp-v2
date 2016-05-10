@@ -13,7 +13,7 @@ class SidebarController {
     },
     {
         'title': 'Projects',
-        'link': '/team'
+        'link': '/projects'
     },
     {
         'title': 'Profile',
