@@ -37,12 +37,12 @@ block content
 					.announcement-meta
 						img.circular(ng-src="{{Phased.user.gravatar}}")
 						p.announcement-time Dec 12 12:00
-				.announcement
-					h2 This is a old announcement
-					p Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis egestas risus a lectus venenatis dapibus. Cras elit tortor, pretium eget fringilla eu, suscipit non arcu. Integer ex libero, volutpat vitae fermentum in, laoreet eget ex. Maecenas porttitor felis quis sem pulvinar, id vulputate nibh condimentum. In et convallis diam, vitae eleifend velit...
+				.announcement(ng-repeat="announcement in Phased.team.announcements")
+					h2 {{announcement.name}}
+					p {{announcement.description}}
 					.announcement-meta
-						img.circular(ng-src="{{Phased.user.gravatar}}")
-						p.announcement-time Dec 12 12:00
+						img.circular(ng-src="{{Phased.team.members[announcement.user].profile.gravatar}}")
+						p.announcement-time {{announcement.created | date : 'short'}}
 						
 				button.btn-phased-not-important-solid.add-announcement Add announcement				
 						

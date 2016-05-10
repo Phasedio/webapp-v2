@@ -38,7 +38,11 @@ angular.module('webappV2App')
 			PROJECT_ADDED : 'Phased:newProject',
 			PROJECT_CHANGED : 'Phased:changedProject',
 			PROJECT_DELETED : 'Phased:deletedProject',
-			PROJECT_DESTROYED : 'Phased:destroyedProject'
+			PROJECT_DESTROYED : 'Phased:destroyedProject',
+
+			ANNOUNCEMENT_ADDED : 'Phased:newAnnouncement',
+			ANNOUNCEMENT_CHANGED : 'Phased:changedAnnouncement',
+			ANNOUNCEMENT_DELETED : 'Phased:deletedAnnouncement'
 		},
 		// tasks to do after the indicated events
 		_toDoAfter = {
@@ -53,12 +57,14 @@ angular.module('webappV2App')
 		_CONFIG = {},
 		_DEFAULTS = {
 			STATUS_LIMIT : 30,
+			ANNOUNCEMENTS_LIMIT: 10,
 			TEAM : {
 				details : {},
 				members : {},
 				statuses : {},
 				tasks : {},
-				projects : {}
+				projects : {},
+				announcements : {}
 			}
 		},
 		_oldestStatusTime = new Date().getTime(),
@@ -420,7 +426,7 @@ angular.module('webappV2App')
     */
     var _watchTeam = function watchTeam() {
     	var teamID = Phased.team.uid = Phased.user.currentTeam,
-    	props = ['details', 'members'],
+    	props = ['details', 'members', 'announcements'],
     	completed = [],
     	now = moment.utc().unix();
 
@@ -434,6 +440,7 @@ angular.module('webappV2App')
 
     	//
     	// details
+    	//
     	_FBRef.child(`team/${teamID}/details`).on('value', snap => {
     		$rootScope.$evalAsync(() => {
     			_.assign(Phased.team.details, snap.val());
@@ -463,6 +470,18 @@ angular.module('webappV2App')
     		$rootScope.$evalAsync(() => {
     			delete Phased.team.members[uid]; // delete from team
     		});
+    	});
+
+    	//
+    	// announcements
+    	//
+    	_FBRef.child(`team/${teamID}/announcements`)
+    	.limitToLast(_DEFAULTS.ANNOUNCEMENTS_LIMIT)
+    	.on('value', snap => {
+    		$rootScope.$evalAsync(() => {
+    			_.assign(Phased.team.announcements, snap.val());
+    		});
+    		maybeTeamComplete('announcements');
     	});
 
     	//
