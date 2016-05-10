@@ -334,6 +334,16 @@ angular.module('webappV2App')
 				if (!(statusID in Phased.team.statuses)) {
 					throw new ReferenceError(`Could not find ${statusID} in team statuses`);
 				}
+
+				let status = Phased.team.statuses[statusID];
+				if (!!status.projectID && status.projectID != this.ID) {
+					console.log('Status currently linked to a project; unlinking from other project...');
+					let oldProj = Phased.team.tasks[Phased.team.statuses[statusID].projectID];
+					oldProj.unlinkStatus(statusID);
+				}
+
+				// set status' projectID
+				Phased.team.statuses[statusID].projectID = this.ID;
 				
 				super.pushVal('statusIDs', statusID);
 			}
@@ -341,25 +351,64 @@ angular.module('webappV2App')
 			/**
 			*		Unlinks a status from the project
 			*
+			*		@param 	{string}	statusID 	ID of the status to unlink
+			*		@throws	TypeError 					if statusID isn't a string
 			*/
 			unlinkStatus(statusID) {
-				console.log('Project#unlinkStatus stub');
+				if (!(typeof statusID == 'string')) {
+					throw new TypeError('statusID should be string, got ' + (typeof statusID));
+				}
+
+				if (statusID in Phased.team.statuses && Phased.team.statuses[statusID].projectID == this.ID)
+					Phased.team.statuses[statusID].projectID = undefined;
+
+				super.removeFromCollection('statusIDs', statusID);
 			}
 
 			/**
 			*		Links an existing task to the project
 			*
+			*		@param 	{string}	taskID 		ID of the task to link
+			*		@throws	TypeError 					if taskID isn't a string
+			*		@throws	ReferenceError			if task doesn't exist
 			*/
 			linkTask(taskID) {
-				console.log('Project#linkTask stub');
+				if (!(typeof taskID == 'string')) {
+					throw new TypeError('taskID should be string, got ' + (typeof taskID));
+				}
+
+				if (!(taskID in Phased.team.tasks)) {
+					throw new ReferenceError(`Could not find ${taskID} in team tasks`);
+				}
+
+				let task = Phased.team.tasks[taskID];
+				if (!!task.proejctID && task.projectID != this.ID) {
+					console.log('Task currently linked to a project; unlinking from other project...');
+					let oldProj = Phased.team.projects[Phased.team.tasks[taskID].proejctID];
+					oldProj.unlinkTask(taskID);
+				}
+
+				// set task's projectID
+				Phased.team.tasks[taskID].projectID = this.ID;
+				
+				return super.pushVal('taskIDs', taskID);
 			}
 
 			/**
 			*		Unlinks a task from the project
 			*
+			*		@param 	{string}	taskID 		ID of the task to unlink
+			*		@throws	TypeError 					if taskID isn't a string
 			*/
 			unlinkTask(taskID) {
-				console.log('Project#unlinkTask stub');
+				if (!(typeof taskID == 'string')) {
+					throw new TypeError('taskID should be string, got ' + (typeof taskID));
+				}
+
+				if (taskID in Phased.team.tasks && Phased.team.tasks[taskID].projectID == this.ID)
+					Phased.team.tasks[taskID].projectID = undefined;
+
+				super.removeFromCollection('taskIDs', taskID);
 			}
 		}
 
