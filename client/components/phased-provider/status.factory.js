@@ -262,6 +262,7 @@ angular.module('webappV2App')
 		});
 
 		// watch for new statuses added to the DB and create them here
+		// also watch for statuses that have been deleted from the DB
 		$rootScope.$on('Phased:teamComplete', () => {
 			FBRef.child(`team/${Phased.team.uid}/statuses`).on('child_added', (snap) => {
 				let cfg = snap.val();
@@ -269,6 +270,25 @@ angular.module('webappV2App')
 
 				$rootScope.$evalAsync( () => Phased.team.statuses[id] = new Status(id, cfg) );
 			});
+
+			FBRef.child(`team/${Phased.team.uid}/statuses`).on('child_removed', (snap) => {
+				// when a status has been removed; assume the DB info is correct and we only need to update the local data
+				let id = snap.key();
+				var status = Phased.team.statuses[id];
+
+				if (status instanceof Status) { // if it's a status
+					$rootScope.$evalAsync(() => {
+						if (Phased.team.members[status.user].currentStatus == id) { // if it's the user's currentStatus
+							let next = getNextMostRecentStatus(status.user, id);	// get their next-most-recent
+							Phased.team.members[status.user].currentStatus = next.ID; // and set it to their current status
+						}
+						status.destroy(); // remove all FB watches etc
+						delete Phased.team.statuses[id]; // delete reference in Phased service
+					});
+				} /*else {
+					console.log('status not a Status object!');
+				}*/
+			})
 		});
 
 		// manage deleted status references
