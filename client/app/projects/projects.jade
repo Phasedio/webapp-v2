@@ -4,12 +4,18 @@ block content
     .container		
         .row
             .col-lg-8
-                .project
+                .project(ng-repeat="project in Phased.team.projects")
                     .project-info.clearfix
                         .project-discript
-                            h1 this is a test
-                            p Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras dignissim viverra suscipit. Nam et magna vitae elit gravida fermentum sit amet a nunc. Quisque fermentum felis sit amet tellus lacinia sodales. Cras pulvinar malesuada nunc. Maecenas gravida facilisis sem. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.
+                            h1 {{project.name}}
+                            p(ng-if="project.description") {{project.description}}
+                            p(ng-if="!project.description") no description entered
                         .project-meta
-                            button view project
+                            button.btn.btn-phased-important view project
                             .project-members
-                            h3.project-complete-ness 50%
+                            h3.project-due(ng-if="project.dueDate") {{project.dueDate}}
+                            h3.project-due(ng-if="!project.dueDate") No due date
+                            h2.project-complete-ness(ng-if="hasTasks(project.tasks)") 00%
+                            h2.project-complete-ness(ng-if="!hasTasks(project.tasks)") --%
+            .col-lg-4
+                button.btn-phased-not-important-solid.new-project New project	                
