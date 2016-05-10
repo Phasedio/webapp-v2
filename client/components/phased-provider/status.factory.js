@@ -10,6 +10,21 @@ angular.module('webappV2App')
 	.factory('StatusFactory', ['Phased', 'DBObject', '$rootScope', 'getUTCTimecode', function(Phased, DBObject, $rootScope, getUTCTimecode) {
 		var FBRef; // root FBRef
 
+		/**
+		*		Gets most recent status for a user other than statusID
+		*
+		*		@param		{string}	userID
+		*		@param		{string}	statusID
+		*		@return 	{Status}	
+		*/
+		var getNextMostRecentStatus = function getNextMostRecentStatus(userID, statusID) {
+				let userStatuses = _.filter(Phased.team.statuses, (o) => {
+					return o.user == userID && o.ID != statusID;
+				});
+				userStatuses = _.sortBy(userStatuses, 'startTime');
+				return _.last(userStatuses);
+		}
+
 		/** Class representing a status */
 		class Status extends DBObject {
 			/**
@@ -76,11 +91,7 @@ angular.module('webappV2App')
 				var is_user_currentStatus = Phased.team.members[this.user].currentStatus == this.ID;
 				if (is_user_currentStatus) {
 					// get last status
-					let userStatuses = _.sortBy(Phased.team.statuses, 'ID', (o) => {
-						if (o.ID == this.ID) return false;
-						return o.user == this.user ? o.startTime : false;
-					});
-					let last = _.last(userStatuses);
+					let last = getNextMostRecentStatus(this.user, this.ID);
 					// update db
 					FBRef.root().child(`team/${Phased.team.uid}/members/${Phased.user.uid}/currentStatus`).set(last.ID).then(() => $rootScope.$apply());
 				}
@@ -150,7 +161,7 @@ angular.module('webappV2App')
 			*		Does NOT return the status object; status is created from FB.on set below
 			*
 			*		@param		{object}	args	attributes for the new status
-			*		@returns	{Promise}
+			*		@returns	{Promise}				resolved with new status' ID, rejected with any error
 			*/
 			create : function create(args) {
 				return new Promise((fulfill, reject) => {
@@ -251,6 +262,7 @@ angular.module('webappV2App')
 		});
 
 		// watch for new statuses added to the DB and create them here
+		// also watch for statuses that have been deleted from the DB
 		$rootScope.$on('Phased:teamComplete', () => {
 			FBRef.child(`team/${Phased.team.uid}/statuses`).on('child_added', (snap) => {
 				let cfg = snap.val();
@@ -258,6 +270,25 @@ angular.module('webappV2App')
 
 				$rootScope.$evalAsync( () => Phased.team.statuses[id] = new Status(id, cfg) );
 			});
+
+			FBRef.child(`team/${Phased.team.uid}/statuses`).on('child_removed', (snap) => {
+				// when a status has been removed; assume the DB info is correct and we only need to update the local data
+				let id = snap.key();
+				var status = Phased.team.statuses[id];
+
+				if (status instanceof Status) { // if it's a status
+					$rootScope.$evalAsync(() => {
+						if (Phased.team.members[status.user].currentStatus == id) { // if it's the user's currentStatus
+							let next = getNextMostRecentStatus(status.user, id);	// get their next-most-recent
+							Phased.team.members[status.user].currentStatus = next.ID; // and set it to their current status
+						}
+						status.destroy(); // remove all FB watches etc
+						delete Phased.team.statuses[id]; // delete reference in Phased service
+					});
+				} /*else {
+					console.log('status not a Status object!');
+				}*/
+			})
 		});
 
 		// manage deleted status references

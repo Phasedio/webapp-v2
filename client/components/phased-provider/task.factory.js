@@ -398,7 +398,7 @@ angular.module('webappV2App')
 			*		2. post to team
 			*
 			*		@param		{object}	args	attributes for the new task (or string name)
-			*		@returns	{Promise}
+			*		@returns	{Promise}				resolved with new task's ID; rejected with any error
 			*/
 			create : function create (args) {
 				return new Promise((fulfill, reject) => {
@@ -500,7 +500,11 @@ angular.module('webappV2App')
 					// 2. SEND TO SERVER
 					console.log('new task', newTask);
 
-					FBRef.child(`team/${Phased.team.uid}/tasks`).push(newTask).then(fulfill, reject);
+					var newTaskRef = FBRef.child(`team/${Phased.team.uid}/tasks`).push(newTask);
+					var newTaskID = newTaskRef.key();
+					newTaskRef.then(() => {
+						fulfill(newTaskID);
+					}, reject);
 				});
 			}
 		} 
@@ -511,6 +515,7 @@ angular.module('webappV2App')
 		});
 
 		// watch for new tasks added to the DB and create them here
+		// also watch for tasks that have been deleted from the DB
 		$rootScope.$on('Phased:teamComplete', () => {
 			FBRef.child(`team/${Phased.team.uid}/tasks`).on('child_added', (snap) => {
 				let cfg = snap.val();
@@ -518,6 +523,18 @@ angular.module('webappV2App')
 
 				$rootScope.$evalAsync( () => Phased.team.tasks[id] = new Task(id, cfg) );
 			});
+
+			FBRef.child(`team/${Phased.team.uid}/tasks`).on('child_removed', (snap) => {
+				let id = snap.key();
+				let task = Phased.team.tasks[id];
+
+				if (task instanceof Task) {
+					$rootScope.$evalAsync(() => {
+						task.destroy(); // remove all FB watches etc
+						delete Phased.team.tasks[id]; // delete reference in Phased service
+					});
+				}
+			})
 		});
 
 		// manage deleted task references
