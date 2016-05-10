@@ -37,7 +37,7 @@ block content
 					.announcement-meta
 						img.circular(ng-src="{{Phased.user.gravatar}}")
 						p.announcement-time Dec 12 12:00
-				.announcement(ng-repeat="announcement in Phased.team.announcements")
+				.announcement(ng-repeat="announcement in Phased.team.announcements | orderObjectBy : 'created' : true")
 					h2 {{announcement.name}}
 					p {{announcement.description}}
 					.announcement-meta
