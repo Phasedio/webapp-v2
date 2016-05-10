@@ -1,4 +1,8 @@
+
 .profile-info{
+  width:160px;
+  margin: auto;
+  margin-bottom:48px;
   img{
     width: 60px;
     display: block;
@@ -10,6 +14,12 @@
     margin-top:8px;
     text-align: center;
     font-size: 24px;
+    font-weight: 200;
+  }
+  h6{
+    color:$gray;
+    text-align: center;
+    font-size: 14px;
     font-weight: 200;
   }
   hr{

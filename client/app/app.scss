@@ -145,16 +145,42 @@ body{
   
 }
 
-.sidebar{
-  width:250px;
-  height: 100vh;
-  min-height: 700px;
-  position: fixed;
-  top:0;
-  background:#2A2A2A;
+.btn-phased-not-important-sneaky{
+  background: transparent;
+  font-weight: 200;
+  padding:8px;
+  border:0;
+  color:$green;
+  position: relative;
+  transition: all 0.2s;
+  -webkit-transition-timing-function: linear; /* Safari and Chrome */
+  transition-timing-function: linear;
+  
+   &:after{
+      content: "";
+      display: block;
+      width: 80%;
+      height:15px;
+      box-shadow: 0px 2px 50px rgba(0,0,0,0);
+      position: absolute;
+      bottom:0;
+      left:10%;
+      z-index: -1;
+      transition: all 0.2s;
+      -webkit-transition-timing-function: linear; /* Safari and Chrome */
+      transition-timing-function: linear;
+    }
+  &:hover{
+    background: #fff;
+    &:after{
+      box-shadow: 0px 2px 50px rgba(0,0,0,0.25);
+    }
+  }  
 }
+
+
 .rightside_content{
- padding-left:250px;
+ padding-left:200px;
 }
 
 // Component styles are injected through grunt

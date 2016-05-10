@@ -12,3 +12,27 @@
 		}
 	}
 }
+.navbar-header{
+	width: 20%;
+	float: left;
+}
+#navbar-main{
+	width: 20%;
+	float: left;
+	.profile-link{
+		float: right;
+	}
+}
+.navbar-team{
+	width: 60%;
+	float: left;
+	a{
+		display: block;
+		text-align: center;
+		font-size:15px;
+		color:$black;
+		padding-top: 15px;
+    	padding-bottom: 15px;
+		padding: 1em;
+	}
+}

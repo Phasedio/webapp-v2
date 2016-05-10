@@ -1,24 +1,29 @@
 extends ../../layout/with-nav.jade
 //ddsddbsd
 block content
-  .container
+  
+  .container.bgcontainer
     .row
-      .col-lg-2
+      
+        
+      .col-lg-8.col-lg-offset-2
         .profile-info
           img.circular(ng-src="{{Phased.user.gravatar}}")
           h2 {{Phased.user.name}}
+          h6 Ass kicker in chief
           hr
-          ul
-            li
-              span tel:
-              p 905 878 3623
-            li
-              span email:
-              p brian@phased.io
-            li
-              span slack:
-              p @brian
-      .col-lg-8
+          button.btn-phased-not-important-sneaky.btn-block(ng-click="showContact = true;") contact
+          .contact-info(ng-show="showContact")
+            ul
+              li
+                span tel:
+                p 905 878 3623
+              li
+                span email:
+                p brian@phased.io
+              li
+                span slack:
+                p @brian
         .profile-view-select
           button.btn-phased-not-important-solid(ng-class="{active : profileView == 'status'}" ng-click="profileView = 'status'") Statuses
           button.btn-phased-not-important-solid(ng-class="{active : profileView == 'task'}" ng-click="profileView = 'task'") Tasks

@@ -9,7 +9,7 @@ block content
 	.container		
 		.row
 			// Status update area
-			.col-lg-6
+			.col-lg-8
 				.statusUpdate(ng-class="{active:statusActive}" ng-click="openStatus()")
 					img.circular(ng-src="{{Phased.user.gravatar}}")
 					form(name="statusUpdate" ng-submit="postStatus(newStatus)")
@@ -30,7 +30,7 @@ block content
 								//Tags n context stuff here
 			
 			// Announcement area		
-			.col-lg-4.col-lg-offset-2
+			.col-lg-4
 				.announcement.new-announcement
 					h2 This is a new announcement
 					p Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis egestas risus a lectus venenatis dapibus. Cras elit tortor, pretium eget fringilla eu, suscipit non arcu. Integer ex libero, volutpat vitae fermentum in, laoreet eget ex. Maecenas porttitor felis quis sem pulvinar, id vulputate nibh condimentum. In et convallis diam, vitae eleifend velit...

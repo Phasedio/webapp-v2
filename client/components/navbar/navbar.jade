@@ -7,11 +7,10 @@ div.navbar.navbar-default.navbar-static-top(ng-controller='NavbarController')
         span.icon-bar
         span.icon-bar
       a.navbar-brand(href='/') 
-
+    .navbar-team
+      a(href="") {{Phased.team.details.name}}  
     div#navbar-main.navbar-collapse.collapse(uib-collapse='nav.isCollapsed', ng-if="Phased.LOGGED_IN")
-      ul.nav.navbar-nav
-        li
-          a(href="") {{Phased.team.details.name}}
+     
       .profile-link
         a(href="/profile")
           {{Phased.user.name}}
