@@ -630,4 +630,28 @@ angular.module('webappV2App')
 		Phased.logout = function logout() {
 			_FBRef.unauth();
 		}
+
+		/**
+		*	Make an announcement to the team
+		*
+		*	@param 	{string}	name 					name/title of announcement
+		*	@param	{string} 	description 	full text of announcment (optional)
+		*	@return {Promise}								resolve passed ID of the new announcement
+		*/
+		Phased.addAnnouncement = function addAnnouncement(name, description = '') {
+			return new Promise((fulfill, reject) => {
+				var data = {
+					name : name,
+					description : description,
+					user : Phased.user.uid,
+					created : Firebase.ServerValue.TIMESTAMP
+				}
+
+				var newRef = _FBRef.child(`team/${Phased.team.uid}/announcements`).push(data);
+				var newID = newRef.key();
+				newRef.then(() => {
+					fulfill(newID);
+				}, reject);
+			});
+		}
 	})
