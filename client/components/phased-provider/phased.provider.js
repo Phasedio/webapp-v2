@@ -57,7 +57,8 @@ angular.module('webappV2App')
 				details : {},
 				members : {},
 				statuses : {},
-				tasks : {}
+				tasks : {},
+				projects : {}
 			}
 		},
 		_oldestStatusTime = new Date().getTime(),

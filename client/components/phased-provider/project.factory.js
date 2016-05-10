@@ -415,14 +415,116 @@ angular.module('webappV2App')
 		/**	The status factory object */
 		var ProjectFactory = {
 			Project : Project,
+
 			/*
 			*		Factory method for creating a new project and posting to the DB
 			*		Does NOT return the project object
 			*
 			*		@param		{object}	args	attributes for the new project
-			*		@returns	{Promise}
+			*		@returns	{Promise}				resolved with new Project's ID
 			*/
 			create : function create (args) {
+				return new Promise((fulfill, reject) => {
+					if (typeof args == 'string') {
+						args = {name: args};
+					} else if (typeof args != 'object') {
+						var msg = 'ProjectFactory.createProject expects an object or string; got ' + (typeof args);
+						console.warn(msg);
+						reject(new Error(msg));
+						return;
+					}
+
+					if (!Phased || typeof Phased != 'object' || !Phased.SET_UP) {
+						reject(new Error('Cannot make a project without Phased!'));
+						return;
+					}
+
+					// destructure args
+					const { name, description, dueDate, memberIDs, taskIDs } = args;
+
+					// simplest object
+					var newProject = {
+						created: Firebase.ServerValue.TIMESTAMP, // now
+						status: Phased.meta.project.STATUS_ID.CREATED
+					}
+
+					// 1. PROP VALIDATION
+					// name
+					if (!('name' in args) || typeof name != 'string') {
+						var msg = 'Cannot post a nameless project!';
+						console.warn(msg);
+						reject(new Error(msg));
+						return;
+					} else {
+						newProject.name = name;
+					}
+
+					// description
+					if (!!description) {
+						if (typeof description == 'string')
+							newProject.description = description;
+						else
+							console.warn('project.description should be a string; got ' + (typeof description));
+					}
+
+					// dueDate (could be Date, Moment, or timestamp)
+					if (dueDate) {
+						let timecode = getUTCTimecode(dueDate);
+						if (!!timecode) {
+							newTask.dueDate = timecode;
+						} else {
+							console.warn('"dueDate" should be a Date, Moment, or numeric timestamp. Not using supplied value (' + typeof dueDate + ')');
+						}
+					}
+
+					// memberIDs
+					let projMembers = [];
+					if (memberIDs) {
+						if (typeof memberIDs == 'object') {
+							// loop through to ensure each is actually a member
+							for (var i in memberIDs) {
+								let memberID = memberIDs[i];
+								if (memberID in Phased.team.members)
+									projMembers.push(memberID)
+								else
+									console.warn(`${memberID} is not a member on the current team; ignoring`);
+							}
+						} else {
+							console.warn('Expected object or array for project.memberIDs, ignoring supplied ' + (typeof memberIDs));
+						}
+					}
+
+					// taskIDs
+					let projTasks = [];
+					if (taskIDs) {
+						if (typeof taskIDs == 'object') {
+							// loop through to ensure each is actually a task
+							for (var i in taskIDs) {
+								let taskID = taskIDs[i];
+								if (taskID in Phased.team.tasks)
+									projTasks.push(taskID)
+								else
+									console.warn(`${taskID} is not a task on the current team; ignoring`);
+							}
+						} else {
+							console.warn('Expected object or array for project.taskIDs, ignoring supplied ' + (typeof taskIDs));
+						}
+					}
+
+					// 2. SEND TO SERVER
+					var newProjectRef = FBRef.child(`team/${Phased.team.uid}/projects`).push(newProject);
+					var newProjectID = newProjectRef.key();
+					newProjectRef.then(() => {
+						// push up member and task ID arrays to get unique FB keys properly initiated
+						for (var i in projMembers) {
+							newProjectRef.child('memberIDs').push(projMembers[i]);
+						}
+						for (var i in projTasks) {
+							newProjectRef.child('taskIDs').push(projTasks[i]);
+						}
+						fulfill(newProjectID);
+					}, reject);
+				});
 			}
 		} 
 
