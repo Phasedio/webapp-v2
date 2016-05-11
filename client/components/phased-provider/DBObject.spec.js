@@ -14,6 +14,10 @@ describe('Class: DBObject', function() {
   var lastPushed;
   // data fed to update gets stashed here
   var lastUpdated;
+  // data fed to set gets stashed here
+  var lastSet;
+  // last event passed to FBRef.off
+  var lastOffEvent;
   // a stub Firebase
   var Firebase = function Firebase(FURL) {}
 
@@ -37,6 +41,9 @@ describe('Class: DBObject', function() {
     FBRefStubCl.prototype.val = sandbox.stub();
     FBRefStubCl.prototype.set = sandbox.stub();
     FBRefStubCl.prototype.on = sandbox.stub().returnsPromise().resolves({});
+    FBRefStubCl.prototype.off = sandbox.spy(function (evt) {
+      lastOffEvent = evt;
+    });
     FBRefStubCl.prototype.once = sandbox.stub().returnsPromise().resolves({});
     FBRefStubCl.prototype.push = sandbox.spy(function (data) {
       lastPushed = data;
@@ -44,6 +51,10 @@ describe('Class: DBObject', function() {
     });
     FBRefStubCl.prototype.update = sandbox.spy(function (data) {
       lastUpdated = data;
+      return snapStub;
+    });
+    FBRefStubCl.prototype.set = sandbox.spy(function (data) {
+      lastSet = data;
       return snapStub;
     });
 
