@@ -37,7 +37,7 @@ angular.module('webappV2App')
 			*/
 			constructor(ID, cfg) {
 				// fail if Phased team ID or member IDs aren't available
-				if (!ID || typeof ID != 'string' || !cfg || typeof cfg != 'object' || cfg == undefined) {
+				if (_.isNil(ID) || typeof ID != 'string' || !cfg || typeof cfg != 'object' || _.isNil(cfg)) {
 					throw new Error('Invalid arguments supplied to Status');
 				}
 
