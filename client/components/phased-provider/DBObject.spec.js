@@ -57,6 +57,9 @@ describe('Class: DBObject', function() {
     inject(function(
       _$rootScope_, StatusFactory, _DBObject_) {
       $rootScope = _$rootScope_;
+      sandbox.stub($rootScope, '$evalAsync', function (toDo) {
+        toDo();
+      });
       DBObject = _DBObject_;
     });
   });
@@ -208,4 +211,113 @@ describe('Class: DBObject', function() {
       expect(myDBO.description).to.be.empty;
     })
   })
+
+  describe('#childChanged', function () {
+    // create an object to house "methods" to spy on
+    var that = {};
+    var myDBO;
+
+    beforeEach(function () {
+      that.DBObject = DBObject;
+      sandbox.spy(that, 'DBObject'); // spy on DBObject constructor
+      // a class child to extend DBObject 
+      class DBObjectChild extends that.DBObject {
+        constructor() {
+          var myFb = new Firebase();
+          super(myFb.child('never!'));
+          this._.name = 'Billy Joel';
+          this._.description = 'William Martin "Billy" Joel (born May 9, 1949) is an American pianist, singer-songwriter and a composer. Since releasing his first hit song, "Piano Man", in 1973, ...';
+        }
+      }
+      that.DBObjectChild = DBObjectChild;
+      myDBO = new that.DBObjectChild();
+    });
+
+    it('should update the respective property on _', function () {
+      snapStub.key = sandbox.stub().returns('strProp');
+      snapStub.val = sandbox.stub().returns('a value');
+      myDBO.childChanged(snapStub);
+      expect(myDBO._.strProp).to.equal(snapStub.val());
+
+      snapStub.key = sandbox.stub().returns('numProp');
+      snapStub.val = sandbox.stub().returns(5);
+      myDBO.childChanged(snapStub);
+      expect(myDBO._.numProp).to.equal(snapStub.val());
+
+      snapStub.key = sandbox.stub();
+      snapStub.val = sandbox.stub();
+    });
+
+    describe('deep merging object properties', function () {
+      beforeEach(function () {
+        // start state
+        myDBO._.objProp = {
+          existingProp  : 'exists',
+          changedProp   : 'starts the same',
+          removedProp   : 'will be removed',
+          existingObjProp : {
+            existingProp  : 'exists',
+            changedProp   : 'starts the same',
+            removedProp   : 'will be removed'
+          }
+        }
+
+        snapStub.key = sandbox.stub().returns('objProp');
+
+        // end state
+        snapStub.val = sandbox.stub().returns({
+          existingProp  : 'exists',
+          newProp       : 'also exists',
+          changedProp  : 'is different',
+          existingObjProp : {
+            existingProp  : 'exists',
+            newProp       : 'also exists',
+            changedProp  : 'is different',
+          }
+        });
+        myDBO.childChanged(snapStub);
+      })
+
+      // FIREST LEVEL
+      it('should add all new properties', function () {
+        expect(myDBO._.objProp).to.have.property('newProp')
+          .that.equals('also exists');
+      })
+
+      it('should not remove unchanged existing properties', function () {
+        expect(myDBO._.objProp).to.have.property('existingProp')
+          .that.equals('exists');
+      })
+
+      it('should update values of changed existing properties', function () {
+        expect(myDBO._.objProp).to.have.property('changedProp')
+          .that.equals('is different');
+      })
+
+      it('should remove all newly removed properties', function () {
+        expect(myDBO._.objProp).to.not.have.property('removedProp')
+      })
+
+
+      // NEXT LEVEL
+      it('should add all new properties to nested object property', function () {
+        expect(myDBO._.objProp.existingObjProp).to.have.property('newProp')
+          .that.equals('also exists');
+      })
+
+      it('should not remove unchanged existing properties to nested object property', function () {
+        expect(myDBO._.objProp.existingObjProp).to.have.property('existingProp')
+          .that.equals('exists');
+      })
+
+      it('should update values of changed existing properties to nested object property', function () {
+        expect(myDBO._.objProp.existingObjProp).to.have.property('changedProp')
+          .that.equals('is different');
+      })
+
+      it('should remove all newly removed properties to nested object property', function () {
+        expect(myDBO._.objProp.existingObjProp).to.not.have.property('removedProp')
+      })
+    })
+  });
 });
