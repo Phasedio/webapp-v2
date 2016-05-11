@@ -267,5 +267,108 @@ describe('Class: Status', function() {
   			assert(DBObject.prototype.delete.called, 'DBObject.delete was not called');
   		});
   	});
+  });
+
+  describe('accessors', function () {
+  	var myStatus, cfg, ID;
+  	beforeEach(function () {
+  		Phased.SET_UP = true;
+  		cfg = {
+  			name : 'sth',
+  			projectID : 'sth',
+  			taskID : 'sth',
+  			startTime : 1463004841200,
+  			endTime : 1463009841200,
+  			totalTime : 5000000,
+  			user : 'someUID',
+  			time : 54657983000
+  		}
+  		ID = '-Kasdkew4312qzxorsomething';
+  		myStatus = new StatusFactory.Status(ID, cfg);
+  	});
+
+		it('should generally return the value kept in _', function () {
+			expect(myStatus.startTime).to.equal(myStatus._.startTime);
+			expect(myStatus.endTime).to.equal(myStatus._.endTime);
+			expect(myStatus.totalTime).to.equal(myStatus._.totalTime);
+		});
+
+		describe('set startTime', function () {
+			it('should fail if val isn\'t Date-like', function () {
+				var setStartTime = function (newT) {
+					myStatus.startTime = newT;
+				}
+				// with undefined
+				expect(setStartTime.bind(undefined, undefined)).to.throw(TypeError);
+				// with some string
+				expect(setStartTime.bind(undefined, 'asome')).to.throw(TypeError);
+				// with object
+				expect(setStartTime.bind(undefined, {a:1})).to.throw(TypeError);
+			})
+
+			it('should not fail if val is Date-like', function () {
+				var setStartTime = function (newT) {
+					myStatus.startTime = newT;
+				}
+				// with Date
+				expect(setStartTime.bind(undefined, new Date())).to.not.throw(TypeError);
+				// with Moment
+				expect(setStartTime.bind(undefined, new moment())).to.not.throw(TypeError);
+				// with timestamp
+				expect(setStartTime.bind(undefined, 1463009841200)).to.not.throw(TypeError);
+			});
+
+			it('should call setProperty', function () {
+				sandbox.spy(DBObject.prototype, 'setProperty');
+				myStatus.startTime = 1463009841200;
+				assert(DBObject.prototype.setProperty.called, 'did not call super.setProperty');
+			})
+
+			it('should update totalTime', function () {
+				myStatus.startTime = myStatus.endTime - 200;
+				expect(myStatus.totalTime).to.equal(200);
+			})
+		})
+
+		describe('set endTime', function () {
+			it('should fail if val isn\'t Date-like', function () {
+				var setEndTime = function (newT) {
+					myStatus.endTime = newT;
+				}
+				// with undefined
+				expect(setEndTime.bind(undefined, undefined)).to.throw(TypeError);
+				// with some string
+				expect(setEndTime.bind(undefined, 'asome')).to.throw(TypeError);
+				// with object
+				expect(setEndTime.bind(undefined, {a:1})).to.throw(TypeError);
+			})
+
+			it('should not fail if val is Date-like', function () {
+				var setEndTime = function (newT) {
+					myStatus.startTime = newT;
+				}
+				// with Date
+				expect(setEndTime.bind(undefined, new Date())).to.not.throw(TypeError);
+				// with Moment
+				expect(setEndTime.bind(undefined, new moment())).to.not.throw(TypeError);
+				// with timestamp
+				expect(setEndTime.bind(undefined, 1463009841201)).to.not.throw(TypeError);
+			});
+
+			it('should call setProperty', function () {
+				sandbox.spy(DBObject.prototype, 'setProperty');
+				myStatus.endTime = 1463009841201;
+				assert(DBObject.prototype.setProperty.called, 'did not call super.setProperty');
+			})
+
+			it('should fail if new end is before start', function () {
+				expect(() => {myStatus.endTime = myStatus.startTime - 200}).to.throw(Error);
+			})
+
+			it('should update totalTime', function () {
+				myStatus.endTime = myStatus.startTime + 200;
+				expect(myStatus.totalTime).to.equal(200);
+			})
+		})
   })
 });
