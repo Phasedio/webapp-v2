@@ -93,10 +93,17 @@ angular.module('webappV2App')
 			// update own data until FB child_changed is fired
 			let path = address.split('/');
 			
-			if (val === null) // delete if null
+			if (val === null) { // delete if null
 				_.unset(this._, path);
-			else 
+				path.pop();
+				let holder = _.get(this._, path)
+				if (holder instanceof Array) {
+					// remove empty keys from array
+					_.set(this._, path, holder.filter(n => true));
+				}
+			} else {
 				_.set(this._, path, val);
+			}
 
 			// update DB val
 			this._.FBRef.child(address).set(val);
