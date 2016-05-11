@@ -30,8 +30,8 @@ describe('Class: DBObject', function() {
     sandbox.stub(window, 'Firebase', Firebase); // replace window Firebase object with our own stubbed version
 
     snapStub = sandbox.stub().returnsPromise().resolves({})();
-    snapStub.key = sandbox.stub();
-    snapStub.val = sandbox.stub();
+    snapStub.key = sandbox.stub().returns('-Kasdfwerasdfasdfsomestupidsh');
+    snapStub.val = sandbox.stub().returns('a very nice val');
 
     class FBRefStubCl extends Firebase {
     };
