@@ -444,4 +444,48 @@ describe('Class: DBObject', function() {
       expect(lastSet).to.equal('mayer');
     });
   });
+
+  describe('#removeFromCollection', function () {
+    // create an object to house "methods" to spy on
+    var that = {};
+    var myDBO;
+
+    beforeEach(function () {
+      that.DBObject = DBObject;
+
+      // a class child to extend DBObject 
+      class DBObjectChild extends that.DBObject {
+        constructor() {
+          var myFb = new Firebase();
+          super(myFb.child('n'));
+        }
+      }
+      that.DBObjectChild = DBObjectChild;
+      myDBO = new that.DBObjectChild();
+    });
+
+    it('should remove the value at the location', function () {
+      myDBO.setProperty('some/path', ['exists', 'also exists']);
+      myDBO.removeFromCollection('some/path', 'also exists');
+      expect(myDBO._.some.path).to.deep.equal(['exists']);
+
+      myDBO.setProperty('some/other/path', {a : '1', b : '2', asdf : 'asdf'});
+      myDBO.removeFromCollection('some/other/path', 'asdf');
+      expect(myDBO._.some.other.path).to.deep.equal({a:'1', b:'2'});
+    })
+
+    it('should not change _ if value cannot be found at address', function () {
+      var initialState = _.assign(myDBO._);
+      myDBO.removeFromCollection('not/present', 'a nothing');
+      expect(myDBO._).to.deep.equal(initialState);
+    })
+
+    it('should call #setProperty to keep DB in sync', function () {
+      myDBO.setProperty('some/other/path', {a : '1', b : '2', asdf : 'asdf'});
+      sandbox.spy(myDBO, 'setProperty');
+      myDBO.removeFromCollection('some/other/path', 'asdf');
+      assert(myDBO.setProperty.called, 'setProperty was not called');
+    })
+  })
+
 });
