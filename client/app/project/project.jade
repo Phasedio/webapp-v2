@@ -23,10 +23,25 @@ block content
                                         span( uib-dropdown-toggle="true")
                                             .project-add-member +
                                         ul.dropdown-menu(uib-dropdown-menu="true")
-                                            li(ng-repeat="member in Phased.team.members") 
-                                                a(href=""){{member.profile.name}}
+                                            li(ng-repeat="(key,member) in Phased.team.members" ) 
+                                                a(href="" ng-click="addMember(key)") {{member.profile.name}}
                                     img.circular(ng-repeat="member in project.memberIDs" ng-src="{{Phased.team.members[member].profile.gravatar}}")        
                         .project-tasks.project-div
+                             ul.task-list.shadow
+                                li.task.clearfix(ng-repeat="task in project.tasks | orderObjectBy : 'created' : true" class="type-{{Phased.meta.task.TYPE[task.type]}}")
+                                    .task-checkbox
+                                    .task-info
+                                    h3 {{task.name}}
+                                    .task-meta.clearfix 
+                                        p.due-date(ng-if="task.dueDate")
+                                        time {{task.dueDate | date : 'shortDate'}}
+                                        p.status {{Phased.meta.task.STATUS[task.status]}}
+                                        p.comments(href="#" ng-click="onComments($event, task)") Comments
+                                        ul.comments-list(ng-if="task.comments")
+                                            li.comment(ng-repeat="comment in task.comments") 
+                                            p.text {{comment.text}}
+                                            p.footer {{Phased.team.members[comment.user].profile.name}} at {{comment.time | date : 'MMM d y h:mma'}}
+                                        p.footer Work on this
                         .project-comments.project-div
                             form.comment-form(ng-submit="addComment(comment)")
                                 .form-group    

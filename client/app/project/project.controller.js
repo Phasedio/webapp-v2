@@ -10,6 +10,10 @@ var ProjectController = function ProjectsController ($http, $scope, Phased, Stat
   $scope.addComment = function addComment(text){
     Phased.team.projects[$routeParams.projectID].addComment(text);
   };
+  $scope.addMember = function addMember(uid){
+    console.log(uid);
+    Phased.team.projects[$routeParams.projectID].addMember(uid);
+  };
 };
 angular.module('webappV2App')
   .component('project', {
