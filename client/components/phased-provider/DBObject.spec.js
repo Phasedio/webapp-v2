@@ -488,4 +488,39 @@ describe('Class: DBObject', function() {
     })
   })
 
+  describe('#pushVal', function () {
+    // create an object to house "methods" to spy on
+    var that = {};
+    var myDBO;
+
+    beforeEach(function () {
+      that.DBObject = DBObject;
+
+      // a class child to extend DBObject 
+      class DBObjectChild extends that.DBObject {
+        constructor() {
+          var myFb = new Firebase();
+          super(myFb.child('n'));
+        }
+      }
+      that.DBObjectChild = DBObjectChild;
+      myDBO = new that.DBObjectChild();
+    });
+
+    it('should push the new val to Firebase to get the key', function () {
+      myDBO.pushVal('cow/legs', 'broken');
+      assert(FBRefStub.prototype.push.called);
+    });
+
+    it('should return the new key', function () {
+      var key = myDBO.pushVal('a/b', 'd');
+      expect(key).to.be.a.string;
+    })
+
+    it('should update local data while waiting for FB', function () {
+      var key = myDBO.pushVal('horse/legs', 'broken');
+      expect(myDBO._.horse.legs).to.include.keys(key);
+      expect(myDBO._.horse.legs[key]).to.equal('broken');
+    })
+  })
 });
