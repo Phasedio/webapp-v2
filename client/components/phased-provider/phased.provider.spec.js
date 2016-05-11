@@ -129,10 +129,6 @@ describe('Component: PhasedProvider', function() {
     });
   });
 
-  afterEach(function() {
-    sandbox.reset();
-  });
-
   //
   //  TESTS
   //

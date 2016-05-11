@@ -75,11 +75,6 @@ describe('Class: DBObject', function() {
     });
   });
 
-  afterEach(function() {
-    sandbox.reset();
-  });
-
-
   //
   //	TESTS
   //
