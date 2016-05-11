@@ -424,7 +424,16 @@ describe('Class: DBObject', function() {
 
       // amputate the broken one before it goes septic
       myDBO.setProperty('cow/legs/2', null);
-      expect(myDBO._.cow.legs[2]).to.be.undefined;
+      expect(myDBO._.cow.legs).to.not.include('broken');
+
+
+      // give the horse some legs
+      myDBO.setProperty('horse/legs', {a: 'whole', b:'whole', c:'broken', d:'whole'});
+      expect(myDBO._.horse.legs).to.be.an('object');
+
+      // amputate the broken one before it goes septic
+      myDBO.setProperty('horse/legs/c', null);
+      expect(myDBO._.horse.legs.c).to.be.undefined;
     })
 
     it('should update the database', function () {
