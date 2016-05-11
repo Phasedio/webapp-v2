@@ -24,10 +24,10 @@ angular.module('webappV2App')
 			}
 
 			// create hidden _ pseudo-private property holder
-			Object.defineProperty( this, '_', {value: {}, configurable:false, writeable:true, enumerable: false} );
+			Object.defineProperty( this, '_', {value: {}, configurable:false, writable:true, enumerable: false} );
 
 			// define immutable ID property
-			Object.defineProperty( this, 'ID', {value: FBRef.key(), configurable:false, writeable:false, enumerable: true} );
+			Object.defineProperty( this, 'ID', {value: FBRef.key(), configurable:false, writable:false, enumerable: true} );
 
 			// set up _FBRef handlers for child_changed
 			this._.FBRef = FBRef;

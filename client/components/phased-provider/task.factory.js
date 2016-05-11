@@ -50,7 +50,7 @@ angular.module('webappV2App')
 				this.statusIDs = this._.statusIDs;
 
 				// register read-only properties
-				Object.defineProperty( this, 'created', {value: cfg.created, configurable:false, writeable:false, enumerable: true} );
+				Object.defineProperty( this, 'created', {value: cfg.created, configurable:false, writable:false, enumerable: true} );
 
 				// broadcast TASK_ADDED
 				$rootScope.$broadcast(Phased.RUNTIME_EVENTS.TASK_ADDED, ID);

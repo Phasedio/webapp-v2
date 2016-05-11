@@ -62,8 +62,8 @@ angular.module('webappV2App')
 				this.projectID = this._.projectID;
 
 				// register read-only properties
-				Object.defineProperty( this, 'user', {value: cfg.user, configurable:false, writeable:false, enumerable: true} );
-				Object.defineProperty( this, 'time', {value: cfg.time, configurable:false, writeable:false, enumerable: true} );
+				Object.defineProperty( this, 'user', {value: cfg.user, configurable:false, writable:false, enumerable: true} );
+				Object.defineProperty( this, 'time', {value: cfg.time, configurable:false, writable:false, enumerable: true} );
 				
 				// broadcast STATUS_ADDED 
 				$rootScope.$broadcast(Phased.RUNTIME_EVENTS.STATUS_ADDED, ID);
