@@ -160,8 +160,8 @@ angular.module('webappV2App')
 		}
 
 		set description(val = '') {
-			if (typeof val != 'string' || val !== null) {
-				throw new TypeError((typeof this) + ' description must be string or null');
+			if (typeof val != 'string' && val !== null) {
+				throw new TypeError((typeof this) + ' description must be string or null, got ' + (typeof val));
 			} else {
 				this.setProperty('description', val);
 				return val;
