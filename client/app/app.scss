@@ -72,9 +72,11 @@ $gray: #8F8F8F;
 /**
  * App-wide Styles
  */
-
+h1,h2,h3,h4,h5,h6{
+  font-weight: 400;
+}
 h2{
-  font-weight: 200;
+  
   font-size: 48px;
 }
 .spacer{
@@ -205,6 +207,7 @@ body{
 @import 'login/login';
 @import 'new-project/new-project';
 @import 'profile/profile';
+@import 'project/project';
 @import 'projects/projects';
 @import 'reports/reports';
 @import 'team/team';

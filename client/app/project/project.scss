@@ -1,0 +1,93 @@
+.project-div{
+    border-top:1px solid $gray;
+    padding-top:20px;
+    margin-top:20px;
+    h5{
+        color:$gray;
+        text-transform: uppercase;
+        margin-top:0;
+    }
+}
+.project-created-following{
+    
+    
+    
+    .project-created,.project-following{
+        display: inline-block;
+        
+    }
+    .project-created{
+        margin-right:48px;
+    }
+    .project-add-member{
+        width: 30px;
+        height: 30px;
+        margin-right:8px;
+        border: 1px dashed $gray;
+        border-radius: 100px;
+        color:$gray;
+        text-align: center;
+        margin-top:5px;
+        font-size:18px;
+       &:hover{
+           border: 1px solid $green;
+           color:$green;
+       }
+    }
+}
+.project-members-list{
+    
+    img{
+        width: 30px;
+        margin-right:8px;
+    }
+}
+
+.project-comments-list{
+    ul{
+        list-style: none;
+        margin: 0;
+        padding:0;
+    }
+}
+
+.comment-form{
+    overflow: auto;
+    textarea{
+        resize: none;
+    }
+}
+.comment{
+    margin-top:20px;
+    overflow: auto;
+    .comment-info,.comment-icon{
+        display: inline-block;
+        float: left;
+    }
+    .comment-icon{
+        margin-right:20px;
+        img{
+            width: 30px;
+        }
+    }
+    .comment-info{
+        p{
+           font-size: 21px;
+           font-weight: 200;
+       }
+    }
+    .comment-ident{
+        overflow: auto;
+        h4,h5{
+            display: inline-block;
+            float:left;
+            margin-top:0;
+            margin-right:20px;
+        }
+        h5{
+            color:$gray;
+            text-transform: none;
+            font-weight: 200;
+        }
+    }
+}
