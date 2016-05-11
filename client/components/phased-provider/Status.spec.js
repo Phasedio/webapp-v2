@@ -370,5 +370,11 @@ describe('Class: Status', function() {
 				expect(myStatus.totalTime).to.equal(200);
 			})
 		})
+
+		describe('set totalTime', function () {
+			it('should always fail', function () {
+				expect(()=> {myStatus.totalTime += 1}).to.throw(Error);
+			})
+		})
   })
 });
