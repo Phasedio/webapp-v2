@@ -146,4 +146,66 @@ describe('Class: DBObject', function() {
         .that.is.a('function') 
     })
   })
+
+
+  describe('.name and .description accessors', function () {
+    // create an object to house "methods" to spy on
+    var that = {};
+    var myDBO;
+
+    beforeEach(function () {
+      that.DBObject = DBObject;
+      sandbox.spy(that, 'DBObject'); // spy on DBObject constructor
+      // a class child to extend DBObject 
+      class DBObjectChild extends that.DBObject {
+        constructor() {
+          var myFb = new Firebase();
+          super(myFb.child('never!'));
+          this._.name = 'Billy Joel';
+          this._.description = 'William Martin "Billy" Joel (born May 9, 1949) is an American pianist, singer-songwriter and a composer. Since releasing his first hit song, "Piano Man", in 1973, ...';
+        }
+      }
+      that.DBObjectChild = DBObjectChild;
+      myDBO = new that.DBObjectChild();
+    });
+
+
+    it('should return the same value as in the _ property', function () {
+      expect(myDBO.name).to.equal(myDBO._.name);
+      expect(myDBO.description).to.equal(myDBO._.description);
+    })
+
+    it('should only accept strings', function () {
+      expect(() => myDBO.name = {}).to.throw(TypeError);
+      expect(() => myDBO.name = 12).to.throw(TypeError);
+      expect(() => myDBO.name = undefined).to.throw(TypeError);
+      expect(() => myDBO.name = 'Billy Mae').to.not.throw(TypeError);
+
+      expect(() => myDBO.description = {}).to.throw(TypeError);
+      expect(() => myDBO.description = 12).to.throw(TypeError);
+      expect(() => myDBO.description = 'mega').to.not.throw(TypeError);
+    })
+
+    it('should not allow empty name', function () {
+      expect(() => myDBO.name = null).to.throw(TypeError);
+      expect(myDBO.name).to.not.be.empty;
+
+      expect(() => myDBO.name = undefined).to.throw(TypeError);
+      expect(myDBO.name).to.not.be.empty;
+
+      expect(() => myDBO.name = '').to.throw(TypeError);
+      expect(myDBO.name).to.not.be.empty;
+    })
+
+    it('should allow empty description', function () {
+      expect(() => myDBO.description = null).to.not.throw(TypeError);
+      expect(myDBO.description).to.be.empty;
+
+      expect(() => myDBO.description = undefined).to.not.throw(TypeError);
+      expect(myDBO.description).to.be.empty;
+
+      expect(() => myDBO.description = '').to.not.throw(TypeError);
+      expect(myDBO.description).to.be.empty;
+    })
+  })
 });
