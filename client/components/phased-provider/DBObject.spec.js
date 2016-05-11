@@ -99,5 +99,51 @@ describe('Class: DBObject', function() {
       new that.DBObjectChild();
       assert(that.DBObject.called, 'DBObject constructor was not called');
     })
+
+    it('should fail when called without a FBRef', function () {
+      class badDBOChild extends DBObject {}
+      var mkBadChild = function () {
+        new badDBOChild();
+      }
+      expect(mkBadChild).to.throw(Error);
+    })
+
+    it('should define pseudo-private _ property', function () {
+      var myDBO = new that.DBObjectChild();
+      expect(myDBO).to.have.property('_');
+      var props = Object.getOwnPropertyDescriptor(myDBO, '_');
+
+      expect(props.configurable).to.be.false;
+      expect(props.writable).to.be.true;
+      expect(props.enumerable).to.be.false;
+    })
+
+    it('should have ID, name, and description properties', function () {
+      var myDBO = new that.DBObjectChild();
+      expect(myDBO).to.have.property('ID');
+      expect(myDBO).to.have.property('name');
+      expect(myDBO).to.have.property('description');
+
+      var props = Object.getOwnPropertyDescriptor(myDBO, 'ID');
+      expect(props.configurable).to.be.false;
+      expect(props.writable).to.be.false;
+      expect(props.enumerable).to.be.true;
+    })
+
+    it('should have childChanged, destroy, delete, setProperty, removeFromCollection, and pushVal methods', function () {
+      var myDBO = new that.DBObjectChild();
+      expect(myDBO).to.have.property('childChanged')
+        .that.is.a('function')
+      expect(myDBO).to.have.property('destroy')
+        .that.is.a('function')
+      expect(myDBO).to.have.property('delete')
+        .that.is.a('function')
+      expect(myDBO).to.have.property('setProperty')
+        .that.is.a('function')
+      expect(myDBO).to.have.property('removeFromCollection')
+        .that.is.a('function')
+      expect(myDBO).to.have.property('pushVal')
+        .that.is.a('function') 
+    })
   })
 });
