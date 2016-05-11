@@ -206,6 +206,66 @@ describe('Class: Status', function() {
   })
 
   describe('methods', function() {
-  	
+  	var myStatus, cfg, ID;
+  	beforeEach(function () {
+  		Phased.SET_UP = true;
+  		cfg = {
+  			name : 'sth',
+  			projectID : 'sth',
+  			taskID : 'sth',
+  			startTime : 'sth',
+  			endTime : 'sth',
+  			totalTime : 'sth',
+  			user : 'someUID',
+  			time : 54657983000
+  		}
+  		ID = '-Kasdkew4312qzxorsomething';
+  	});
+
+  	describe('#destroy', function () {
+  		beforeEach(function () {
+  			myStatus = new StatusFactory.Status(ID, cfg);
+  		});
+
+  		it('should fire STATUS_DESTROYED with identifying info', function () {
+  			var data = {
+  				statusID : myStatus.ID,
+  				projectID : myStatus.projectID,
+  				taskID : myStatus.taskID
+  			}
+  			myStatus.destroy();
+
+	  		expect(lastBroadcastEvent).to.equal(Phased.RUNTIME_EVENTS.STATUS_DESTROYED);
+	  		expect(lastBroadcastEventData).to.deep.equal(data);
+  		})
+
+  		it('should call super.destroy', function () {
+  			sandbox.spy(DBObject.prototype, 'destroy');
+  			myStatus.destroy();
+  			assert(DBObject.prototype.destroy.called, 'DBObject.destroy was not called');
+  		});
+  	});
+
+  	describe('#delete', function () {
+  		beforeEach(function () {
+  			myStatus = new StatusFactory.Status(ID, cfg);
+  			Phased.team.members[cfg.user] = {
+  				currentStatus: ID
+  			}
+  		});
+
+  		it('should update the currentStatus attr of its user if needed', function () {
+  			expect(Phased.team.members[cfg.user].currentStatus).to.equal(ID);
+  			myStatus.delete();
+  			assert(FBRefStub.prototype.set.called, 'FBRef.set was not called');
+  			expect(lastSet).to.not.equal(ID);
+  		})
+
+  		it('should call super.delete', function () {
+  			sandbox.spy(DBObject.prototype, 'delete');
+  			myStatus.delete();
+  			assert(DBObject.prototype.delete.called, 'DBObject.delete was not called');
+  		});
+  	});
   })
 });
