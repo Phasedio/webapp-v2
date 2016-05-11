@@ -389,4 +389,50 @@ describe('Class: DBObject', function() {
       assert(myDBO.destroy.called, '#delete did not call #destroy');
     })
   })
+
+  describe('#setProperty', function () {
+    // create an object to house "methods" to spy on
+    var that = {};
+    var myDBO;
+
+    beforeEach(function () {
+      that.DBObject = DBObject;
+
+      // a class child to extend DBObject 
+      class DBObjectChild extends that.DBObject {
+        constructor() {
+          var myFb = new Firebase();
+          super(myFb.child('n'));
+        }
+      }
+      that.DBObjectChild = DBObjectChild;
+      myDBO = new that.DBObjectChild();
+    });
+
+    it('should set the property on _', function () {
+      myDBO.setProperty('bill', 'mayer');
+      expect(myDBO._.bill).to.equal('mayer');
+
+      myDBO.setProperty('cow/legs/2', 'broken');
+      expect(myDBO._.cow.legs[2]).to.equal('broken');
+    })
+
+    it('should delete the property when passed null', function () {
+      // give the cow some legs
+      myDBO.setProperty('cow/legs', ['whole', 'whole', 'broken', 'whole']);
+      expect(myDBO._.cow.legs).to.be.an('array');
+
+      // amputate the broken one before it goes septic
+      myDBO.setProperty('cow/legs/2', null);
+      expect(myDBO._.cow.legs[2]).to.be.undefined;
+    })
+
+    it('should update the database', function () {
+      FBRefStub.prototype.child.reset();
+      myDBO.setProperty('bill', 'mayer');
+      assert(FBRefStub.prototype.child.called, 'did not attempt to get FBRef for address');
+      assert(FBRefStub.prototype.set.called, 'did not attempt to call set');
+      expect(lastSet).to.equal('mayer');
+    });
+  });
 });
