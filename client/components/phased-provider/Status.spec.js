@@ -8,6 +8,8 @@ describe('Class: Status', function() {
 
   // other modules to save
   var $rootScope;
+	var lastBroadcastEvent;
+	var lastBroadcastEventData;
 
   // a stub data snapshot
   var snapStub;
@@ -71,6 +73,12 @@ describe('Class: Status', function() {
     inject(function(
       _$rootScope_, _StatusFactory_, _DBObject_, _Phased_) {
       $rootScope = _$rootScope_;
+  		sandbox.stub($rootScope, '$broadcast', function (_evt_, _data_) {
+  			lastBroadcastEvent = _evt_;
+  			lastBroadcastEventData = _data_;
+  			$rootScope.$emit(_evt_, _data_);
+  		});
+
       sandbox.stub($rootScope, '$evalAsync', function (toDo) {
         toDo();
       });
@@ -185,13 +193,6 @@ describe('Class: Status', function() {
   	})
 
   	it('should broadcast a STATUS_ADDED event', function () {
-  		var evt;
-  		var data;
-  		sandbox.stub($rootScope, '$broadcast', function (_evt_, _data_) {
-  			evt = _evt_;
-  			data = _data_;
-  		});
-
   		Phased.SET_UP = true;
   		var cfg = {
   			user : 'someUID',
@@ -199,8 +200,8 @@ describe('Class: Status', function() {
   		}
   		var myStatus = new StatusFactory.Status('asdf', cfg);
 
-  		expect(evt).to.equal(Phased.RUNTIME_EVENTS.STATUS_ADDED);
-  		expect(data).to.equal('asdf');
+  		expect(lastBroadcastEvent).to.equal(Phased.RUNTIME_EVENTS.STATUS_ADDED);
+  		expect(lastBroadcastEventData).to.equal('asdf');
   	})
   })
 
