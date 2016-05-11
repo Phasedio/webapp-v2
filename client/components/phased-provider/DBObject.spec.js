@@ -331,4 +331,62 @@ describe('Class: DBObject', function() {
       })
     })
   });
+
+  describe('#destroy', function () {
+    // create an object to house "methods" to spy on
+    var that = {};
+    var myDBO;
+
+    beforeEach(function () {
+      that.DBObject = DBObject;
+
+      // a class child to extend DBObject 
+      class DBObjectChild extends that.DBObject {
+        constructor() {
+          var myFb = new Firebase();
+          super(myFb.child('n'));
+        }
+      }
+      that.DBObjectChild = DBObjectChild;
+      myDBO = new that.DBObjectChild();
+    });
+
+    it('should call FBRef.off with child_changed', function () {
+      myDBO.destroy();
+      assert(FBRefStub.prototype.off.called, 'did not call FBRef.off()');
+      expect(lastOffEvent).to.equal('child_changed');
+    })
+  })
+
+  describe('#delete', function () {
+    // create an object to house "methods" to spy on
+    var that = {};
+    var myDBO;
+
+    beforeEach(function () {
+      that.DBObject = DBObject;
+
+      // a class child to extend DBObject 
+      class DBObjectChild extends that.DBObject {
+        constructor() {
+          var myFb = new Firebase();
+          super(myFb.child('n'));
+        }
+      }
+      that.DBObjectChild = DBObjectChild;
+      myDBO = new that.DBObjectChild();
+    });
+
+    it('should delete the data in firebase', function () {
+      myDBO.delete();
+      assert(FBRefStub.prototype.set.called);
+      expect(lastSet).to.be.null;
+    })
+
+    it('should call #destroy', function () {
+      sandbox.spy(myDBO, 'destroy');
+      myDBO.delete();
+      assert(myDBO.destroy.called, '#delete did not call #destroy');
+    })
+  })
 });
