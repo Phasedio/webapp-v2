@@ -53,11 +53,14 @@ angular.module('webappV2App')
 						if (!(i in val))
 							delete this._[id][i];
 					}
-					// b) add new members and synce current members
-					_.merge(this._[id], val);
-				} else {
+					// b) add new members and sync current members
+					_.assign(this._[id], val);
+				} else if (!_.isNil(val)) { // is null or undefined
 					// simple assign
 					this._[id] = val;
+				} else {
+					// delete if undefined
+					delete this._[id];
 				}
 			});
 		}
