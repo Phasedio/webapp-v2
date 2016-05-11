@@ -1,0 +1,46 @@
+extends ../../layout/with-nav.jade
+//ddsddbsd
+block content
+    .container		
+        .row
+            .col-lg-8.col-lg-offset-2
+                .project
+                    .project-info.clearfix
+                        .project-discript
+                            h1 {{project.name}}
+                            p(ng-if="project.description") {{project.description}}
+                            p(ng-if="!project.description") no description entered
+                        .project-created-following.project-div
+                            .project-created
+                                h5 created
+                                p
+                                    time {{project.created | date : 'short'}}
+                            .project-following
+                                h5 following
+                                    
+                                .project-members-list
+                                    .dropdown(uib-dropdown="true")
+                                        span( uib-dropdown-toggle="true")
+                                            .project-add-member +
+                                        ul.dropdown-menu(uib-dropdown-menu="true")
+                                            li(ng-repeat="member in Phased.team.members") 
+                                                a(href=""){{member.profile.name}}
+                                    img.circular(ng-repeat="member in project.memberIDs" ng-src="{{Phased.team.members[member].profile.gravatar}}")        
+                        .project-tasks.project-div
+                        .project-comments.project-div
+                            form.comment-form(ng-submit="addComment(comment)")
+                                .form-group    
+                                    textarea(name="comment" ng-model="comment" class="form-control" placeholder="Write a comment")
+                                button.btn.pull-right(type="submit") Send
+                            .project-comments-list
+                                h5 comments (5)
+                                ul
+                                    li.comment(ng-repeat="comment in project.comments") 
+                                        .comment-icon
+                                            img.circular(ng-src="{{Phased.team.members[comment.user].profile.gravatar}}")
+                                        .comment-info 
+                                            .comment-ident
+                                                h4 {{Phased.team.members[comment.user].profile.name}}
+                                                h5 
+                                                    time(am-time-ago="comment.time") 
+                                            p {{comment.text}}                       

@@ -3,19 +3,22 @@ extends ../../layout/with-nav.jade
 block content
     .container		
         .row
-            .col-lg-8
-                .project(ng-repeat="project in Phased.team.projects")
-                    .project-info.clearfix
-                        .project-discript
-                            h1 {{project.name}}
-                            p(ng-if="project.description") {{project.description}}
-                            p(ng-if="!project.description") no description entered
-                        .project-meta
-                            button.btn.btn-phased-important view project
-                            .project-members
-                            h3.project-due(ng-if="project.dueDate") {{project.dueDate}}
-                            h3.project-due(ng-if="!project.dueDate") No due date
-                            h2.project-complete-ness(ng-if="hasTasks(project.tasks)") 00%
-                            h2.project-complete-ness(ng-if="!hasTasks(project.tasks)") --%
-            .col-lg-4
-                a.btn-phased-not-important-solid.new-project(href="/projects/new") New project	                
+            .col-lg-8.col-lg-offset-2
+                a.btn.btn-phased-not-important-solid.new-project.shadow(href="/projects/new") New project
+                .project(ng-repeat="project in Phased.team.projects" )
+                    a(ng-href="/projects/{{project.ID}}")
+                        .project-info.clearfix
+                            .project-discript
+                                h1 {{project.name}}
+                                p(ng-if="project.description") {{project.description}}
+                                p(ng-if="!project.description") no description entered
+                            .project-meta
+                                h3.project-due(ng-if="project.dueDate") {{project.dueDate}}
+                                h3.project-due(ng-if="!project.dueDate") No due date
+                                .project-members
+                                    img.circular(ng-repeat="member in project.memberIDs" ng-src="{{Phased.team.members[member].profile.gravatar}}")
+                                
+                                h2.project-complete-ness(ng-if="hasTasks(project.tasks)") 00%
+                                h2.project-complete-ness(ng-if="!hasTasks(project.tasks)") --%
+           
+                             
