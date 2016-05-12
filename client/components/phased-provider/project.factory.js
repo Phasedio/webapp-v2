@@ -40,7 +40,6 @@ angular.module('webappV2App')
 					name : this._.name,
 					description : this._.description,
 					dueDate : this._.dueDate,
-					assignment : this._.assignment,
 					comments : this._.comments,
 					status : this._.status,
 					taskIDs : this._.taskIDs,
