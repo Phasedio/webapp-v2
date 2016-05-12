@@ -46,8 +46,8 @@ describe('Class: Task', function() {
     };
 
     FBRefStubCl.prototype.then = sandbox.stub();
-    FBRefStubCl.prototype.key = sandbox.stub();
-    FBRefStubCl.prototype.val = sandbox.stub();
+    FBRefStubCl.prototype.key = sandbox.stub().returns('aKey');
+    FBRefStubCl.prototype.val = sandbox.stub().returns({});
     FBRefStubCl.prototype.set = sandbox.stub();
     FBRefStubCl.prototype.on = sandbox.stub().returnsPromise().resolves({});
     FBRefStubCl.prototype.off = sandbox.spy(function (evt) {
@@ -284,7 +284,7 @@ describe('Class: Task', function() {
       it('should broadcast TASK_DESTROYED with identifying info', function () {
         var data = {
           projectID : myTask.projectID,
-          taskID : myTask.taskID
+          taskID : myTask.ID
         }
         myTask.destroy();
 

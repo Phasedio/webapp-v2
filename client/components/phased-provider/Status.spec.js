@@ -42,8 +42,8 @@ describe('Class: Status', function() {
     };
 
     FBRefStubCl.prototype.then = sandbox.stub();
-    FBRefStubCl.prototype.key = sandbox.stub();
-    FBRefStubCl.prototype.val = sandbox.stub();
+    FBRefStubCl.prototype.key = sandbox.stub().returns('aKey');
+    FBRefStubCl.prototype.val = sandbox.stub().returns({});
     FBRefStubCl.prototype.set = sandbox.stub();
     FBRefStubCl.prototype.on = sandbox.stub().returnsPromise().resolves({});
     FBRefStubCl.prototype.off = sandbox.spy(function (evt) {
