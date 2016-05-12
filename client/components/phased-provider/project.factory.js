@@ -177,25 +177,6 @@ angular.module('webappV2App')
 			// 	TASK MANIP
 
 			/**
-			*		Links an existing task to the project
-			*
-			*		@param	{string}	taskID 		ID of the task to associate with the project
-			*		@throws	TypeError						if taskID isn't a string
-			*		@throws	ReferenceError			if the task at taskID doesn't exist
-			*/
-			linkTask(taskID) {
-				if (typeof taskID != 'string') {
-					throw new TypeError('taskID should be String, got ' + (typeof taskID));
-				}
-
-				if (!taskID || !(taskID in Phased.team.tasks)) {
-					throw new ReferenceError(`Could not find task ${taskID} in team`);
-				}
-
-				super.pushVal('taskIDs', taskID);
-			}
-
-			/**
 			*		Creates a new task linked to the project
 			*
 			*		@param 		{object}	args 	attributes for the new task
@@ -216,22 +197,49 @@ angular.module('webappV2App')
 			}
 
 			/**
-			*		Removes a task from the project
+			*		Links an existing task to the project
 			*
-			*		@param	{string}	taskID 		ID of the task to remove from the project
-			*		@throws	TypeError						if taskID isn't a string
-			*		@throws	ReferenceError			if the task at taskID isn't linked to the project
+			*		@param 	{string}	taskID 		ID of the task to link
+			*		@throws	TypeError 					if taskID isn't a string
+			*		@throws	ReferenceError			if task doesn't exist
 			*/
-			removeTask(taskID) {
-				if (typeof taskID != 'string') {
-					throw new TypeError('taskID should be String, got ' + (typeof taskID));
+			linkTask(taskID) {
+				if (!(typeof taskID == 'string')) {
+					throw new TypeError('taskID should be string, got ' + (typeof taskID));
 				}
 
-				if (!taskID || !(taskID in this._.taskIDs)) {
-					throw new ReferenceError(`Could not find task ${taskID} in team`);
+				if (!(taskID in Phased.team.tasks)) {
+					throw new ReferenceError(`Could not find ${taskID} in team tasks`);
 				}
 
-				super.setProperty(`taskIDs/${taskID}`, null);
+				let task = Phased.team.tasks[taskID];
+				if (!!task.proejctID && task.projectID != this.ID) {
+					console.log('Task currently linked to a project; unlinking from other project...');
+					let oldProj = Phased.team.projects[Phased.team.tasks[taskID].proejctID];
+					oldProj.unlinkTask(taskID);
+				}
+
+				// set task's projectID
+				Phased.team.tasks[taskID].projectID = this.ID;
+				
+				return super.pushVal('taskIDs', taskID);
+			}
+
+			/**
+			*		Unlinks a task from the project
+			*
+			*		@param 	{string}	taskID 		ID of the task to unlink
+			*		@throws	TypeError 					if taskID isn't a string
+			*/
+			unlinkTask(taskID) {
+				if (!(typeof taskID == 'string')) {
+					throw new TypeError('taskID should be string, got ' + (typeof taskID));
+				}
+
+				if (taskID in Phased.team.tasks)
+					Phased.team.tasks[taskID].projectID = undefined;
+
+				super.removeFromCollection('taskIDs', taskID);
 			}
 
 			//	COMMENT MANIP
@@ -363,52 +371,6 @@ angular.module('webappV2App')
 					Phased.team.statuses[statusID].projectID = undefined;
 
 				super.removeFromCollection('statusIDs', statusID);
-			}
-
-			/**
-			*		Links an existing task to the project
-			*
-			*		@param 	{string}	taskID 		ID of the task to link
-			*		@throws	TypeError 					if taskID isn't a string
-			*		@throws	ReferenceError			if task doesn't exist
-			*/
-			linkTask(taskID) {
-				if (!(typeof taskID == 'string')) {
-					throw new TypeError('taskID should be string, got ' + (typeof taskID));
-				}
-
-				if (!(taskID in Phased.team.tasks)) {
-					throw new ReferenceError(`Could not find ${taskID} in team tasks`);
-				}
-
-				let task = Phased.team.tasks[taskID];
-				if (!!task.proejctID && task.projectID != this.ID) {
-					console.log('Task currently linked to a project; unlinking from other project...');
-					let oldProj = Phased.team.projects[Phased.team.tasks[taskID].proejctID];
-					oldProj.unlinkTask(taskID);
-				}
-
-				// set task's projectID
-				Phased.team.tasks[taskID].projectID = this.ID;
-				
-				return super.pushVal('taskIDs', taskID);
-			}
-
-			/**
-			*		Unlinks a task from the project
-			*
-			*		@param 	{string}	taskID 		ID of the task to unlink
-			*		@throws	TypeError 					if taskID isn't a string
-			*/
-			unlinkTask(taskID) {
-				if (!(typeof taskID == 'string')) {
-					throw new TypeError('taskID should be string, got ' + (typeof taskID));
-				}
-
-				if (taskID in Phased.team.tasks && Phased.team.tasks[taskID].projectID == this.ID)
-					Phased.team.tasks[taskID].projectID = undefined;
-
-				super.removeFromCollection('taskIDs', taskID);
 			}
 		}
 
