@@ -397,7 +397,43 @@ describe('Class: Project', function() {
     })
 
     describe('#linkTask', function () {
-    	
+    	it('should fail if arg is not a string', function () {
+        expect(() => myProject.linkTask(1)).to.throw(TypeError);
+        expect(() => myProject.linkTask({a:1})).to.throw(TypeError);
+        expect(() => myProject.linkTask([1,2,3])).to.throw(TypeError);
+        expect(() => myProject.linkTask(undefined)).to.throw(TypeError);
+        expect(() => myProject.linkTask(null)).to.throw(TypeError);
+    	})
+
+    	it('should fail if arg is not the UID of an existing task', function () {
+    		Phased.team.tasks['taskID'] = new TaskFactory.Task('taskID', {name: 'juice some lemons'});
+    		expect(() => myProject.linkTask('not a task')).to.throw(ReferenceError);
+    		expect(() => myProject.linkTask('taskID')).to.not.throw(ReferenceError);
+    	})
+
+    	it('should add task ID to taskIDs', function () {
+    		Phased.team.tasks['taskID'] = new TaskFactory.Task('taskID', {name: 'juice some lemons'});
+    		myProject.linkTask('taskID');
+    		expect(_.values(myProject._.taskIDs)).to.contain('taskID', 'in _,');
+    		expect(_.values(myProject.taskIDs)).to.contain('taskID', 'in accessor,');
+    	})
+
+    	it('should set task projectID to this project ID', function () {
+    		Phased.team.tasks['taskID'] = new TaskFactory.Task('taskID', {name: 'juice some lemons'});
+    		myProject.linkTask('taskID');
+    		expect(Phased.team.tasks['taskID']).to.have.property('projectID').that.equals(myProject.ID);
+    	})
+
+    	it('should unlink task from other project, if linked', function () {
+    		Phased.team.tasks['taskID'] = new TaskFactory.Task('taskID', {name: 'juice some lemons', projectID : 'otherProj'});
+    		Phased.team.projects['otherProj'] = new ProjectFactory.Project('otherProj', {name: 'asdf', taskIDs: {'asd' : 'taskID'}});
+    		sandbox.spy(Phased.team.projects['otherProj'], 'unlinkTask');
+
+    		myProject.linkTask('taskID');
+
+    		assert(Phased.team.projects['otherProj'].unlinkTask.called, 'otherProj.unlinkTask was not called');
+    		assert(Phased.team.projects['otherProj'].unlinkTask.calledWith('taskID'), 'otherProj.unlinkTask was called with bad data: ' + Phased.team.projects['otherProj'].unlinkTask.args[0][0]);
+    	});
     })
 
     describe('#unlinkTask', function () {
