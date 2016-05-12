@@ -435,7 +435,29 @@ describe('Class: Task', function() {
     })
 
     describe('#postStatus', function() {
+      it('should fail if args are neither string nor object', function () {
+        expect(()=> myTask.postStatus()).to.throw(TypeError);
+        expect(()=> myTask.postStatus(1234)).to.throw(TypeError);
+        expect(()=> myTask.postStatus(true)).to.throw(TypeError);
 
+        expect(()=> myTask.postStatus({name:'val'})).to.not.throw(TypeError);
+        expect(()=> myTask.postStatus('asdf')).to.not.throw(TypeError);
+      })
+
+      it('should call StatusFactory.create', function () {
+        sandbox.stub(StatusFactory, 'create');
+        myTask.postStatus('my lovely status');
+        assert(StatusFactory.create.called, 'did not call StatusFactory.create');
+        StatusFactory.create.restore();
+      })
+
+      it('should pass StatusFactory.create an object with the appropriate taskID', function () {
+        sandbox.stub(StatusFactory, 'create');
+        myTask.postStatus('my lovely status');
+        var args = StatusFactory.create.args[0][0];
+        expect(args.taskID).to.equal(myTask.ID);
+        StatusFactory.create.restore();
+      })
     })
 
     describe('#linkStatus', function() {
