@@ -85,3 +85,18 @@ angular.module('webappV2App', [
       return Object.keys(input).length;
     }
   })
+  /**
+  * orders team members by post date of their currentStatus
+  *
+  */
+  .filter('orderMembersByStatusTime', ['Phased', function orderMembersByStatusTime(Phased) {
+      return function(members, asc = false) {
+        if (!Phased.SET_UP)
+          return members;
+  
+        return _.orderBy(members, (o) => {
+          let status = Phased.team.statuses[o.currentStatus];
+          return _.isNil(status) ? 0 : status.time;
+        }, asc ? 'asc' : 'desc');
+      }
+    }])

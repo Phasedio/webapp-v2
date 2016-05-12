@@ -17,7 +17,7 @@ block content
 						.status-options(ng-class="{active:statusActive}")
 							button.btn-phased-important-solid(type="submit") Post
 							
-				.team-member(ng-repeat="member in Phased.team.members")
+				.team-member(ng-repeat="member in Phased.team.members | orderMembersByStatusTime")
 					.member-post.clearfix
 						img(ng-src="{{member.profile.gravatar}}" class="circular" title="{{member.profile.name}}")
 						.member-details
