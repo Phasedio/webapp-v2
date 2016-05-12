@@ -196,7 +196,8 @@ describe('Class: Task', function() {
   	it('should pin relevant cfg params to _', function () {
   		Phased.SET_UP = true;
   		var cfg = {
-  			name : 'sth',
+        name : 'sth',
+        description : 'sth',
   			projectID : 'sth',
   			dueDate : 'sth',
   			assignment : {'to' : '{}', 'by' : 'milkman'},
@@ -732,6 +733,7 @@ describe('Class: Task', function() {
       cfg = {
         name : 'sth',
         created : 54657983000,
+        description : 'lipsum and whatever',
         projectID : 'sth',
         dueDate : 'sth',
         assignment : {'to' : '{}', 'by' : 'milkman'},
@@ -741,19 +743,76 @@ describe('Class: Task', function() {
       }
       ID = '-KasdfmyTaskID';
       myTask = new TaskFactory.Task(ID, cfg);
+      sandbox.spy(myTask, 'setProperty')
     })
+    
+    it('should generally return the value kept in _', function () {
+      expect(myTask.dueDate).to.equal(myTask._.dueDate);
+      expect(myTask.status).to.equal(myTask._.status);
+      expect(myTask.assignment).to.equal(myTask._.assignment);
+      expect(myTask.comments).to.equal(myTask._.comments);
+      expect(myTask.description).to.equal(myTask._.description);
+    });
 
     describe('dueDate', function () {
+      it('should fail if val isn\'t Date-like', function () {
+        // with undefined
+        expect(()=> myTask.dueDate = undefined).to.throw(TypeError);
+        // with some string
+        expect(()=> myTask.dueDate = 'asome').to.throw(TypeError);
+        // with object
+        expect(()=> myTask.dueDate = {a:1}).to.throw(TypeError);
+      })
 
+      it('should not fail if val is Date-like', function () {
+        // with Date
+        expect(() => myTask.dueDate = new Date()).to.not.throw(TypeError);
+        // with Moment
+        expect(() => myTask.dueDate = new moment()).to.not.throw(TypeError);
+        // with timestamp
+        expect(() => myTask.dueDate = 1463009841200).to.not.throw(TypeError);
+      });
+
+      it('should call setProperty', function () {
+        myTask.dueDate = 123456789000;
+        assert(myTask.setProperty.called, 'did not call setProperty');
+      })
     });
+
     describe('status', function () {
+      it('should fail if new value isn\'t a valid status ID', function() {
+        expect(() => myTask.status = 99).to.throw(TypeError);
+      });
 
+      it('should call setProperty', function () {
+        myTask.status = Phased.meta.task.STATUS_ID.CREATED;
+        assert(myTask.setProperty.called, 'did not call setProperty');
+      })
     });
+
     describe('assignment', function () {
-
+      it('should always fail when directly set', function () {
+        expect(() => myTask.assignment = {}).to.throw(Error);
+      })
     });
-    describe('comments', function () {
 
+    describe('comments', function () {
+      it('should always fail when directly set', function () {
+        expect(() => myTask.comments = {}).to.throw(Error);
+      })
+    });
+
+    describe('description', function () {
+      it('should fail if value is not a string', function () {
+        expect(() => myTask.description = 123456).to.throw(TypeError);
+        expect(() => myTask.description = {}).to.throw(TypeError);
+        expect(() => myTask.description = [123456]).to.throw(TypeError);
+        expect(() => myTask.description = null).to.throw(TypeError);
+      })
+      it('should call setProperty', function () {
+        myTask.description = '123456789000';
+        assert(myTask.setProperty.called, 'did not call setProperty');
+      })
     });
   })
 });
