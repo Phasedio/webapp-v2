@@ -275,8 +275,8 @@ angular.module('webappV2App')
 					throw new TypeError('statusID should be string, got ' + (typeof statusID));
 				}
 
-				if (statusID in Phased.team.statuses && Phased.team.statuses[statusID].taskID == this.ID)
-					Phased.team.statuses[statusID].taskID = undefined;
+				if (statusID in Phased.team.statuses)
+					Phased.team.statuses[statusID].taskID = '';
 
 				super.removeFromCollection('statusIDs', statusID);
 			}
@@ -335,12 +335,13 @@ angular.module('webappV2App')
 			*		The user (if admin) approves of a task that has been submit for review
 			*/
 			approve() {
-				if (Phased.team.members[Phased.user.uid].role != Phased.meta.ROLE_ID.ADMIN) {
+				if (Phased.team.members[Phased.user.uid].role != Phased.meta.ROLE_ID.ADMIN 
+					&& Phased.team.members[Phased.user.uid].role != Phased.meta.ROLE_ID.OWNER) {
 					throw new Error('User must be admin to approve or reject task completion');
 				}
 
 				if (this.status != Phased.meta.task.STATUS_ID.IN_REVIEW) {
-					new Error('Task must be in review before approval or rejection');
+					throw new Error('Task must be in review before approval or rejection');
 				}
 
 				this.status = Phased.meta.task.STATUS_ID.COMPLETE;
@@ -359,7 +360,8 @@ angular.module('webappV2App')
 			*		The user (if admin) rejects a task that has been submit for review
 			*/
 			reject() {
-				if (Phased.team.members[Phased.user.uid].role != Phased.meta.ROLE_ID.ADMIN) {
+				if (Phased.team.members[Phased.user.uid].role != Phased.meta.ROLE_ID.ADMIN
+					&& Phased.team.members[Phased.user.uid].role != Phased.meta.ROLE_ID.OWNER) {
 					throw new Error('User must be admin to approve or reject task completion');
 				}
 
