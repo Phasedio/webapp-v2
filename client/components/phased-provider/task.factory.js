@@ -45,6 +45,7 @@ angular.module('webappV2App')
 
 				// ensure props exist
 				this._.comments = this._.comments || {};
+				this._.assignment = this._.assignment || {};
 				this._.statusIDs = this._.statusIDs || {};
 
 				this.statusIDs = this._.statusIDs;
