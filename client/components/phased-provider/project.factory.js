@@ -357,7 +357,7 @@ angular.module('webappV2App')
 				let status = Phased.team.statuses[statusID];
 				if (!!status.projectID && status.projectID != this.ID) {
 					console.log('Status currently linked to a project; unlinking from other project...');
-					let oldProj = Phased.team.tasks[Phased.team.statuses[statusID].projectID];
+					let oldProj = Phased.team.projects[status.projectID];
 					oldProj.unlinkStatus(statusID);
 				}
 
@@ -378,8 +378,8 @@ angular.module('webappV2App')
 					throw new TypeError('statusID should be string, got ' + (typeof statusID));
 				}
 
-				if (statusID in Phased.team.statuses && Phased.team.statuses[statusID].projectID == this.ID)
-					Phased.team.statuses[statusID].projectID = undefined;
+				if (statusID in Phased.team.statuses)
+					Phased.team.statuses[statusID].projectID = '';
 
 				this.removeFromCollection('statusIDs', statusID);
 			}
