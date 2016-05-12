@@ -163,7 +163,7 @@ angular.module('webappV2App')
 					throw new TypeError('Cannot add empty comment to task');
 				}
 
-				return super.pushVal('comments', {
+				return this.pushVal('comments', {
 					text : text,
 					user : Phased.user.uid,
 					time : Firebase.ServerValue.TIMESTAMP
