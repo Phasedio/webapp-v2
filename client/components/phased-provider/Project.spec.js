@@ -437,7 +437,27 @@ describe('Class: Project', function() {
     })
 
     describe('#unlinkTask', function () {
-    	
+    	beforeEach(function () {
+    		Phased.team.tasks['taskID'] = new TaskFactory.Task('taskID', {name: 'juice some lemons', projectID: myProject.ID});
+    		myProject._.taskIDs['asdf'] = 'taskID';
+    	})
+    	it('should fail if arg is not a string', function () {
+        expect(() => myProject.unlinkTask(1)).to.throw(TypeError);
+        expect(() => myProject.unlinkTask({a:1})).to.throw(TypeError);
+        expect(() => myProject.unlinkTask([1,2,3])).to.throw(TypeError);
+        expect(() => myProject.unlinkTask(undefined)).to.throw(TypeError);
+        expect(() => myProject.unlinkTask(null)).to.throw(TypeError);
+    	})
+
+    	it('should the tasks projectID to ""', function () {
+    		myProject.unlinkTask('taskID');
+    		expect(Phased.team.tasks['taskID'].projectID).to.be.empty;
+    	})
+
+    	it('should remove the taskID from own taskIDs', function () {
+    		myProject.unlinkTask('taskID');
+    		expect(_.values(myProject.taskIDs)).to.not.contain('taskID');
+    	})
     })
 
     describe('#addComment', function () {
