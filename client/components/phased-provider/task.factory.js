@@ -138,12 +138,15 @@ angular.module('webappV2App')
 				if (!!uid && !(uid in Phased.team.members)) {
 					throw new ReferenceError(`Could not find member ${uid} in team`);
 				}
-
-				super.setProperty('assignment', {
-					to : uid,
+				
+				let assignment = {
 					by : Phased.user.uid,
 					time : Firebase.ServerValue.TIMESTAMP
-				});
+				}
+
+				if (!!uid) assignment.to = uid;
+				
+				this.setProperty('assignment', assignment);
 			}
 
 			//	COMMENT MANIP
