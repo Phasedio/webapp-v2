@@ -196,6 +196,18 @@ describe('Class: Task', function() {
   		}
   	})
 
+    it('should ensure comments, assignment, and statusIDs have empty objects if they don\'t exist', function () {
+      Phased.SET_UP = true;
+      var cfg = {
+        name : 'sth',
+        projectID : 'sth'
+      }
+      var myTask = new TaskFactory.Task('asdf', cfg);
+      expect(myTask).to.have.property('comments').that.is.an('object');
+      expect(myTask).to.have.property('assignment').that.is.an('object');
+      expect(myTask).to.have.property('statusIDs').that.is.an('object');
+    })
+
   	it('should expose projectID and statusIDs', function () {
   		Phased.SET_UP = true;
   		var cfg = {
@@ -207,7 +219,7 @@ describe('Class: Task', function() {
   		expect(myTask.projectID).to.equal(myTask._.projectID).and.to.equal(cfg.projectID);
   	})
 
-  	it('should define fixed created prop', function () {
+  	it('should define immutable created prop', function () {
   		Phased.SET_UP = true;
   		var cfg = {
   			created : 54657983000
