@@ -116,7 +116,18 @@ describe('Class: Task', function() {
 
       Phased.meta = {
         ROLE : ["member","admin","owner"],
-        ROLE_ID : {ADMIN:1,MEMBER:0,OWNER:2}
+        ROLE_ID : {ADMIN:1,MEMBER:0,OWNER:2},
+        task : {
+          "STATUS": ["In progress", "Complete", "Assigned", "Created", "In review", "Rejected"],
+          "STATUS_ID": {
+            "ASSIGNED": 2,
+            "COMPLETE": 1,
+            "CREATED": 3,
+            "IN_PROGRESS": 0,
+            "IN_REVIEW": 4,
+            "REJECTED": 5
+          }
+        }
       }
 
       $rootScope.$broadcast('Phased:meta'); // to cue Factory to save FBRef
@@ -538,27 +549,178 @@ describe('Class: Task', function() {
     })
 
     describe('#workOn', function() {
+      var statusID = '-kgobbledyasgook';
+      beforeEach(function () {
+        myTask = new TaskFactory.Task(ID, cfg);
+        Phased.team.tasks[myTask.ID] = myTask;
+        sandbox.stub(StatusFactory, 'create').returnsPromise().resolves(statusID);
+      })
 
+      it('should change the task status to IN_PROGRESS', function () {
+        myTask.workOn();
+        expect(myTask.status).to.equal(Phased.meta.task.STATUS_ID.IN_PROGRESS);
+      })
+
+      it('should create a new status', function () {
+        myTask.workOn();
+        assert(StatusFactory.create.called, 'did not attempt to create a new status');
+      })
+
+      it('should attempt to link the new status to the current task', function () {
+        sandbox.spy(myTask, 'linkStatus');
+        myTask.workOn();
+        assert(myTask.linkStatus.called, 'did not attempt to call linkStatus');
+        assert(myTask.linkStatus.calledWith(statusID), 'called with wrong statusID');
+      })
     })
 
     describe('#take', function() {
-
+      it('should call assignTo with user\'s own ID', function () {
+        sandbox.spy(myTask, 'assignTo');
+        myTask.take();
+        assert(myTask.assignTo.called, 'did not attempt to call assignTo');
+        assert(myTask.assignTo.calledWith(Phased.user.uid), 'called assignTo with wrong ID');
+      })
     })
 
     describe('#takeAndWorkOn', function() {
+      it('should call take', function () {
+        sandbox.spy(myTask, 'take');
+        myTask.takeAndWorkOn();
+        assert(myTask.take.called);
+        myTask.take.restore();
+      })
 
+      it('should call workOn', function () {
+        sandbox.spy(myTask, 'workOn');
+        myTask.takeAndWorkOn();
+        assert(myTask.workOn.called);
+        myTask.workOn.restore();
+      })
     })
 
     describe('#submitForReview', function() {
+      var statusID = '-kgobbledyasgook';
+      beforeEach(function () {
+        myTask = new TaskFactory.Task(ID, cfg);
+        Phased.team.tasks[myTask.ID] = myTask;
+        sandbox.stub(StatusFactory, 'create').returnsPromise().resolves(statusID);
+      })
 
+      it('should change the task status to IN_REVIEW', function () {
+        myTask.submitForReview();
+        expect(myTask.status).to.equal(Phased.meta.task.STATUS_ID.IN_REVIEW);
+      })
+
+      it('should create a new status', function () {
+        myTask.submitForReview();
+        assert(StatusFactory.create.called, 'did not attempt to create a new status');
+      })
+
+      it('should attempt to link the new status to the current task', function () {
+        sandbox.spy(myTask, 'linkStatus');
+        myTask.submitForReview();
+        assert(myTask.linkStatus.called, 'did not attempt to call linkStatus');
+        assert(myTask.linkStatus.calledWith(statusID), 'called with wrong statusID');
+      })
     })
 
     describe('#approve', function() {
+      var statusID = '-kgobbledyasgook';
+      beforeEach(function () {
+        myTask = new TaskFactory.Task(ID, cfg);
+        myTask.status = Phased.meta.task.STATUS_ID.IN_REVIEW;
+        Phased.team.tasks[myTask.ID] = myTask;
+        sandbox.stub(StatusFactory, 'create').returnsPromise().resolves(statusID);
 
+        Phased.team.members[Phased.user.uid].role = Phased.meta.ROLE_ID.ADMIN;
+      })
+
+      it('should fail if user is not admin or owner', function () {
+        Phased.team.members[Phased.user.uid].role = Phased.meta.ROLE_ID.MEMBER;
+        expect(() => myTask.approve()).to.throw(Error);
+
+        Phased.team.members[Phased.user.uid].role = Phased.meta.ROLE_ID.ADMIN;
+        expect(() => myTask.approve()).to.not.throw(Error);
+
+        myTask.status = Phased.meta.task.STATUS_ID.IN_REVIEW; // have to reset-above test set status to COMPLETE
+        Phased.team.members[Phased.user.uid].role = Phased.meta.ROLE_ID.OWNER;
+        expect(() => myTask.approve()).to.not.throw(Error);
+      })
+
+      it('should fail if task is not in review', function () {
+        myTask.status = Phased.meta.task.STATUS_ID.COMPLETE;
+        expect(() => myTask.approve()).to.throw(Error);
+
+        myTask.status = Phased.meta.task.STATUS_ID.IN_REVIEW;
+        expect(() => myTask.approve()).to.not.throw(Error);
+      })
+
+      it('should change the task status to COMPLETE', function () {
+        myTask.approve();
+        expect(myTask.status).to.equal(Phased.meta.task.STATUS_ID.COMPLETE);
+      })
+
+      it('should create a new status', function () {
+        myTask.approve();
+        assert(StatusFactory.create.called, 'did not attempt to create a new status');
+      })
+
+      it('should attempt to link the new status to the current task', function () {
+        sandbox.spy(myTask, 'linkStatus');
+        myTask.approve();
+        assert(myTask.linkStatus.called, 'did not attempt to call linkStatus');
+        assert(myTask.linkStatus.calledWith(statusID), 'called with wrong statusID');
+      })
     })
 
     describe('#reject', function() {
+      var statusID = '-kgobbledyasgook';
+      beforeEach(function () {
+        myTask = new TaskFactory.Task(ID, cfg);
+        myTask.status = Phased.meta.task.STATUS_ID.IN_REVIEW;
+        Phased.team.tasks[myTask.ID] = myTask;
+        sandbox.stub(StatusFactory, 'create').returnsPromise().resolves(statusID);
 
+        Phased.team.members[Phased.user.uid].role = Phased.meta.ROLE_ID.ADMIN;
+      })
+
+      it('should fail if user is not admin or owner', function () {
+        Phased.team.members[Phased.user.uid].role = Phased.meta.ROLE_ID.MEMBER;
+        expect(() => myTask.reject()).to.throw(Error);
+
+        Phased.team.members[Phased.user.uid].role = Phased.meta.ROLE_ID.ADMIN;
+        expect(() => myTask.reject()).to.not.throw(Error);
+
+        myTask.status = Phased.meta.task.STATUS_ID.IN_REVIEW;
+        Phased.team.members[Phased.user.uid].role = Phased.meta.ROLE_ID.OWNER;
+        expect(() => myTask.reject()).to.not.throw(Error);
+      })
+
+      it('should fail if task is not in review', function () {
+        myTask.status = Phased.meta.task.STATUS_ID.COMPLETE;
+        expect(() => myTask.reject()).to.throw(Error);
+
+        myTask.status = Phased.meta.task.STATUS_ID.IN_REVIEW;
+        expect(() => myTask.reject()).to.not.throw(Error);
+      })
+
+      it('should change the task status to REJECTED', function () {
+        myTask.reject();
+        expect(myTask.status).to.equal(Phased.meta.task.STATUS_ID.REJECTED);
+      })
+
+      it('should create a new status', function () {
+        myTask.reject();
+        assert(StatusFactory.create.called, 'did not attempt to create a new status');
+      })
+
+      it('should attempt to link the new status to the current task', function () {
+        sandbox.spy(myTask, 'linkStatus');
+        myTask.reject();
+        assert(myTask.linkStatus.called, 'did not attempt to call linkStatus');
+        assert(myTask.linkStatus.calledWith(statusID), 'called with wrong statusID');
+      })
     })
 
   })
