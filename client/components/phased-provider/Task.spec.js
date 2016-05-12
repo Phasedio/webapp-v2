@@ -506,7 +506,35 @@ describe('Class: Task', function() {
     })
 
     describe('#unlinkStatus', function() {
+      beforeEach(function () {
+        Phased.team.statuses = {
+          'statusID' : new StatusFactory.Status('statusID', {name:'chillin', taskID : 'purpleTask'})
+        }
+        Phased.team.tasks = {
+          'purpleTask' : new TaskFactory.Task('purpleTask', {name: 'purple', statusIDs : {'a':'statusID'}})
+        }
+        myTask = new TaskFactory.Task(ID, cfg);
+        Phased.team.tasks[myTask.ID] = myTask;
+      })
 
+      it('should fail if arg is not a string', function () {
+        expect(()=> myTask.unlinkStatus()).to.throw(TypeError);
+        expect(()=> myTask.unlinkStatus(1234)).to.throw(TypeError);
+        expect(()=> myTask.unlinkStatus(true)).to.throw(TypeError);
+        expect(()=> myTask.unlinkStatus({name:'val'})).to.throw(TypeError);
+
+        expect(()=> myTask.unlinkStatus('asdf')).to.not.throw(TypeError);
+      })
+
+      it('should empty the status\'s taskID', function () {
+        Phased.team.tasks['purpleTask'].unlinkStatus('statusID');
+        expect(Phased.team.statuses['statusID'].taskID).to.be.empty;
+      })
+
+      it('should remove the status\'s ID from the task\'s statusIDs', function () {
+        Phased.team.tasks['purpleTask'].unlinkStatus('statusID');
+        expect(_.values(Phased.team.tasks['purpleTask'].statusIDs)).to.not.include('statusID');
+      })
     })
 
     describe('#workOn', function() {
