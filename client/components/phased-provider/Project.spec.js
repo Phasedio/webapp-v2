@@ -461,15 +461,106 @@ describe('Class: Project', function() {
     })
 
     describe('#addComment', function () {
-    	
+      beforeEach(function () {
+        myProject._.comments = {};
+      })
+
+      it('should fail if arg isnt a string comment', function () {
+        expect(()=> myProject.addComment()).to.throw(TypeError);
+        expect(()=> myProject.addComment(1234)).to.throw(TypeError);
+        expect(()=> myProject.addComment('')).to.throw(TypeError);
+        expect(()=> myProject.addComment({a:1})).to.throw(TypeError);
+        expect(()=> myProject.addComment([1,3])).to.throw(TypeError);
+      })
+
+      it('should call pushVal', function () {
+        sandbox.spy(myProject, 'pushVal');
+        myProject.addComment('this is a comment');
+        assert(myProject.pushVal.called, 'did not call pushVal');
+        myProject.pushVal.restore();
+      });
+
+      it('should pass pushVal an object with text, user, and timestamp', function () {
+        var args = {
+          text: 'this is a comment',
+          user: Phased.user.uid,
+          time: Firebase.ServerValue.TIMESTAMP
+        }
+        myProject.addComment(args.text);
+        expect(lastPushed).to.deep.equal(args);
+      })
+
+      it('should add comment to list of comments', function() {
+        myProject.addComment('this is a comment');
+        var key = Object.keys(myProject.comments).pop(); // should be only comment
+        var comment = myProject.comments[key];
+        expect(comment).to.have.property('text').that.equals('this is a comment');
+        expect(comment).to.have.property('user').that.equals(Phased.user.uid);
+        expect(comment).to.have.property('time'); // once FB transaction completes this will be an actual timestamp
+      })
     })
 
     describe('#deleteComment', function () {
-    	
+      beforeEach(function () {
+        myProject._.comments = {
+          'commentID' : {
+            text : 'asdf',
+            user : Phased.user.uid,
+            time : 5646540000
+          }
+        };
+      })
+
+      it('should fail if the argument is not a string', function () {
+        expect(()=> myProject.deleteComment()).to.throw(TypeError);
+        expect(()=> myProject.deleteComment(1234)).to.throw(TypeError);
+        expect(()=> myProject.deleteComment({a:1})).to.throw(TypeError);
+        expect(()=> myProject.deleteComment([1,3])).to.throw(TypeError);
+      })
+
+      it('should fail if the argument is not a UID for an existing comment', function () {
+        expect(()=> myProject.deleteComment('not a comment')).to.throw(ReferenceError);
+      })
+
+      it('should delete the comment', function () {
+        myProject.deleteComment('commentID');
+        expect(myProject.comments).to.be.empty;
+      })
     })
 
     describe('#editComment', function () {
-    	
+      beforeEach(function () {
+        myProject._.comments = {
+          'commentID' : {
+            text : 'asdf',
+            user : Phased.user.uid,
+            time : 5646540000
+          }
+        };
+      })
+
+      it('should fail if the ID argument is not a string', function () {
+        expect(()=> myProject.editComment()).to.throw(TypeError);
+        expect(()=> myProject.editComment(1234, 'text')).to.throw(TypeError);
+        expect(()=> myProject.editComment({a:1}, 'text')).to.throw(TypeError);
+        expect(()=> myProject.editComment([1,3], 'text')).to.throw(TypeError);
+      })
+
+      it('should fail if the ID argument is not a UID for an existing comment', function () {
+        expect(()=> myProject.editComment('not a comment', 'text')).to.throw(ReferenceError);
+      })
+
+      it('should fail if the text argument is a string', function () {
+        expect(()=> myProject.editComment('commentID')).to.throw(TypeError);
+        expect(()=> myProject.editComment('commentID', 1234)).to.throw(TypeError);
+        expect(()=> myProject.editComment('commentID', {a:1})).to.throw(TypeError);
+        expect(()=> myProject.editComment('commentID', [1,3])).to.throw(TypeError);
+      })
+
+      it('should edit the comment', function () {
+        myProject.editComment('commentID', 'new text');
+        expect(myProject.comments['commentID'].text).to.equal('new text');
+      })
     })
 
     describe('#postStatus', function () {
