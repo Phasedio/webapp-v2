@@ -109,8 +109,7 @@ angular.module('webappV2App')
 			}
 
 			set assignment(val) {
-				console.warn('Setting task assignment directly has no effect; please use Task#assignTo');
-				return false;
+				throw new Error('Setting task assignment directly has no effect; please use Task#assignTo');
 			}
 
 			/**		comments 	*/
@@ -119,8 +118,7 @@ angular.module('webappV2App')
 			}
 
 			set comments(val) {
-				console.warn('Setting task comments directly has no effect; please use Task#addComment');
-				return false;
+				throw new Error('Setting task comments directly has no effect; please use Task#addComment');
 			}
 
 			/**		description 	*/
