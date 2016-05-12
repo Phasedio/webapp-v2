@@ -699,6 +699,7 @@ describe('Class: Project', function() {
       }
       ID = '-KasdfmyProjectID';
       myProject = new ProjectFactory.Project(ID, cfg);
+      sandbox.spy(myProject, 'setProperty');
     })
 
 		it('should generally return the value in _', function () {
@@ -708,26 +709,48 @@ describe('Class: Project', function() {
 			expect(myProject.memberIDs).to.equal(myProject._.memberIDs);
 			expect(myProject.taskIDs).to.equal(myProject._.taskIDs);
 		})
+
 		describe('dueDate', function () {
-			
+      it('should fail if val isn\'t Date-like', function () {
+        // with undefined
+        expect(()=> myProject.dueDate = undefined).to.throw(TypeError);
+        // with some string
+        expect(()=> myProject.dueDate = 'asome').to.throw(TypeError);
+        // with object
+        expect(()=> myProject.dueDate = {a:1}).to.throw(TypeError);
+      })
+
+      it('should not fail if val is Date-like', function () {
+        // with Date
+        expect(() => myProject.dueDate = new Date()).to.not.throw(TypeError);
+        // with Moment
+        expect(() => myProject.dueDate = new moment()).to.not.throw(TypeError);
+        // with timestamp
+        expect(() => myProject.dueDate = 1463009841200).to.not.throw(TypeError);
+      });
+
+      it('should call setProperty', function () {
+        myProject.dueDate = 123456789000;
+        assert(myProject.setProperty.called, 'did not call setProperty');
+      })
 		})
 
 		describe('status', function () {
-			
+      it('should fail if new value isn\'t a valid status ID', function() {
+        expect(() => myProject.status = 99).to.throw(TypeError);
+      });
+
+      it('should call setProperty', function () {
+        myProject.status = Phased.meta.project.STATUS_ID.CREATED;
+        assert(myProject.setProperty.called, 'did not call setProperty');
+      })
 		})
 
 		describe('comments', function () {
-			
+      it('should always fail when directly set', function () {
+        expect(() => myProject.comments = {}).to.throw(Error);
+      })
 		})
-
-		describe('memberIDs', function () {
-			
-		})
-
-		describe('taskIDs', function () {
-			
-		})
-
 	})
 
 });
