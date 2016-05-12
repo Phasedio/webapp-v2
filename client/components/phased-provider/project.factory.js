@@ -243,7 +243,7 @@ angular.module('webappV2App')
 				}
 
 				if (taskID in Phased.team.tasks)
-					Phased.team.tasks[taskID].projectID = undefined;
+					Phased.team.tasks[taskID].projectID = '';
 
 				this.removeFromCollection('taskIDs', taskID);
 			}
