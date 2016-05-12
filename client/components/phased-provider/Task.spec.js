@@ -461,7 +461,48 @@ describe('Class: Task', function() {
     })
 
     describe('#linkStatus', function() {
+      beforeEach(function () {
+        Phased.team.statuses = {
+          'statusID' : new StatusFactory.Status('statusID', {name:'chillin', taskID : 'purpleTask'})
+        }
+        Phased.team.tasks = {
+          'purpleTask' : new TaskFactory.Task('purpleTask', {name: 'purple', statusIDs : {'a':'statusID'}})
+        }
+        myTask = new TaskFactory.Task(ID, cfg);
+        Phased.team.tasks[myTask.ID] = myTask;
+      })
 
+      it('should fail if arg is not a string', function () {
+        expect(()=> myTask.linkStatus()).to.throw(TypeError);
+        expect(()=> myTask.linkStatus(1234)).to.throw(TypeError);
+        expect(()=> myTask.linkStatus(true)).to.throw(TypeError);
+        expect(()=> myTask.linkStatus({name:'val'})).to.throw(TypeError);
+
+        expect(()=> myTask.linkStatus('asdf')).to.not.throw(TypeError);
+      })
+
+      it('should fail if arg is not the UID of an existing status', function () {
+        expect(()=> myTask.linkStatus('asdf')).to.throw(ReferenceError);
+        expect(()=> myTask.linkStatus('statusID')).to.not.throw(ReferenceError);
+      })
+
+      it('should set status taskID to this task\'s ID', function () {
+        myTask.linkStatus('statusID');
+        expect(Phased.team.statuses['statusID'].taskID).to.equal(myTask.ID);
+      })
+
+      it('should add status ID to own statusIDs list', function () {
+        myTask.linkStatus('statusID');
+        expect(_.values(myTask.statusIDs)).to.contain('statusID');
+      })
+
+      it('should attempt to unlink the status from its old task, if it is already linked', function () {
+        sandbox.spy(Phased.team.tasks['purpleTask'], 'unlinkStatus');
+        Phased.team.tasks['purpleTask'].linkStatus('statusID'); // set up initial linkage
+        myTask.linkStatus('statusID');
+        assert(Phased.team.tasks['purpleTask'].unlinkStatus.calledWith('statusID'), 'did not attmept to call unlinkStatus');
+        Phased.team.tasks['purpleTask'].unlinkStatus.restore();
+      })
     })
 
     describe('#unlinkStatus', function() {
