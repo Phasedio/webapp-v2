@@ -37,7 +37,7 @@ body{
       left:10%;
       z-index: -1;
     }
-    img {
+    .member-profile {
       display: inline-block;
       float: left;
       //margin: 0 auto;
@@ -72,9 +72,25 @@ body{
     }
     .like-status{
       color:$black;
+      
+      &:hover{
+        #iOS-icon-kit{
+          fill:$green;
+        }
+      }
+    }
+    .liked-status{
+      #iOS-icon-kit{
+          fill:$green;
+      }
     }
     .comment-status{
       color:$black;
+      &:hover{
+        #iOS-icon-kit{
+          fill:$green;
+        }
+      }
     }
 
     .status-time {
@@ -223,7 +239,7 @@ body{
   }
   
 }
-.new-announcement{
+.new-announcement,.newAnnouncement{
   border-color: $green;
 }
 .add-announcement{
@@ -255,3 +271,4 @@ body{
     }
   }  
 }
+

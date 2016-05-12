@@ -13,28 +13,32 @@ var TeamController = function TeamController($http, $scope, Phased, StatusFactor
   })();
 
   $scope.postStatus = function postStatus(name) {
+    $scope.newStatus = '';
+    $scope.statusActive = false;
     StatusFactory.create(name).then(()=>{
-      $scope.newStatus = '';
+      
     }, (e) => {
+      $scope.statusActive = true;
+      $scope.newStatus = name;
       console.log(e);
     });
   };
 
-  $scope.makeTask = function makeTask(name) {
-    TaskFactory.create(name).then(()=>{
-      console.log('made task!');
-    }, (e) => {
-      console.log(e);
-    });
-  };
+  // $scope.makeTask = function makeTask(name) {
+  //   TaskFactory.create(name).then(()=>{
+  //     console.log('made task!');
+  //   }, (e) => {
+  //     console.log(e);
+  //   });
+  // };
 
-  $scope.makeProject = function makeProject(name) {
-    ProjectFactory.create(name).then(()=>{
-      console.log('made project!');
-    }, (e) => {
-      console.log(e);
-    });
-  };
+  // $scope.makeProject = function makeProject(name) {
+  //   ProjectFactory.create(name).then(()=>{
+  //     console.log('made project!');
+  //   }, (e) => {
+  //     console.log(e);
+  //   });
+  // };
 
   $scope.openStatus = function openStatus(){
      $scope.statusActive  = true;

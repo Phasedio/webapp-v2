@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="24px" height="19px" viewBox="0 0 24 19" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 3.7.1 (28215) - http://www.bohemiancoding.com/sketch -->
+    <title>selected</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="icon-artboard" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="iOS-icon-kit" transform="translate(-515.000000, -1180.000000)" fill="#929292">
+            <g id="Icon-sets">
+                <g id="View/Edit-Control-Icons" transform="translate(100.000000, 1116.500000)">
+                    <g id="SVGs" transform="translate(50.000000, 44.000000)">
+                        <path d="M365.5,30 L368.5,27 L373.5,32 L386,19.5 L389,22.5 L373.5,38 L365.5,30 Z" id="selected"></path>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>
