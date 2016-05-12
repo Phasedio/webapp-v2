@@ -275,8 +275,8 @@ angular.module('webappV2App')
 					throw new TypeError('statusID should be string, got ' + (typeof statusID));
 				}
 
-				if (statusID in Phased.team.statuses && Phased.team.statuses[statusID].taskID == this.ID)
-					Phased.team.statuses[statusID].taskID = undefined;
+				if (statusID in Phased.team.statuses)
+					Phased.team.statuses[statusID].taskID = '';
 
 				super.removeFromCollection('statusIDs', statusID);
 			}
