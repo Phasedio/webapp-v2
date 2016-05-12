@@ -152,7 +152,7 @@ angular.module('webappV2App')
 					throw new ReferenceError(`Could not find member ${uid} in team`);
 				}
 
-				super.pushVal('members', uid);
+				this.pushVal('members', uid);
 			}
 
 			/**
@@ -171,7 +171,7 @@ angular.module('webappV2App')
 					throw new ReferenceError(`Could not find member ${uid} in team`);
 				}
 
-				super.setProperty(`memberIDs/${uid}`, null);
+				this.setProperty(`memberIDs/${uid}`, null);
 			}
 
 			// 	TASK MANIP
@@ -222,7 +222,7 @@ angular.module('webappV2App')
 				// set task's projectID
 				Phased.team.tasks[taskID].projectID = this.ID;
 				
-				return super.pushVal('taskIDs', taskID);
+				return this.pushVal('taskIDs', taskID);
 			}
 
 			/**
@@ -239,7 +239,7 @@ angular.module('webappV2App')
 				if (taskID in Phased.team.tasks)
 					Phased.team.tasks[taskID].projectID = undefined;
 
-				super.removeFromCollection('taskIDs', taskID);
+				this.removeFromCollection('taskIDs', taskID);
 			}
 
 			//	COMMENT MANIP
@@ -255,7 +255,7 @@ angular.module('webappV2App')
 					throw new TypeError('Cannot add empty comment to task');
 				}
 
-				return super.pushVal('comments', {
+				return this.pushVal('comments', {
 					text : text,
 					user : Phased.user.uid,
 					time : Firebase.ServerValue.TIMESTAMP
@@ -278,7 +278,7 @@ angular.module('webappV2App')
 					throw new ReferenceError(`Could not find comment ${commentID} for task ${this.ID}`);
 				}
 
-				super.setProperty(`comments/${commentID}`, null);
+				this.setProperty(`comments/${commentID}`, null);
 			}
 
 			/**
@@ -302,7 +302,7 @@ angular.module('webappV2App')
 					throw new ReferenceError(`Could not find comment ${commentID} for task ${this.ID}`);
 				}
 
-				super.setProperty(`comments/${commentID}/text`, text);
+				this.setProperty(`comments/${commentID}/text`, text);
 			}
 
 			//	STATUS MANIP
@@ -353,7 +353,7 @@ angular.module('webappV2App')
 				// set status' projectID
 				Phased.team.statuses[statusID].projectID = this.ID;
 				
-				super.pushVal('statusIDs', statusID);
+				this.pushVal('statusIDs', statusID);
 			}
 
 			/**
@@ -370,7 +370,7 @@ angular.module('webappV2App')
 				if (statusID in Phased.team.statuses && Phased.team.statuses[statusID].projectID == this.ID)
 					Phased.team.statuses[statusID].projectID = undefined;
 
-				super.removeFromCollection('statusIDs', statusID);
+				this.removeFromCollection('statusIDs', statusID);
 			}
 		}
 
