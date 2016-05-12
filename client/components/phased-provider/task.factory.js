@@ -48,6 +48,7 @@ angular.module('webappV2App')
 				this._.statusIDs = this._.statusIDs || {};
 
 				this.statusIDs = this._.statusIDs;
+				this.projectID = this._.projectID;
 
 				// register read-only properties
 				Object.defineProperty( this, 'created', {value: cfg.created, configurable:false, writable:false, enumerable: true} );
