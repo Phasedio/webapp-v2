@@ -605,13 +605,81 @@ describe('Class: Project', function() {
     })
 
     describe('#linkStatus', function () {
-    	
+      beforeEach(function () {
+        Phased.team.statuses = {
+          'statusID' : new StatusFactory.Status('statusID', {name:'chillin', projectID : 'otherProj'})
+        }
+        Phased.team.projects = {
+          'otherProj' : new ProjectFactory.Project('otherProj', {name: 'purple', statusIDs : {'a':'statusID'}})
+        }
+        myProject = new ProjectFactory.Project(ID, cfg);
+        Phased.team.projects[myProject.ID] = myProject;
+      })
+
+      it('should fail if arg is not a string', function () {
+        expect(()=> myProject.linkStatus()).to.throw(TypeError);
+        expect(()=> myProject.linkStatus(1234)).to.throw(TypeError);
+        expect(()=> myProject.linkStatus(true)).to.throw(TypeError);
+        expect(()=> myProject.linkStatus({name:'val'})).to.throw(TypeError);
+
+        expect(()=> myProject.linkStatus('asdf')).to.not.throw(TypeError);
+      })
+
+      it('should fail if arg is not the UID of an existing status', function () {
+        expect(()=> myProject.linkStatus('asdf')).to.throw(ReferenceError);
+        expect(()=> myProject.linkStatus('statusID')).to.not.throw(ReferenceError);
+      })
+
+      it('should set status projectID to this project\'s ID', function () {
+        myProject.linkStatus('statusID');
+        expect(Phased.team.statuses['statusID'].projectID).to.equal(myProject.ID);
+      })
+
+      it('should add status ID to own statusIDs list', function () {
+        myProject.linkStatus('statusID');
+        expect(_.values(myProject.statusIDs)).to.contain('statusID');
+      })
+
+      it('should attempt to unlink the status from its old project, if it is already linked', function () {
+        sandbox.spy(Phased.team.projects['otherProj'], 'unlinkStatus');
+        Phased.team.projects['otherProj'].linkStatus('statusID'); // set up initial linkage
+        myProject.linkStatus('statusID');
+        assert(Phased.team.projects['otherProj'].unlinkStatus.calledWith('statusID'), 'did not attmept to call unlinkStatus');
+        Phased.team.projects['otherProj'].unlinkStatus.restore();
+      })
     })
 
     describe('#unlinkStatus', function () {
-    	
-    })
+      beforeEach(function () {
+        Phased.team.statuses = {
+          'statusID' : new StatusFactory.Status('statusID', {name:'chillin', projectID : 'otherProj'})
+        }
+        Phased.team.projects = {
+          'otherProj' : new ProjectFactory.Project('otherProj', {name: 'purple', statusIDs : {'a':'statusID'}})
+        }
+        myProject = new ProjectFactory.Project(ID, cfg);
+        Phased.team.projects[myProject.ID] = myProject;
+      })
 
+      it('should fail if arg is not a string', function () {
+        expect(()=> myProject.unlinkStatus()).to.throw(TypeError);
+        expect(()=> myProject.unlinkStatus(1234)).to.throw(TypeError);
+        expect(()=> myProject.unlinkStatus(true)).to.throw(TypeError);
+        expect(()=> myProject.unlinkStatus({name:'val'})).to.throw(TypeError);
+
+        expect(()=> myProject.unlinkStatus('asdf')).to.not.throw(TypeError);
+      })
+
+      it('should empty the status\'s projectID', function () {
+        Phased.team.projects['otherProj'].unlinkStatus('statusID');
+        expect(Phased.team.statuses['statusID'].projectID).to.be.empty;
+      })
+
+      it('should remove the status\'s ID from the project\'s statusIDs', function () {
+        Phased.team.projects['otherProj'].unlinkStatus('statusID');
+        expect(_.values(Phased.team.projects['otherProj'].statusIDs)).to.not.include('statusID');
+      })
+    })
 	})
 
 	describe('accessors', function () {
