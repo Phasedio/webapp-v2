@@ -278,4 +278,139 @@ describe('Class: Project', function() {
   		expect(lastBroadcastEventData).to.equal('asdf');
   	})
   })
+	
+	describe('methods', function () {
+    var myProject, cfg, ID;
+    beforeEach(function () {
+      Phased.SET_UP = true;
+      cfg = {
+        name : 'sth',
+        description : 'asdfasdf',
+        created : 54657983000,
+        dueDate : 'sth',
+        comments : {'asdf' : {}, '-Kasdf' : {}},
+        status : 3,
+        statusIDs : {'asdf' : {}, '-Kasdf' : {}},
+        taskIDs : {'asdf' : {}, '-Kasdf' : {}},
+        memberIDs : {'asdf' : {}, '-Kasdf' : {}}
+      }
+      ID = '-KasdfmyProjectID';
+      myProject = new ProjectFactory.Project(ID, cfg);
+    })
+
+    describe('#destroy', function () {
+    	beforeEach(function () {
+    		myProject = new ProjectFactory.Project(ID, cfg);
+    	})
+
+    	it('should broadcast PROJECT_DESTROYED event', function () {
+    		var projID = myProject.ID;
+    		myProject.destroy();
+    		expect(lastBroadcastEvent).to.equal(Phased.RUNTIME_EVENTS.PROJECT_DESTROYED);
+    		expect(lastBroadcastEventData).to.equal(projID);
+    	})
+
+    	it('should call super.destroy', function () {
+    		sandbox.spy(DBObject.prototype, 'destroy');
+    		myProject.destroy();
+        assert(DBObject.prototype.destroy.called, 'DBObject.destroy was not called');
+    	})
+    })
+
+    describe('#addMember', function () {
+    	it('should fail if arg is not a string', function () {
+    		
+    	})
+    })
+
+    describe('#removeMember', function () {
+    	
+    })
+
+    describe('#createTask', function () {
+    	
+    })
+
+    describe('#linkTask', function () {
+    	
+    })
+
+    describe('#unlinkTask', function () {
+    	
+    })
+
+    describe('#addComment', function () {
+    	
+    })
+
+    describe('#deleteComment', function () {
+    	
+    })
+
+    describe('#editComment', function () {
+    	
+    })
+
+    describe('#postStatus', function () {
+    	
+    })
+
+    describe('#linkStatus', function () {
+    	
+    })
+
+    describe('#unlinkStatus', function () {
+    	
+    })
+
+	})
+
+	describe('accessors', function () {
+    var myProject, cfg, ID;
+    beforeEach(function () {
+      Phased.SET_UP = true;
+      cfg = {
+        name : 'sth',
+        description : 'asdfasdf',
+        created : 54657983000,
+        dueDate : 'sth',
+        comments : {'asdf' : {}, '-Kasdf' : {}},
+        status : 3,
+        statusIDs : {'asdf' : {}, '-Kasdf' : {}},
+        taskIDs : {'asdf' : {}, '-Kasdf' : {}},
+        memberIDs : {'asdf' : {}, '-Kasdf' : {}}
+      }
+      ID = '-KasdfmyProjectID';
+      myProject = new ProjectFactory.Project(ID, cfg);
+    })
+
+		it('should generally return the value in _', function () {
+			expect(myProject.dueDate).to.equal(myProject._.dueDate);
+			expect(myProject.status).to.equal(myProject._.status);
+			expect(myProject.comments).to.equal(myProject._.comments);
+			expect(myProject.memberIDs).to.equal(myProject._.memberIDs);
+			expect(myProject.taskIDs).to.equal(myProject._.taskIDs);
+		})
+		describe('dueDate', function () {
+			
+		})
+
+		describe('status', function () {
+			
+		})
+
+		describe('comments', function () {
+			
+		})
+
+		describe('memberIDs', function () {
+			
+		})
+
+		describe('taskIDs', function () {
+			
+		})
+
+	})
+
 });
