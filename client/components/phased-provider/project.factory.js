@@ -49,9 +49,9 @@ angular.module('webappV2App')
 
 				// ensure props exist
 				this._.comments = this._.comments || {};
-				this._.taskIDs = this._.taskIDs || {};
-				this._.statusIDs = this._.statusIDs || {};
-				this._.memberIDs = this._.memberIDs || {};
+				this.taskIDs = this._.taskIDs = this._.taskIDs || {};
+				this.statusIDs = this._.statusIDs = this._.statusIDs || {};
+				this.memberIDs = this._.memberIDs = this._.memberIDs || {};
 
 				// register read-only properties
 				Object.defineProperty( this, 'created', {value: cfg.created, configurable:false, writable:false, enumerable: true} );
@@ -111,36 +111,6 @@ angular.module('webappV2App')
 
 			set comments(val) {
 				console.warn('Setting project comments directly has no effect; please use Project#addComment');
-				return false;
-			}
-
-			/**		memberIDs 	*/
-			get memberIDs() {
-				return this._.memberIDs;
-			}
-
-			set memberIDs(val) {
-				console.warn('Setting project memberIDs directly has no effect; please use Project#addMember');
-				return false;
-			}
-
-			/**		taskIDs 	*/
-			get taskIDs() {
-				return this._.taskIDs;
-			}
-
-			set taskIDs(val) {
-				console.warn('Setting project taskIDs directly has no effect; please use Project#addTask');
-				return false;
-			}
-
-			/**		statusIDs 	*/
-			get statusIDs() {
-				return this._.statusIDs;
-			}
-
-			set statusIDs(val) {
-				console.warn('Setting project statusIDs directly has no effect; please use Project#addTask');
 				return false;
 			}
 
