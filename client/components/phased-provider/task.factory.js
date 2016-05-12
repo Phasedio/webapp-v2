@@ -84,7 +84,7 @@ angular.module('webappV2App')
 				if (!val) {
 					throw new TypeError('Task dueDate could not be parsed');
 				} else {
-					super.setProperty('dueDate', val);
+					this.setProperty('dueDate', val);
 					return val;
 				}
 			}
@@ -98,7 +98,7 @@ angular.module('webappV2App')
 				if (!val in Phased.meta.task.STATUS_ID) {
 					throw new TypeError('Task status should be one of Phased.meta.task.STATUS_ID');
 				} else {
-					super.setProperty('status', val);
+					this.setProperty('status', val);
 					return val;
 				}
 			}
@@ -132,7 +132,7 @@ angular.module('webappV2App')
 				if (typeof val != 'string')
 					throw new TypeError(`description should be a string, got ${typeof val}`);
 
-				super.setProperty('dueDate', val);
+				this.setProperty('dueDate', val);
 				return val;
 			}
 			
