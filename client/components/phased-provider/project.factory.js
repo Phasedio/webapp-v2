@@ -171,7 +171,7 @@ angular.module('webappV2App')
 					throw new ReferenceError(`Could not find member ${uid} in team`);
 				}
 
-				this.setProperty(`memberIDs/${uid}`, null);
+				this.removeFromCollection(`memberIDs`, uid);
 			}
 
 			// 	TASK MANIP
