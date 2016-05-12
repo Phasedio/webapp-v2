@@ -95,7 +95,7 @@ angular.module('webappV2App')
 			}
 
 			set status(val) {
-				if (!val in Phased.meta.task.STATUS_ID) {
+				if (!(val in _.values(Phased.meta.task.STATUS_ID))) {
 					throw new TypeError('Task status should be one of Phased.meta.task.STATUS_ID');
 				} else {
 					this.setProperty('status', val);
