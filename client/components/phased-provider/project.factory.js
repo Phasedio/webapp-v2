@@ -48,16 +48,16 @@ angular.module('webappV2App')
 				} = cfg);
 
 				// ensure props exist
-				this._.comments = this._.comments || {};
-				this._.taskIDs = this._.taskIDs || {};
-				this._.statusIDs = this._.statusIDs || {};
-				this._.memberIDs = this._.memberIDs || {};
+				this.comments = this._.comments = this._.comments || {};
+				this.taskIDs = this._.taskIDs = this._.taskIDs || {};
+				this.statusIDs = this._.statusIDs = this._.statusIDs || {};
+				this.memberIDs = this._.memberIDs = this._.memberIDs || {};
 
 				// register read-only properties
 				Object.defineProperty( this, 'created', {value: cfg.created, configurable:false, writable:false, enumerable: true} );
 				
 				// broadcast PROJECT_ADDED
-				$rootScope.$broadcast(Phased.RUNTIME_EVENTS.PROJECT_ADDED);
+				$rootScope.$broadcast(Phased.RUNTIME_EVENTS.PROJECT_ADDED, ID);
 			}
 
 			/*
