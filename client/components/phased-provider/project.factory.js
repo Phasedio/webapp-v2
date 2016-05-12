@@ -67,7 +67,7 @@ angular.module('webappV2App')
 			*/
 			destroy() {
 				// fire PROJECT_DESTROYED
-				$rootScope.$broadcast(Phased.RUNTIME_EVENTS.PROJECT_DESTROYED);
+				$rootScope.$broadcast(Phased.RUNTIME_EVENTS.PROJECT_DESTROYED, this.ID);
 
 				// call super.destroy()
 				super.destroy();
