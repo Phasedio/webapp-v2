@@ -319,7 +319,24 @@ describe('Class: Project', function() {
 
     describe('#addMember', function () {
     	it('should fail if arg is not a string', function () {
-    		
+        expect(() => myProject.addMember(1)).to.throw(TypeError);
+        expect(() => myProject.addMember({a:1})).to.throw(TypeError);
+        expect(() => myProject.addMember([1,2,3])).to.throw(TypeError);
+        expect(() => myProject.addMember(undefined)).to.throw(TypeError);
+        expect(() => myProject.addMember(null)).to.throw(TypeError);
+    	})
+
+    	it('should fail if arg is not the UID of a team member', function () {
+    		expect(() => myProject.addMember('not a member')).to.throw(ReferenceError);
+    		expect(() => myProject.addMember('memberID')).to.not.throw(ReferenceError);
+    	})
+
+    	it('should call pushVal with member ID', function () {
+    		sandbox.spy(myProject, 'pushVal');
+    		myProject.addMember('memberID');
+    		assert(myProject.pushVal.called, 'pushVal was not called');
+    		assert(myProject.pushVal.calledWith('members', 'memberID'), 'pushVal was called with incorrect data: ' + myProject.pushVal.args[0][0] + ', ' + myProject.pushVal.args[0][1]);
+    		myProject.pushVal.restore();
     	})
     })
 
