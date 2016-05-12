@@ -35,6 +35,7 @@ angular.module('webappV2App')
 				// expand relevant properties from cfg
 				({
 					name : this._.name,
+					description : this._.description,
 					projectID : this._.projectID,
 					dueDate : this._.dueDate,
 					assignment : this._.assignment,
@@ -121,6 +122,20 @@ angular.module('webappV2App')
 				console.warn('Setting task comments directly has no effect; please use Task#addComment');
 				return false;
 			}
+
+			/**		description 	*/
+			get description() {
+				return this._.description;
+			}
+
+			set description(val) {
+				if (typeof val != 'string')
+					throw new TypeError(`description should be a string, got ${typeof val}`);
+
+				super.setProperty('dueDate', val);
+				return val;
+			}
+			
 
 			//	ASSIGNMENT MANIP
 
