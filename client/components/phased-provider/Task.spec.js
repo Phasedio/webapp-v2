@@ -471,6 +471,21 @@ describe('Class: Task', function() {
         expect(args.taskID).to.equal(myTask.ID);
         StatusFactory.create.restore();
       })
+
+      it('should attempt to link new status to statusIDs', function () {
+        var statusID = 'someTask';
+        sandbox.stub(StatusFactory, 'create').returnsPromise().resolves(statusID);
+        sandbox.spy(myTask, 'linkStatus');
+        myTask.postStatus('mrrow');
+        assert(myTask.linkStatus.called, 'linkStatus was not called');
+        assert(myTask.linkStatus.calledWith(statusID), 'linkStatus was called with the wrong data');
+        myTask.linkStatus.restore();
+        StatusFactory.create.restore();
+      })
+
+      it('should return a promise', function () {
+        myTask.postStatus('return a promise').should.be.an.instanceOf(Promise);
+      })
     })
 
     describe('#linkStatus', function() {

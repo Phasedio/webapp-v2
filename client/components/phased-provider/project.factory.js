@@ -187,13 +187,18 @@ angular.module('webappV2App')
 					args = {
 						name : args
 					}
-				} else if (typeof args != 'object' || !!args) {
+				} else if (typeof args != 'object' && !!args) {
 					throw new TypeError('args should be String or Object, got ' + typeof args);
 				} 
 
 				args.projectID = this.ID;
 
-				return TaskFactory.create(args);
+				return new Promise((fulfill, reject) => {
+					TaskFactory.create(args).then((taskID) => {
+						this.linkTask(taskID);
+						fulfill(taskID);
+					}, reject);	
+				});
 			}
 
 			/**
@@ -318,13 +323,18 @@ angular.module('webappV2App')
 					args = {
 						name : args
 					}
-				} else if (typeof args != 'object' || !!args) {
+				} else if (typeof args != 'object' && !!args) {
 					throw new TypeError('args should be String or Object, got ' + typeof args);
 				} 
 
 				args.projectID = this.ID;
 
-				return StatusFactory.create(args);
+				return new Promise((fulfill, reject) => {
+					StatusFactory.create(args).then((statusID) => {
+						this.linkStatus(statusID);
+						fulfill(statusID);
+					}, reject);
+				})
 			}
 
 			/**

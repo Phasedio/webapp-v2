@@ -245,7 +245,12 @@ angular.module('webappV2App')
 
 				args.taskID = this.ID;
 
-				return StatusFactory.create(args);
+				return new Promise((fulfill, reject) => {
+					StatusFactory.create(args).then((statusID) => {
+						this.linkStatus(statusID);
+						fulfill(statusID);
+					}, reject);
+				})
 			}
 
 			/**

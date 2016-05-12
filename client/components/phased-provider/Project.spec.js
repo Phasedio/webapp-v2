@@ -363,7 +363,37 @@ describe('Class: Project', function() {
     })
 
     describe('#createTask', function () {
-    	
+    	it('should fail if arg is not a string or cfg object', function () {
+        expect(() => myProject.createTask(1)).to.throw(TypeError);
+        expect(() => myProject.createTask(undefined)).to.throw(TypeError);
+        expect(() => myProject.createTask(null)).to.throw(TypeError);
+
+        expect(() => myProject.createTask({name:'asdf'})).to.not.throw(TypeError);
+    	})
+
+    	it('should call TaskFactory.create with an object with own ID ast projectID', function () {
+    		sandbox.spy(TaskFactory, 'create');
+    		myProject.createTask('get to the choppa');
+    		assert(TaskFactory.create.called, 'TaskFactory.create was not called');
+
+    		var args = TaskFactory.create.args[0][0];
+    		expect(args).to.have.property('projectID').that.equals(myProject.ID);
+    	})
+
+    	it('should attempt to link new task to taskIDs', function () {
+    		var taskID = 'someTask';
+    		sandbox.stub(TaskFactory, 'create').returnsPromise().resolves(taskID);
+    		sandbox.spy(myProject, 'linkTask');
+    		myProject.createTask('get to the choppa');
+    		assert(myProject.linkTask.called, 'linkTask was not called');
+    		assert(myProject.linkTask.calledWith(taskID), 'linkTask was called with the wrong data');
+    		myProject.linkTask.restore();
+    		TaskFactory.create.restore();
+    	})
+
+    	it('should return a promise', function () {
+    		myProject.createTask('return a promise').should.be.an.instanceOf(Promise);
+    	})
     })
 
     describe('#linkTask', function () {
@@ -387,7 +417,44 @@ describe('Class: Project', function() {
     })
 
     describe('#postStatus', function () {
-    	
+      it('should fail if args are neither string nor object', function () {
+        expect(()=> myProject.postStatus()).to.throw(TypeError);
+        expect(()=> myProject.postStatus(1234)).to.throw(TypeError);
+        expect(()=> myProject.postStatus(true)).to.throw(TypeError);
+
+        expect(()=> myProject.postStatus({name:'val'})).to.not.throw(TypeError);
+        expect(()=> myProject.postStatus('asdf')).to.not.throw(TypeError);
+      })
+
+      it('should call StatusFactory.create', function () {
+        sandbox.stub(StatusFactory, 'create');
+        myProject.postStatus('my lovely status');
+        assert(StatusFactory.create.called, 'did not call StatusFactory.create');
+        StatusFactory.create.restore();
+      })
+
+      it('should pass StatusFactory.create an object with the appropriate taskID', function () {
+        sandbox.stub(StatusFactory, 'create');
+        myProject.postStatus('my lovely status');
+        var args = StatusFactory.create.args[0][0];
+        expect(args.projectID).to.equal(myProject.ID);
+        StatusFactory.create.restore();
+      })
+
+      it('should attempt to link new status to statusIDs', function () {
+        var statusID = 'someTask';
+        sandbox.stub(StatusFactory, 'create').returnsPromise().resolves(statusID);
+        sandbox.spy(myProject, 'linkStatus');
+        myProject.postStatus('mrrow');
+        assert(myProject.linkStatus.called, 'linkStatus was not called');
+        assert(myProject.linkStatus.calledWith(statusID), 'linkStatus was called with the wrong data');
+        myProject.linkStatus.restore();
+        StatusFactory.create.restore();
+      })
+
+      it('should return a promise', function () {
+        myProject.postStatus('return a promise').should.be.an.instanceOf(Promise);
+      })
     })
 
     describe('#linkStatus', function () {
