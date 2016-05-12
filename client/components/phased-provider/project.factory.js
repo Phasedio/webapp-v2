@@ -48,10 +48,10 @@ angular.module('webappV2App')
 				} = cfg);
 
 				// ensure props exist
-				this.comments = this._.comments = this._.comments || {};
-				this.taskIDs = this._.taskIDs = this._.taskIDs || {};
-				this.statusIDs = this._.statusIDs = this._.statusIDs || {};
-				this.memberIDs = this._.memberIDs = this._.memberIDs || {};
+				this._.comments = this._.comments || {};
+				this._.taskIDs = this._.taskIDs || {};
+				this._.statusIDs = this._.statusIDs || {};
+				this._.memberIDs = this._.memberIDs || {};
 
 				// register read-only properties
 				Object.defineProperty( this, 'created', {value: cfg.created, configurable:false, writable:false, enumerable: true} );
@@ -131,6 +131,16 @@ angular.module('webappV2App')
 
 			set taskIDs(val) {
 				console.warn('Setting project taskIDs directly has no effect; please use Project#addTask');
+				return false;
+			}
+
+			/**		statusIDs 	*/
+			get statusIDs() {
+				return this._.statusIDs;
+			}
+
+			set statusIDs(val) {
+				console.warn('Setting project statusIDs directly has no effect; please use Project#addTask');
 				return false;
 			}
 
