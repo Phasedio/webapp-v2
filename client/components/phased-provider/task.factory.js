@@ -45,6 +45,7 @@ angular.module('webappV2App')
 
 				// ensure props exist
 				this._.comments = this._.comments || {};
+				this._.assignment = this._.assignment || {};
 				this._.statusIDs = this._.statusIDs || {};
 
 				this.statusIDs = this._.statusIDs;
@@ -138,12 +139,15 @@ angular.module('webappV2App')
 				if (!!uid && !(uid in Phased.team.members)) {
 					throw new ReferenceError(`Could not find member ${uid} in team`);
 				}
-
-				super.setProperty('assignment', {
-					to : uid,
+				
+				let assignment = {
 					by : Phased.user.uid,
 					time : Firebase.ServerValue.TIMESTAMP
-				});
+				}
+
+				if (!!uid) assignment.to = uid;
+				
+				this.setProperty('assignment', assignment);
 			}
 
 			//	COMMENT MANIP
@@ -159,7 +163,7 @@ angular.module('webappV2App')
 					throw new TypeError('Cannot add empty comment to task');
 				}
 
-				return super.pushVal('comments', {
+				return this.pushVal('comments', {
 					text : text,
 					user : Phased.user.uid,
 					time : Firebase.ServerValue.TIMESTAMP
@@ -222,7 +226,7 @@ angular.module('webappV2App')
 					args = {
 						name : args
 					}
-				} else if (typeof args != 'object' || !!args) {
+				} else if (typeof args != 'object' && !!args) {
 					throw new TypeError('args should be String or Object, got ' + typeof args);
 				} 
 
