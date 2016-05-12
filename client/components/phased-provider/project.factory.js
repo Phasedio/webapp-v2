@@ -218,10 +218,11 @@ angular.module('webappV2App')
 				}
 
 				let task = Phased.team.tasks[taskID];
-				if (!!task.proejctID && task.projectID != this.ID) {
+				if (!!task.projectID && task.projectID != this.ID) {
 					console.log('Task currently linked to a project; unlinking from other project...');
-					let oldProj = Phased.team.projects[Phased.team.tasks[taskID].proejctID];
-					oldProj.unlinkTask(taskID);
+					let oldProj = Phased.team.projects[task.projectID];
+					if (!!oldProj)
+						oldProj.unlinkTask(taskID);
 				}
 
 				// set task's projectID
