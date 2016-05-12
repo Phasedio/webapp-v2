@@ -152,7 +152,7 @@ angular.module('webappV2App')
 					throw new ReferenceError(`Could not find member ${uid} in team`);
 				}
 
-				this.pushVal('members', uid);
+				this.pushVal('memberIDs', uid);
 			}
 
 			/**
