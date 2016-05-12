@@ -334,6 +334,7 @@ describe('Class: Task', function() {
       beforeEach(function () {
         myTask._.comments = {};
       })
+
       it('should fail if arg isnt a string comment', function () {
         expect(()=> myTask.addComment()).to.throw(TypeError);
         expect(()=> myTask.addComment(1234)).to.throw(TypeError);
@@ -370,11 +371,65 @@ describe('Class: Task', function() {
     })
 
     describe('#deleteComment', function() {
+      beforeEach(function () {
+        myTask._.comments = {
+          'commentID' : {
+            text : 'asdf',
+            user : Phased.user.uid,
+            time : 5646540000
+          }
+        };
+      })
+      it('should fail if the argument is not a string', function () {
+        expect(()=> myTask.deleteComment()).to.throw(TypeError);
+        expect(()=> myTask.deleteComment(1234)).to.throw(TypeError);
+        expect(()=> myTask.deleteComment({a:1})).to.throw(TypeError);
+        expect(()=> myTask.deleteComment([1,3])).to.throw(TypeError);
+      })
 
+      it('should fail if the argument is not a UID for an existing comment', function () {
+        expect(()=> myTask.deleteComment('not a comment')).to.throw(ReferenceError);
+      })
+
+      it('should delete the comment', function () {
+        myTask.deleteComment('commentID');
+        expect(myTask.comments).to.be.empty;
+      })
     })
 
     describe('#editComment', function() {
+      beforeEach(function () {
+        myTask._.comments = {
+          'commentID' : {
+            text : 'asdf',
+            user : Phased.user.uid,
+            time : 5646540000
+          }
+        };
+      })
 
+      it('should fail if the ID argument is not a string', function () {
+        expect(()=> myTask.editComment()).to.throw(TypeError);
+        expect(()=> myTask.editComment(1234, 'text')).to.throw(TypeError);
+        expect(()=> myTask.editComment({a:1}, 'text')).to.throw(TypeError);
+        expect(()=> myTask.editComment([1,3], 'text')).to.throw(TypeError);
+      })
+
+      it('should fail if the ID argument is not a UID for an existing comment', function () {
+        expect(()=> myTask.editComment('not a comment', 'text')).to.throw(ReferenceError);
+      })
+
+      it('should fail if the text argument is a string', function () {
+        expect(()=> myTask.editComment('commentID')).to.throw(TypeError);
+        expect(()=> myTask.editComment('commentID', 1234)).to.throw(TypeError);
+        expect(()=> myTask.editComment('commentID', {a:1})).to.throw(TypeError);
+        expect(()=> myTask.editComment('commentID', [1,3])).to.throw(TypeError);
+      })
+
+      it('should edit the comment', function () {
+        myTask.editComment('commentID', 'new text');
+        expect(myTask.comments['commentID'].text).to.equal('new text');
+      })
     })
 
     describe('#postStatus', function() {
