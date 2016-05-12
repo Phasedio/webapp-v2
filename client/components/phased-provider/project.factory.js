@@ -85,7 +85,7 @@ angular.module('webappV2App')
 				if (!val) {
 					throw new TypeError('Task dueDate could not be parsed');
 				} else {
-					super.setProperty('dueDate', val);
+					this.setProperty('dueDate', val);
 					return val;
 				}
 			}
@@ -96,10 +96,10 @@ angular.module('webappV2App')
 			}
 
 			set status(val) {
-				if (!val in Phased.meta.project.STATUS_ID) {
+				if (!(val in _.values(Phased.meta.project.STATUS_ID))) {
 					throw new TypeError('Project status should be one of Phased.meta.project.STATUS_ID');
 				} else {
-					super.setProperty('status', val);
+					this.setProperty('status', val);
 					return val;
 				}
 			}
@@ -110,8 +110,7 @@ angular.module('webappV2App')
 			}
 
 			set comments(val) {
-				console.warn('Setting project comments directly has no effect; please use Project#addComment');
-				return false;
+				throw new Error('Setting project comments directly has no effect; please use Project#addComment');
 			}
 
 			//	MEMBER MANIP
