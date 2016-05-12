@@ -4,6 +4,7 @@ describe('Class: Task', function() {
 
   var DBObject;
   var TaskFactory;
+  var StatusFactory;
   var Phased;
 
   // other modules to save
@@ -74,7 +75,7 @@ describe('Class: Task', function() {
     // this will instantiate the DBObject class as extended by StatusFactory
     module('webappV2App', 'dummyModule');
     inject(function(
-      _$rootScope_, _TaskFactory_, _DBObject_, _Phased_) {
+      _$rootScope_, _TaskFactory_, _StatusFactory_, _DBObject_, _Phased_) {
       $rootScope = _$rootScope_;
   		sandbox.stub($rootScope, '$broadcast', function (_evt_, _data_) {
   			lastBroadcastEvent = _evt_;
@@ -87,6 +88,7 @@ describe('Class: Task', function() {
       });
 
       TaskFactory = _TaskFactory_;
+      StatusFactory = _StatusFactory_;
       DBObject = _DBObject_;
       Phased = _Phased_;
 
