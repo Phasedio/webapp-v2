@@ -32,6 +32,9 @@ describe('Class: Task', function() {
     Firebase.prototype.child = sandbox.spy(function() {
       return new FBRefStub();
     });
+    Firebase.ServerValue = {
+      TIMESTAMP : 'ServerValue.TIMESTAMP'
+    }
     sandbox.stub(window, 'Firebase', Firebase); // replace window Firebase object with our own stubbed version
 
     snapStub = sandbox.stub().returnsPromise().resolves({})();
@@ -283,6 +286,9 @@ describe('Class: Task', function() {
     })
 
     describe('#assignTo', function() {
+      beforeEach(function () {
+        myTask._.assignment = {};
+      })
       it('should fail if argument is not a string or nil', function () {
         // will fail
         expect(() => myTask.assignTo(1)).to.throw(TypeError);
@@ -325,7 +331,42 @@ describe('Class: Task', function() {
     })
 
     describe('#addComment', function() {
+      beforeEach(function () {
+        myTask._.comments = {};
+      })
+      it('should fail if arg isnt a string comment', function () {
+        expect(()=> myTask.addComment()).to.throw(TypeError);
+        expect(()=> myTask.addComment(1234)).to.throw(TypeError);
+        expect(()=> myTask.addComment('')).to.throw(TypeError);
+        expect(()=> myTask.addComment({a:1})).to.throw(TypeError);
+        expect(()=> myTask.addComment([1,3])).to.throw(TypeError);
+      })
 
+      it('should call pushVal', function () {
+        sandbox.spy(myTask, 'pushVal');
+        myTask.addComment('this is a comment');
+        assert(myTask.pushVal.called, 'did not call pushVal');
+        myTask.pushVal.restore();
+      });
+
+      it('should pass pushVal an object with text, user, and timestamp', function () {
+        var args = {
+          text: 'this is a comment',
+          user: Phased.user.uid,
+          time: Firebase.ServerValue.TIMESTAMP
+        }
+        myTask.addComment(args.text);
+        expect(lastPushed).to.deep.equal(args);
+      })
+
+      it('should add comment to list of comments', function() {
+        myTask.addComment('this is a comment');
+        var key = Object.keys(myTask.comments).pop(); // should be only comment
+        var comment = myTask.comments[key];
+        expect(comment).to.have.property('text').that.equals('this is a comment');
+        expect(comment).to.have.property('user').that.equals(Phased.user.uid);
+        expect(comment).to.have.property('time'); // once FB transaction completes this will be an actual timestamp
+      })
     })
 
     describe('#deleteComment', function() {
