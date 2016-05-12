@@ -226,7 +226,7 @@ angular.module('webappV2App')
 					args = {
 						name : args
 					}
-				} else if (typeof args != 'object' || !!args) {
+				} else if (typeof args != 'object' && !!args) {
 					throw new TypeError('args should be String or Object, got ' + typeof args);
 				} 
 
