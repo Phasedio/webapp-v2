@@ -240,4 +240,169 @@ describe('Class: Task', function() {
   		expect(lastBroadcastEventData).to.equal('asdf');
   	})
   })
+
+  describe('methods', function () {
+    var myTask, cfg, ID;
+    beforeEach(function () {
+      Phased.SET_UP = true;
+      cfg = {
+        name : 'sth',
+        created : 54657983000,
+        projectID : 'sth',
+        dueDate : 'sth',
+        assignment : {'to' : '{}', 'by' : 'milkman'},
+        comments : {'asdf' : {}, '-Kasdf' : {}},
+        status : 3,
+        statusIDs : {'asdf' : {}, '-Kasdf' : {}}
+      }
+      ID = '-KasdfmyTaskID';
+      myTask = new TaskFactory.Task(ID, cfg);
+    })
+
+    describe('#destroy', function () {
+      afterEach(function () {
+        myTask = new TaskFactory.Task(ID, cfg);
+      });
+
+      it('should broadcast TASK_DESTROYED with identifying info', function () {
+        var data = {
+          projectID : myTask.projectID,
+          taskID : myTask.taskID
+        }
+        myTask.destroy();
+
+        expect(lastBroadcastEvent).to.equal(Phased.RUNTIME_EVENTS.TASK_DESTROYED);
+        expect(lastBroadcastEventData).to.deep.equal(data);
+      })
+
+      it('should call super.destroy', function () {
+        sandbox.spy(DBObject.prototype, 'destroy');
+        myTask.destroy();
+        assert(DBObject.prototype.destroy.called, 'DBObject.destroy was not called');
+      });
+    })
+
+    describe('#assignTo', function() {
+      it('should fail if argument is not a string or nil', function () {
+        // will fail
+        expect(() => myTask.assignTo(1)).to.throw(TypeError);
+        expect(() => myTask.assignTo({a:1})).to.throw(TypeError);
+        expect(() => myTask.assignTo([1,2,3])).to.throw(TypeError);
+
+        // will be okay for type
+        expect(() => myTask.assignTo()).to.not.throw(TypeError);
+        expect(() => myTask.assignTo(null)).to.not.throw(TypeError);
+        expect(() => myTask.assignTo('possibleUID')).to.not.throw(TypeError);
+      })
+
+      it('should fail if argument is not an ID of a team members', function () {
+        expect(() => myTask.assignTo('billy joel')).to.throw(ReferenceError);
+        expect(() => myTask.assignTo('memberID')).to.not.throw(ReferenceError);
+      })
+
+      it('should call setProperty', function () {
+        sandbox.spy(myTask, 'setProperty');
+        myTask.assignTo('memberID');
+        assert(myTask.setProperty.called, 'setProperty was not called');
+      })
+
+      it('should update assignment.to to provided userID', function () {
+        myTask.assignTo('memberID');
+        expect(myTask.assignment).to.have.property('to').that.equals('memberID');
+      })
+
+      it('should remove assignment.to when passed nil', function () {
+        myTask.assignTo();
+        expect(myTask.assignment).to.not.have.property('to')
+      })
+
+      it('should always update assignment.by to current user ID', function () {
+        myTask.assignTo('memberID');
+        expect(myTask.assignment).to.have.property('by').that.equals(Phased.user.uid);
+        myTask.assignTo();
+        expect(myTask.assignment).to.have.property('by').that.equals(Phased.user.uid);
+      })
+    })
+
+    describe('#addComment', function() {
+
+    })
+
+    describe('#deleteComment', function() {
+
+    })
+
+    describe('#editComment', function() {
+
+    })
+
+    describe('#postStatus', function() {
+
+    })
+
+    describe('#linkStatus', function() {
+
+    })
+
+    describe('#unlinkStatus', function() {
+
+    })
+
+    describe('#workOn', function() {
+
+    })
+
+    describe('#take', function() {
+
+    })
+
+    describe('#takeAndWorkOn', function() {
+
+    })
+
+    describe('#submitForReview', function() {
+
+    })
+
+    describe('#approve', function() {
+
+    })
+
+    describe('#reject', function() {
+
+    })
+
+  })
+
+  describe('accessors', function () {
+    var myTask, cfg, ID;
+    beforeEach(function () {
+      Phased.SET_UP = true;
+      cfg = {
+        name : 'sth',
+        created : 54657983000,
+        projectID : 'sth',
+        dueDate : 'sth',
+        assignment : {'to' : '{}', 'by' : 'milkman'},
+        comments : {'asdf' : {}, '-Kasdf' : {}},
+        status : 3,
+        statusIDs : {'asdf' : {}, '-Kasdf' : {}}
+      }
+      ID = '-KasdfmyTaskID';
+      myTask = new TaskFactory.Task(ID, cfg);
+    })
+
+    describe('dueDate', function () {
+
+    });
+    describe('status', function () {
+
+    });
+    describe('assignment', function () {
+
+    });
+    describe('comments', function () {
+
+    });
+  })
 });
