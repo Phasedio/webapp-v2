@@ -264,6 +264,7 @@ describe('Class: Task', function() {
       Phased.SET_UP = true;
       cfg = {
         name : 'sth',
+        description : 'asdf',
         created : 54657983000,
         projectID : 'sth',
         dueDate : 'sth',
