@@ -331,17 +331,35 @@ describe('Class: Project', function() {
     		expect(() => myProject.addMember('memberID')).to.not.throw(ReferenceError);
     	})
 
-    	it('should call pushVal with member ID', function () {
-    		sandbox.spy(myProject, 'pushVal');
+    	it('should add member ID to memberIDs', function () {
     		myProject.addMember('memberID');
-    		assert(myProject.pushVal.called, 'pushVal was not called');
-    		assert(myProject.pushVal.calledWith('members', 'memberID'), 'pushVal was called with incorrect data: ' + myProject.pushVal.args[0][0] + ', ' + myProject.pushVal.args[0][1]);
-    		myProject.pushVal.restore();
+    		expect(_.values(myProject._.memberIDs)).to.contain('memberID', 'in _,');
+    		expect(_.values(myProject.memberIDs)).to.contain('memberID', 'in accessor,');
     	})
     })
 
     describe('#removeMember', function () {
-    	
+    	beforeEach(function () {
+    		myProject._.memberIDs['asdf'] = 'memberID';
+    	})
+
+    	it('should fail if arg is not a string', function () {
+        expect(() => myProject.removeMember(1)).to.throw(TypeError);
+        expect(() => myProject.removeMember({a:1})).to.throw(TypeError);
+        expect(() => myProject.removeMember([1,2,3])).to.throw(TypeError);
+        expect(() => myProject.removeMember(undefined)).to.throw(TypeError);
+        expect(() => myProject.removeMember(null)).to.throw(TypeError);
+    	})
+
+    	it('should fail if arg is not the UID of a team member', function () {
+    		expect(() => myProject.removeMember('not a member')).to.throw(ReferenceError);
+    		expect(() => myProject.removeMember('memberID')).to.not.throw(ReferenceError);
+    	})
+
+    	it('should remove the member from memberIDs', function () {
+    		myProject.removeMember('memberID');
+    		expect(_.values(myProject.memberIDs)).to.not.contain('memberID');
+    	})
     })
 
     describe('#createTask', function () {
