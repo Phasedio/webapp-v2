@@ -87,6 +87,33 @@ describe('Class: Task', function() {
       DBObject = _DBObject_;
       Phased = _Phased_;
 
+      // fill some Phased data
+      Phased.team.members = {
+        'someID' : {
+          role : 1
+        },
+        'myID' : {
+          role : 1
+        },
+        'adminID' : {
+          role : 1
+        },
+        'memberID' : {
+          role : 0
+        },
+        'ownerID' : {
+          role : 2
+        }
+      }
+      Phased.user = {
+        uid : 'myID'
+      }
+
+      Phased.meta = {
+        ROLE : ["member","admin","owner"],
+        ROLE_ID : {ADMIN:1,MEMBER:0,OWNER:2}
+      }
+
       $rootScope.$broadcast('Phased:meta'); // to cue Factory to save FBRef
     });
   });
