@@ -39,7 +39,10 @@ var all = {
         safe: true
       }
     }
-  }
+  },
+
+  FSEC : 'A50wFi5OxaLYNzb4jnEyFMQWmE8mjRyWJCKW723g',  // DB SECRECT
+  FUID: 'phased-server'                               // AUTH UID
 };
 
 // Export the config object based on the NODE_ENV

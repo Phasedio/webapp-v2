@@ -5,7 +5,8 @@
 	"userRoles": [
 		"guest",
 		"user",
-		"admin"
+		"admin",
+		"owner"
 	],
 	"FURL": "https://phased-dev2.firebaseio.com/",
 	"strings": {
