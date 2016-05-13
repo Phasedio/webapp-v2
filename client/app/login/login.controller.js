@@ -14,6 +14,7 @@ class LoginController {
 
     // register own methods to scope
     $scope.login = this.doLogin.bind(this); // ensure callbacks are called in this context
+    $scope.registerUser = this.doRegisterUser.bind(this);
 
     if (Phased.LOGGED_IN) {
       $location.path('/assignments');
@@ -46,6 +47,28 @@ class LoginController {
           $scope.loginErrMessage = err.message;
         }
       });
+  }
+
+  doRegisterUser() {
+    const {$scope, Phased} = this;
+    delete $scope.loginErrMessage;
+    const {email, password} = $scope; // get email and password from scope
+
+    // bail if incomplete credentials entered
+    if (
+      (!email || !password)
+      ||
+      !(email.length > 0 && password.length > 0)
+      ) {
+      return;
+    }
+
+    Phased.registerUser(email, password).then( () => {
+      Phased.login(email, password);
+    }, (err) => {
+      console.log(err);
+      $scope.loginErrMessage = err.message;
+    });
   }
 } 
 

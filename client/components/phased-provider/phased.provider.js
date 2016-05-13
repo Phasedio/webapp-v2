@@ -636,6 +636,28 @@ angular.module('webappV2App')
 			_FBRef.unauth();
 		}
 
+		/*
+		*	Registers a new user using the server API
+		*/
+		Phased.registerUser = function registerUser(email, password) {
+			return new Promise((fulfill, reject) => {
+				$http.post('api/register/user', {
+					email : email,
+					password : password
+				}).then(res => {
+					if (res.data.success) {
+						fulfill(res.data);
+					}	else {
+						reject(res.data);
+					}
+				}, reject);
+			});
+		}
+
+		//
+		// ANNOUNCEMENTS
+		//
+
 		/**
 		*	Make an announcement to the team
 		*
