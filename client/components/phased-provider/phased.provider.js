@@ -348,7 +348,7 @@ angular.module('webappV2App')
     var _getTeam = function getTeam() {
     	console.log('getting team...');
     	var teamID = Phased.team.uid = Phased.user.currentTeam,
-    	props = ['details', 'members', 'statuses', 'tasks'],
+    	props = ['details', 'members', 'statuses'],
     	completed = [];
 
     	var maybeTeamComplete = prop => {
@@ -382,13 +382,6 @@ angular.module('webappV2App')
     		}
     		_doAfter('STATUSES_SET_UP');
     		maybeTeamComplete('statuses');
-    	});
-
-    	// all tasks
-    	_FBRef.child(`team/${teamID}/tasks`).once('value', snap => {
-    		_.assign(Phased.team.tasks, snap.val());
-    		_doAfter('TASKS_SET_UP');
-    		maybeTeamComplete('tasks');
     	});
     }
 
