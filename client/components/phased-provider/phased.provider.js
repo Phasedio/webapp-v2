@@ -24,6 +24,7 @@ angular.module('webappV2App')
 			// and therefore before any data has been loaded from the server
 			LOGIN : 'Phased:login', 
 			LOGOUT : 'Phased:logout',
+			TEAM_SWITCH : 'Phased:teamSwitch',
 
 			STATUS_ADDED : 'Phased:newStatus',
 			STATUS_CHANGED : 'Phased:changedStatus',
@@ -184,7 +185,20 @@ angular.module('webappV2App')
 		*/
 
 		var _die = function die(source) {
-			// console.log('dying of a ' + source);
+			console.log('dying of a ' + source);
+
+			// unwatch all events
+			// team
+			_FBRef.child(`team/${Phased.team.uid}/details`).off('value');				// team details
+			_FBRef.child(`team/${Phased.team.uid}/announcements`).off('value');					// announcements
+			// members
+			_FBRef.child(`team/${Phased.team.uid}/members`).off('child_added');
+			_FBRef.child(`team/${Phased.team.uid}/members`).off('child_removed');
+			_FBRef.child(`team/${Phased.team.uid}/members`).off('child_changed');
+			for (let uid in Phased.team.members) {
+				_FBRef.child(`profile/${uid}`).off('value');
+			}
+
 			// 1. user has logged out
 			if (source.toLowerCase() == 'logout') {
 				$rootScope.$evalAsync(() => {
@@ -201,6 +215,17 @@ angular.module('webappV2App')
 					$rootScope.$broadcast(_RUNTIME_EVENTS.LOGOUT);
 				});
 			} 
+			// 2. clean up app before switching teams
+			else if (source.toLowerCase() == 'team-switch') {
+				$rootScope.$evalAsync(() => {
+					// reset all init events
+					for (let event in _INIT_EVENTS) {
+						if (event !== _INIT_EVENTS.META_SET_UP)
+							Phased[event] = false;
+					}
+					Phased.team = angular.copy(_DEFAULTS.TEAM);
+				});
+			}
 			// 2. normal exit (stash app state here, in localstorage or FB cache key)
 			else {
 
@@ -663,6 +688,16 @@ angular.module('webappV2App')
 					}
 				}, reject);
 			});
+		}
+
+		/*
+		*	User switches to a different team (already registered)
+		*/
+		Phased.switchTeam = function switchTeam(teamID) {
+			_die('team-switch');
+			_FBRef.child(`profile/${Phased.user.uid}/currentTeam`).set(teamID).then(()=>{
+				_init();
+			})
 		}
 
 		//
