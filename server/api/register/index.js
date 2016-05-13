@@ -7,5 +7,6 @@ var router = express.Router();
 
 router.get('/', controller.index);
 router.post('/user', controller.registerUser);
+router.post('/team', controller.registerTeam);
 
 module.exports = router;

@@ -102,3 +102,46 @@ exports.registerUser = function(req, res) {
   });
 }
 
+/**
+*		
+*	An existing user wants to register a new team
+*
+*/
+
+exports.registerTeam = function (req, res) {
+	var teamName = req.body.teamName,
+		userID = req.body.userID;
+	
+	// do some kinda auth stuff here to ensure user is actually logged in
+	console.log('api/register/team is not secured -- authentication needs to be implemented!');
+	var authOkay = true;
+
+	if (authOkay) {
+		var teamRef = FBRef.child('team').push(makeTeam(teamName, userID));
+		var teamID = teamRef.key();
+		teamRef.then(() => {
+			FBRef.child(`profile/${userID}/teams`).push(teamID).then(() => {
+				res.send({success : true, teamID : teamID});
+			});
+		}, err => {
+			console.log(err);
+			res.send({success: false, error: err});
+		})
+	}
+}
+
+
+var makeTeam = function makeTeam(teamName, userID) {
+	var newTeam = {
+		details : {
+			created : Firebase.ServerValue.TIMESTAMP,
+			name : teamName
+		},
+		members : {}
+	}
+	newTeam.members[userID] = {
+		role : Phased.meta.ROLE_ID.OWNER
+	}
+
+	return newTeam;
+}
