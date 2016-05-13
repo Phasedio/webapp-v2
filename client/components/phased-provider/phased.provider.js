@@ -654,6 +654,24 @@ angular.module('webappV2App')
 			});
 		}
 
+		/*
+		*	Registers a new team using the server API
+		*/
+		Phased.registerTeam = function registerTeam(teamName) {
+			return new Promise((fulfill, reject) => {
+				$http.post('api/register/team', {
+					teamName : teamName,
+					userID : Phased.user.uid
+				}).then(res => {
+					if (res.data.success) {
+						fulfill(res.data);
+					}	else {
+						reject(res.data);
+					}
+				}, reject);
+			});
+		}
+
 		//
 		// ANNOUNCEMENTS
 		//
