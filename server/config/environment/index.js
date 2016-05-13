@@ -42,7 +42,7 @@ var all = {
   },
 
   FSEC : 'A50wFi5OxaLYNzb4jnEyFMQWmE8mjRyWJCKW723g',  // DB SECRECT
-  FUID: 'phased-server'                               // AUTH UID
+  FUID: 'phased-server',                               // AUTH UID
   STRIPE_SECRET : 'sk_live_nKZ1ouWkI3WuiVGK2hIvZUH1', // Stripe secret -- we should use the test one for dev
   MANDRILL_SECRET : 'B0N7XKd4RDy6Q7nWP2eFAA'          // Mandrill secret
 };
