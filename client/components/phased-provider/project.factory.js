@@ -507,11 +507,16 @@ angular.module('webappV2App')
 			})
 		});
 
-		// kill all projects when switching teams
+		// shut down when switching teams
 		$rootScope.$on(Phased.RUNTIME_EVENTS.TEAM_SWITCH, () => {
+			// kill all current projects
 			for (var i in Phased.team.projects) {
 				Phased.team.projects[i].destroy();
 			}
+
+			// stop watching for current team projects
+			FBRef.child(`team/${Phased.team.uid}/projects`).off('child_added');
+			FBRef.child(`team/${Phased.team.uid}/projects`).off('child_removed');
 		});
 
 		// manage deleted project references

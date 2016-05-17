@@ -291,11 +291,15 @@ angular.module('webappV2App')
 			})
 		});
 
-		// kill all statuses when switching teams
+		// shutdown when switching teams
 		$rootScope.$on(Phased.RUNTIME_EVENTS.TEAM_SWITCH, () => {
+			// delete everything
 			for (var i in Phased.team.statuses) {
 				Phased.team.statuses[i].destroy();
 			}
+			// stop watching for current team statuses
+			FBRef.child(`team/${Phased.team.uid}/statuses`).off('child_added');
+			FBRef.child(`team/${Phased.team.uid}/statuses`).off('child_removed');
 		});
 
 		// manage deleted status references
