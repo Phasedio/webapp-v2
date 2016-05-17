@@ -218,11 +218,17 @@ angular.module('webappV2App')
 			// 2. clean up app before switching teams
 			else if (source.toLowerCase() == 'team-switch') {
 				$rootScope.$evalAsync(() => {
+					// broadcast team switch
+					// broadcast before blanking team so that die handlers have access to the data they need
+					$rootScope.$broadcast(_RUNTIME_EVENTS.TEAM_SWITCH);
+
 					// reset all init events
 					for (let event in _INIT_EVENTS) {
-						if (event !== _INIT_EVENTS.META_SET_UP)
+						if (event !== 'META_SET_UP' && event !== 'PROFILE_SET_UP')
 							Phased[event] = false;
 					}
+
+					// blank out team
 					Phased.team = angular.copy(_DEFAULTS.TEAM);
 				});
 			}
@@ -694,8 +700,15 @@ angular.module('webappV2App')
 		*	User switches to a different team (already registered)
 		*/
 		Phased.switchTeam = function switchTeam(teamID) {
+			if (!Phased.SET_UP) {
+				console.log('Cannot switch teams before set up!');
+				return;
+			}
+
 			_die('team-switch');
 			_FBRef.child(`profile/${Phased.user.uid}/currentTeam`).set(teamID).then(()=>{
+				// to be sure
+				Phased.user.currentTeam = teamID;
 				_init();
 			})
 		}
