@@ -41,8 +41,8 @@ angular.module('webappV2App')
 					throw new Error('Invalid arguments supplied to Status');
 				}
 
-				if (!Phased.SET_UP) {
-					throw new Error('Cannot create statuses before Phased is set up');
+				if (!Phased.TEAM_SET_UP || ! Phased.META_SET_UP) {
+					throw new Error('Cannot create statuses before Phased team or meta is set up');
 				}
 
 				// call super

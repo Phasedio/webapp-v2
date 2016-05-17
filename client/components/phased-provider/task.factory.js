@@ -25,8 +25,8 @@ angular.module('webappV2App')
 					throw new Error('Invalid arguments supplied to Task');
 				}
 
-				if (!Phased.SET_UP) {
-					throw new Error('Cannot create tasks before Phased is set up');
+				if (!Phased.TEAM_SET_UP || ! Phased.META_SET_UP) {
+					throw new Error('Cannot create tasks before Phased team or meta is set up');
 				}
 
 				// call super
