@@ -257,13 +257,13 @@ angular.module('webappV2App')
 		} 
 
 		// set FBRef
-		$rootScope.$on('Phased:meta', () => {
+		$rootScope.$on(Phased.INIT_EVENTS.META_SET_UP, () => {
 			FBRef = Phased._FBRef;
 		});
 
 		// watch for new statuses added to the DB and create them here
 		// also watch for statuses that have been deleted from the DB
-		$rootScope.$on('Phased:teamComplete', () => {
+		$rootScope.$on(Phased.INIT_EVENTS.TEAM_SET_UP, () => {
 			FBRef.child(`team/${Phased.team.uid}/statuses`).on('child_added', (snap) => {
 				let cfg = snap.val();
 				let id = snap.key();
@@ -289,6 +289,13 @@ angular.module('webappV2App')
 					console.log('status not a Status object!');
 				}*/
 			})
+		});
+
+		// kill all statuses when switching teams
+		$rootScope.$on(Phased.RUNTIME_EVENTS.TEAM_SWITCH, () => {
+			for (var i in Phased.team.statuses) {
+				Phased.team.statuses[i].destroy();
+			}
 		});
 
 		// manage deleted status references

@@ -535,13 +535,13 @@ angular.module('webappV2App')
 		} 
 
 		// set FBRef
-		$rootScope.$on('Phased:meta', () => {
+		$rootScope.$on(Phased.INIT_EVENTS.META_SET_UP, () => {
 			FBRef = Phased._FBRef;
 		});
 
 		// watch for new tasks added to the DB and create them here
 		// also watch for tasks that have been deleted from the DB
-		$rootScope.$on('Phased:teamComplete', () => {
+		$rootScope.$on(Phased.INIT_EVENTS.TEAM_SET_UP, () => {
 			FBRef.child(`team/${Phased.team.uid}/tasks`).on('child_added', (snap) => {
 				let cfg = snap.val();
 				let id = snap.key();
@@ -560,6 +560,13 @@ angular.module('webappV2App')
 					});
 				}
 			})
+		});
+
+		// kill all tasks when switching teams
+		$rootScope.$on(Phased.RUNTIME_EVENTS.TEAM_SWITCH, () => {
+			for (var i in Phased.team.tasks) {
+				Phased.team.tasks[i].destroy();
+			}
 		});
 
 		// manage deleted task references

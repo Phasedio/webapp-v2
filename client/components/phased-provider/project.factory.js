@@ -481,12 +481,12 @@ angular.module('webappV2App')
 		} 
 
 		// set FBRef
-		$rootScope.$on('Phased:meta', () => {
+		$rootScope.$on(Phased.INIT_EVENTS.META_SET_UP, () => {
 			FBRef = Phased._FBRef;
 		});
 
 		// watch for new projects added to the DB and create them here
-		$rootScope.$on('Phased:teamComplete', () => {
+		$rootScope.$on(Phased.INIT_EVENTS.TEAM_SET_UP, () => {
 			FBRef.child(`team/${Phased.team.uid}/projects`).on('child_added', (snap) => {
 				let cfg = snap.val();
 				let id = snap.key();
@@ -505,6 +505,13 @@ angular.module('webappV2App')
 					});
 				}
 			})
+		});
+
+		// kill all projects when switching teams
+		$rootScope.$on(Phased.RUNTIME_EVENTS.TEAM_SWITCH, () => {
+			for (var i in Phased.team.projects) {
+				Phased.team.projects[i].destroy();
+			}
 		});
 
 		// manage deleted project references
